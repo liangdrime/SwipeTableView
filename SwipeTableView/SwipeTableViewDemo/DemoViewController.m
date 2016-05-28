@@ -10,10 +10,11 @@
 #import "SwipeTableView.h"
 #import "CustomTableView.h"
 #import "CustomCollectionView.h"
+#import "CustomSegmentControl.h"
 #import "UIView+Frame.h"
 
 NSString const * kShouldReuseableViewIdentifier = @"setIsJustOneKindOfClassView";
-NSString const * kAdjustContentOffsetDefaultIdentifier = @"doNothing";
+NSString const * kHybridItemViewsIdentifier = @"doNothing";
 NSString const * kAdjustContentSizeToFitMaxItemIdentifier = @"setFitItemsContentSize";
 NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
 
@@ -23,8 +24,8 @@ NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
 @property (nonatomic, assign) BOOL isJustOneKindOfClassView;
 @property (nonatomic, assign) BOOL shouldHiddenNavigationBar;
 @property (nonatomic, assign) BOOL shouldFitItemsContentSize;
-@property (nonatomic, strong) UIView * tableViewHeader;
-@property (nonatomic, strong) UISegmentedControl * segmentBar;
+@property (nonatomic, strong) UIImageView * tableViewHeader;
+@property (nonatomic, strong) CustomSegmentControl * segmentBar;
 
 @end
 
@@ -46,25 +47,42 @@ NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
     [self.view addSubview:_swipeTableView];
     
     // nav bar
-    UIBarButtonItem * rightBarItem = [[UIBarButtonItem alloc]initWithTitle:@"Remove Header" style:UIBarButtonItemStylePlain target:self action:@selector(setSwipeTableHeader:)];
-    UIBarButtonItem * leftBarItem = [[UIBarButtonItem alloc]initWithTitle:@"Remove Bar" style:UIBarButtonItemStylePlain target:self action:@selector(setSwipeTableBar:)];
+    UIBarButtonItem * rightBarItem = [[UIBarButtonItem alloc]initWithTitle:@"- Header" style:UIBarButtonItemStylePlain target:self action:@selector(setSwipeTableHeader:)];
+    UIBarButtonItem * leftBarItem = [[UIBarButtonItem alloc]initWithTitle:@"- Bar" style:UIBarButtonItemStylePlain target:self action:@selector(setSwipeTableBar:)];
     self.navigationItem.leftBarButtonItem = leftBarItem;
     self.navigationItem.rightBarButtonItem = rightBarItem;
     
     // back
     UIButton * back = [UIButton buttonWithType:UIButtonTypeCustom];
-    back.frame = CGRectMake(10, 70, 40, 40);
-    back.backgroundColor = [UIColor orangeColor];
+    back.frame = CGRectMake(10, 0, 40, 40);
+    back.top = _shouldHiddenNavigationBar?25:74;
+    back.backgroundColor = RGBColorAlpha(10, 230, 0, 0.95);
     back.layer.cornerRadius = back.height/2;
     back.layer.masksToBounds = YES;
     back.titleLabel.font = [UIFont systemFontOfSize:14];
     [back setTitle:@"Back" forState:UIControlStateNormal];
-    [back setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    [back setTitleColor:RGBColor(236, 255, 236) forState:UIControlStateNormal];
     [back addTarget:self action:@selector(back) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:back];
+    
+    // edge gesture
+    [_swipeTableView.contentView.panGestureRecognizer requireGestureRecognizerToFail:self.screenEdgePanGestureRecognizer];
 }
 
-#pragma mark - 
+- (UIScreenEdgePanGestureRecognizer *)screenEdgePanGestureRecognizer {
+    UIScreenEdgePanGestureRecognizer *screenEdgePanGestureRecognizer = nil;
+    if (self.navigationController.view.gestureRecognizers.count > 0) {
+        for (UIGestureRecognizer *recognizer in self.navigationController.view.gestureRecognizers) {
+            if ([recognizer isKindOfClass:[UIScreenEdgePanGestureRecognizer class]]) {
+                screenEdgePanGestureRecognizer = (UIScreenEdgePanGestureRecognizer *)recognizer;
+                break;
+            }
+        }
+    }
+    return screenEdgePanGestureRecognizer;
+}
+
+#pragma mark -
 
 - (void)setActionIdentifier:(NSString *)actionIdentifier {
     _actionIdentifier = actionIdentifier;
@@ -97,18 +115,23 @@ NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
 
 - (UIView *)tableViewHeader {
     if (nil == _tableViewHeader) {
-        self.tableViewHeader = [[UIView alloc]initWithFrame:CGRectMake(0, 0, kScreenWidth, kScreenWidth * 3/5)];
+        UIImage * headerImage = [UIImage imageNamed:@"onepiece_kiudai"];
+        self.tableViewHeader = [[UIImageView alloc]initWithImage:headerImage];
+        _tableViewHeader.frame = CGRectMake(0, 0, kScreenWidth, kScreenWidth * (headerImage.size.height/headerImage.size.width));
         _tableViewHeader.backgroundColor = [UIColor purpleColor];
     }
     return _tableViewHeader;
 }
 
-- (UISegmentedControl * )segmentBar {
+- (CustomSegmentControl * )segmentBar {
     if (nil == _segmentBar) {
-        self.segmentBar = [[UISegmentedControl alloc]initWithItems:@[@"Item1",@"Item2",@"Item3",@"Item4"]];
-        _segmentBar.size = CGSizeMake(kScreenWidth, 42);
-        _segmentBar.backgroundColor = [UIColor whiteColor];
-        _segmentBar.tintColor = [UIColor greenColor];
+        self.segmentBar = [[CustomSegmentControl alloc]initWithItems:@[@"Item0",@"Item1",@"Item2",@"Item3"]];
+        _segmentBar.size = CGSizeMake(kScreenWidth, 40);
+        _segmentBar.font = [UIFont systemFontOfSize:15];
+        _segmentBar.textColor = RGBColor(100, 100, 100);
+        _segmentBar.selectedTextColor = RGBColor(0, 0, 0);
+        _segmentBar.backgroundColor = RGBColor(249, 251, 198);
+        _segmentBar.selectionIndicatorColor = RGBColor(249, 104, 92);
         _segmentBar.selectedSegmentIndex = _swipeTableView.currentItemIndex;
         [_segmentBar addTarget:self action:@selector(changeSwipeViewIndex:) forControlEvents:UIControlEventValueChanged];
     }
@@ -120,12 +143,12 @@ NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
         _swipeTableView.swipeHeaderView = self.tableViewHeader;
         [_swipeTableView reloadData];
         
-        UIBarButtonItem * rightBarItem = [[UIBarButtonItem alloc]initWithTitle:@"Remove Header" style:UIBarButtonItemStylePlain target:self action:@selector(setSwipeTableHeader:)];
+        UIBarButtonItem * rightBarItem = [[UIBarButtonItem alloc]initWithTitle:@"- Header" style:UIBarButtonItemStylePlain target:self action:@selector(setSwipeTableHeader:)];
         self.navigationItem.rightBarButtonItem = rightBarItem;
     }else {
         _swipeTableView.swipeHeaderView = nil;
         
-        UIBarButtonItem * rightBarItem = [[UIBarButtonItem alloc]initWithTitle:@"Add Header" style:UIBarButtonItemStylePlain target:self action:@selector(setSwipeTableHeader:)];
+        UIBarButtonItem * rightBarItem = [[UIBarButtonItem alloc]initWithTitle:@"+ Header" style:UIBarButtonItemStylePlain target:self action:@selector(setSwipeTableHeader:)];
         self.navigationItem.rightBarButtonItem = rightBarItem;
     }
 }
@@ -133,14 +156,15 @@ NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
 - (void)setSwipeTableBar:(UIBarButtonItem *)barItem {
     if (!_swipeTableView.swipeHeaderBar) {
         _swipeTableView.swipeHeaderBar = self.segmentBar;
-        [_swipeTableView reloadData];
+        _swipeTableView.scrollEnabled  = YES;
         
-        UIBarButtonItem * leftBarItem = [[UIBarButtonItem alloc]initWithTitle:@"Remove Bar" style:UIBarButtonItemStylePlain target:self action:@selector(setSwipeTableBar:)];
+        UIBarButtonItem * leftBarItem = [[UIBarButtonItem alloc]initWithTitle:@"- Bar" style:UIBarButtonItemStylePlain target:self action:@selector(setSwipeTableBar:)];
         self.navigationItem.leftBarButtonItem = leftBarItem;
     }else {
         _swipeTableView.swipeHeaderBar = nil;
+        _swipeTableView.scrollEnabled  = NO;
         
-        UIBarButtonItem * leftBarItem = [[UIBarButtonItem alloc]initWithTitle:@"Add Bar" style:UIBarButtonItemStylePlain target:self action:@selector(setSwipeTableBar:)];
+        UIBarButtonItem * leftBarItem = [[UIBarButtonItem alloc]initWithTitle:@"+ Bar" style:UIBarButtonItemStylePlain target:self action:@selector(setSwipeTableBar:)];
         self.navigationItem.leftBarButtonItem = leftBarItem;
     }
 }
@@ -157,31 +181,40 @@ NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
 
 - (UIScrollView *)swipeTableView:(SwipeTableView *)swipeView viewForItemAtIndex:(NSInteger)index reusingView:(UIScrollView *)view {
     NSInteger numberOfRows = 10;
-    if (nil == view) {
-        if (_isJustOneKindOfClassView || _shouldFitItemsContentSize || _shouldHiddenNavigationBar) {
-            CustomTableView * talbeView = [[CustomTableView alloc]initWithFrame:swipeView.bounds style:UITableViewStylePlain];
-            talbeView.backgroundColor = [UIColor whiteColor];
-            view = talbeView;
-        }else {
-            if (index == 0 || index == 2) {
-                CustomTableView * talbeView = [[CustomTableView alloc]initWithFrame:swipeView.bounds style:UITableViewStylePlain];
-                talbeView.backgroundColor = [UIColor whiteColor];
-                talbeView.numberOfRows = numberOfRows;
-                view = talbeView;
-            }else {
-                CustomCollectionView * collectionView = [[CustomCollectionView alloc]initWithFrame:swipeView.bounds];
-                collectionView.backgroundColor = [UIColor whiteColor];
-                collectionView.numberOfItems = 2 *numberOfRows;
-                view = collectionView;
-            }
-        }
-    }
     if (_isJustOneKindOfClassView || _shouldFitItemsContentSize || _shouldHiddenNavigationBar) {
+        // 重用
+        if (nil == view) {
+            CustomTableView * tableView = [[CustomTableView alloc]initWithFrame:swipeView.bounds style:UITableViewStylePlain];
+            tableView.backgroundColor = RGBColor(255, 255, 225);
+            view = tableView;
+        }
         if (index == 1 || index == 3) {
             numberOfRows = 5;
         }
         [view setValue:@(numberOfRows) forKey:@"numberOfRows"];
         [view setValue:@(index) forKey:@"itemIndex"];
+        
+    }else {
+        // 混合的itemview只有同类型的item采用重用
+        if (index == 0 || index == 2) {
+            CustomTableView * tableView = [swipeView viewWithTag:1000];
+            if (nil == tableView) {
+                tableView = [[CustomTableView alloc]initWithFrame:swipeView.bounds style:UITableViewStylePlain];
+                tableView.backgroundColor = RGBColor(255, 255, 225);
+                tableView.tag = 1000;
+                tableView.numberOfRows = numberOfRows;
+            }
+            view = tableView;
+        }else {
+            CustomCollectionView * collectionView = [swipeView viewWithTag:1001];
+            if (nil == collectionView) {
+                collectionView = [[CustomCollectionView alloc]initWithFrame:swipeView.bounds];
+                collectionView.backgroundColor = RGBColor(255, 255, 225);
+                collectionView.tag = 1001;
+                collectionView.numberOfItems = 2 *numberOfRows;
+            }
+            view = collectionView;
+        }
     }
     [view performSelector:@selector(reloadData)];
     return view;

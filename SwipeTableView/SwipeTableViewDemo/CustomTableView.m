@@ -7,6 +7,7 @@
 //
 
 #import "CustomTableView.h"
+#import "UIView+Frame.h"
 
 @interface CustomTableView ()<UITableViewDataSource,UITableViewDelegate>
 
@@ -19,6 +20,7 @@
     if (self) {
         self.delegate = self;
         self.dataSource = self;
+        self.separatorColor = RGBColor(175, 175, 175);
         [self registerClass:UITableViewCell.class forCellReuseIdentifier:@"cell"];
         self.tableFooterView = [UIView new];
         self.itemIndex = -1;
@@ -37,10 +39,11 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     UITableViewCell * cell = [tableView dequeueReusableCellWithIdentifier:@"cell"];
-    cell.backgroundColor = [UIColor lightGrayColor];
+    cell.backgroundColor = RGBColor(150, 215, 200);
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
     NSString * title = nil;
     if (_itemIndex >= 0) {
-        title = [NSString stringWithFormat:@"[ ItemView ] (%ld) ---- 第 %ld 行",_itemIndex,indexPath.row];
+        title = [NSString stringWithFormat:@"[ ItemView_%ld ] ---- 第 %ld 行",_itemIndex,indexPath.row];
     }else {
         title = [NSString stringWithFormat:@"第 %ld 行",indexPath.row];
     }

@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7D0B0AD21CF9DD9900CBC1B4 /* CustomSegmentControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 7D0B0AD11CF9DD9900CBC1B4 /* CustomSegmentControl.m */; };
+		7D0B0AD41CF9DDA600CBC1B4 /* onepiece_kiudai.png in Resources */ = {isa = PBXBuildFile; fileRef = 7D0B0AD31CF9DDA600CBC1B4 /* onepiece_kiudai.png */; };
 		7D71D7951CAF6BA30012D296 /* DemoListController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7D71D7941CAF6BA30012D296 /* DemoListController.m */; };
 		7DFB6ACE1CAEBCC600C2F0D3 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 7DFB6ACD1CAEBCC600C2F0D3 /* main.m */; };
 		7DFB6AD11CAEBCC600C2F0D3 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 7DFB6AD01CAEBCC600C2F0D3 /* AppDelegate.m */; };
@@ -32,6 +34,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		7D0B0AD01CF9DD9900CBC1B4 /* CustomSegmentControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomSegmentControl.h; sourceTree = "<group>"; };
+		7D0B0AD11CF9DD9900CBC1B4 /* CustomSegmentControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomSegmentControl.m; sourceTree = "<group>"; };
+		7D0B0AD31CF9DDA600CBC1B4 /* onepiece_kiudai.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = onepiece_kiudai.png; sourceTree = "<group>"; };
 		7D71D7931CAF6BA30012D296 /* DemoListController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DemoListController.h; sourceTree = "<group>"; };
 		7D71D7941CAF6BA30012D296 /* DemoListController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DemoListController.m; sourceTree = "<group>"; };
 		7DFB6AC91CAEBCC600C2F0D3 /* SwipeTableView.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwipeTableView.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -148,6 +153,9 @@
 				7DFB6B071CAEC1BF00C2F0D3 /* CustomTableView.m */,
 				7DFB6B091CAEC1D700C2F0D3 /* CustomCollectionView.h */,
 				7DFB6B0A1CAEC1D700C2F0D3 /* CustomCollectionView.m */,
+				7D0B0AD01CF9DD9900CBC1B4 /* CustomSegmentControl.h */,
+				7D0B0AD11CF9DD9900CBC1B4 /* CustomSegmentControl.m */,
+				7D0B0AD31CF9DDA600CBC1B4 /* onepiece_kiudai.png */,
 			);
 			path = SwipeTableViewDemo;
 			sourceTree = "<group>";
@@ -232,6 +240,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7D0B0AD41CF9DDA600CBC1B4 /* onepiece_kiudai.png in Resources */,
 				7DFB6ADC1CAEBCC600C2F0D3 /* LaunchScreen.storyboard in Resources */,
 				7DFB6AD91CAEBCC600C2F0D3 /* Assets.xcassets in Resources */,
 				7DFB6AD71CAEBCC600C2F0D3 /* Main.storyboard in Resources */,
@@ -256,6 +265,7 @@
 				7DFB6AF41CAEBCEB00C2F0D3 /* SwipeTableView.m in Sources */,
 				7DFB6AF71CAEBCFA00C2F0D3 /* UIView+Frame.m in Sources */,
 				7DFB6B0B1CAEC1D700C2F0D3 /* CustomCollectionView.m in Sources */,
+				7D0B0AD21CF9DD9900CBC1B4 /* CustomSegmentControl.m in Sources */,
 				7D71D7951CAF6BA30012D296 /* DemoListController.m in Sources */,
 				7DFB6B051CAEC19200C2F0D3 /* DemoViewController.m in Sources */,
 				7DFB6B081CAEC1BF00C2F0D3 /* CustomTableView.m in Sources */,

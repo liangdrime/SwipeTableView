@@ -7,6 +7,7 @@
 //
 
 #import "CustomCollectionView.h"
+#import "UIView+Frame.h"
 
 @interface CustomCollectionView ()<UICollectionViewDataSource,UICollectionViewDelegate>
 
@@ -51,7 +52,7 @@
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     UICollectionViewCell * cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"item" forIndexPath:indexPath];
-    cell.backgroundColor = [UIColor grayColor];
+    cell.backgroundColor = RGBColor(150, 215, 200);
     return cell;
 }
 

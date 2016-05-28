@@ -21,15 +21,15 @@
     [super viewDidLoad];
     
     self.dataSource = @[@{
-                            @"title":@"ReuseOneKindView",
+                            @"title":@"SingleOneKindView",
                             @"actionIdfy":kShouldReuseableViewIdentifier,
-                          },
-                        @{
-                            @"title":@"AdjustItemsContentOffset",
-                            @"actionIdfy":kAdjustContentOffsetDefaultIdentifier,
                             },
                         @{
-                            @"title":@"AdjustItemsContentSize",
+                            @"title":@"HybridItemViews",
+                            @"actionIdfy":kHybridItemViewsIdentifier,
+                            },
+                        @{
+                            @"title":@"AdjustContentSize",
                             @"actionIdfy":kAdjustContentSizeToFitMaxItemIdentifier,},
                         @{
                             @"title":@"HiddenNavigationBar",
