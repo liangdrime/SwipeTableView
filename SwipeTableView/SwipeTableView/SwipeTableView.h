@@ -47,7 +47,7 @@
 @property (nonatomic, assign) BOOL alwaysBounceHorizontal;
 
 /*!
- *  在实际中，不同item的listView显示的数据多少不同。当数据多的item垂直滚动后，水平切换到数据少的item时，后一个item垂直滚动的范围便小于前一个item的垂直滚动范围。此时操作当前的item会产生一个会弹的动作。
+ *  在实际中，不同item的listView显示的数据多少不同。当数据多的item垂直滚动后，水平切换到数据少的item时，后一个item垂直滚动的范围便小于前一个item的垂直滚动范围。此时操作当前的item会产生一个回弹的动作。
  *  设置这个属性，可以调整前后两个item的滚动范围一致。默认 shouldAdjustContentSize 是 NO
  */
 @property (nonatomic, assign) BOOL shouldAdjustContentSize;
