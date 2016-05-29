@@ -11,7 +11,7 @@
 #import "CustomTableView.h"
 #import "CustomCollectionView.h"
 #import "CustomSegmentControl.h"
-#import "UIView+Frame.h"
+#import "UIView+SwipeTableViewFrame.h"
 
 NSString const * kShouldReuseableViewIdentifier = @"setIsJustOneKindOfClassView";
 NSString const * kHybridItemViewsIdentifier = @"doNothing";

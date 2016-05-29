@@ -8,7 +8,7 @@
 
 #import "SwipeTableView.h"
 #import <objc/runtime.h>
-#import "UIView+Frame.h"
+#import "UIView+SwipeTableViewFrame.h"
 
 
 @interface UICollectionViewCell (ScrollView)

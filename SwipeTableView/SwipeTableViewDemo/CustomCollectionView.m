@@ -7,7 +7,7 @@
 //
 
 #import "CustomCollectionView.h"
-#import "UIView+Frame.h"
+#import "UIView+SwipeTableViewFrame.h"
 
 @interface CustomCollectionView ()<UICollectionViewDataSource,UICollectionViewDelegate>
 

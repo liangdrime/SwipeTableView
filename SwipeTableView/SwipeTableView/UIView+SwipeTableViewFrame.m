@@ -6,7 +6,7 @@
 //  Copyright © 2016年 Roy lee. All rights reserved.
 //
 
-#import "UIView+Frame.h"
+#import "UIView+SwipeTableViewFrame.h"
 
 @implementation UIView (Frame)
 

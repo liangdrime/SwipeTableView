@@ -7,7 +7,7 @@
 //
 
 #import "CustomTableView.h"
-#import "UIView+Frame.h"
+#import "UIView+SwipeTableViewFrame.h"
 
 @interface CustomTableView ()<UITableViewDataSource,UITableViewDelegate>
 

@@ -17,7 +17,7 @@
 		7DFB6ADC1CAEBCC600C2F0D3 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7DFB6ADA1CAEBCC600C2F0D3 /* LaunchScreen.storyboard */; };
 		7DFB6AE71CAEBCC600C2F0D3 /* SwipeTableViewTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 7DFB6AE61CAEBCC600C2F0D3 /* SwipeTableViewTests.m */; };
 		7DFB6AF41CAEBCEB00C2F0D3 /* SwipeTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7DFB6AF31CAEBCEB00C2F0D3 /* SwipeTableView.m */; };
-		7DFB6AF71CAEBCFA00C2F0D3 /* UIView+Frame.m in Sources */ = {isa = PBXBuildFile; fileRef = 7DFB6AF61CAEBCFA00C2F0D3 /* UIView+Frame.m */; };
+		7DFB6AF71CAEBCFA00C2F0D3 /* UIView+SwipeTableViewFrame.m in Sources */ = {isa = PBXBuildFile; fileRef = 7DFB6AF61CAEBCFA00C2F0D3 /* UIView+SwipeTableViewFrame.m */; };
 		7DFB6B051CAEC19200C2F0D3 /* DemoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7DFB6B031CAEC19200C2F0D3 /* DemoViewController.m */; };
 		7DFB6B081CAEC1BF00C2F0D3 /* CustomTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7DFB6B071CAEC1BF00C2F0D3 /* CustomTableView.m */; };
 		7DFB6B0B1CAEC1D700C2F0D3 /* CustomCollectionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7DFB6B0A1CAEC1D700C2F0D3 /* CustomCollectionView.m */; };
@@ -52,8 +52,8 @@
 		7DFB6AE81CAEBCC600C2F0D3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7DFB6AF21CAEBCEB00C2F0D3 /* SwipeTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SwipeTableView.h; sourceTree = "<group>"; };
 		7DFB6AF31CAEBCEB00C2F0D3 /* SwipeTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SwipeTableView.m; sourceTree = "<group>"; };
-		7DFB6AF51CAEBCFA00C2F0D3 /* UIView+Frame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+Frame.h"; sourceTree = "<group>"; };
-		7DFB6AF61CAEBCFA00C2F0D3 /* UIView+Frame.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+Frame.m"; sourceTree = "<group>"; };
+		7DFB6AF51CAEBCFA00C2F0D3 /* UIView+SwipeTableViewFrame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+SwipeTableViewFrame.h"; sourceTree = "<group>"; };
+		7DFB6AF61CAEBCFA00C2F0D3 /* UIView+SwipeTableViewFrame.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+SwipeTableViewFrame.m"; sourceTree = "<group>"; };
 		7DFB6B021CAEC19200C2F0D3 /* DemoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DemoViewController.h; sourceTree = "<group>"; };
 		7DFB6B031CAEC19200C2F0D3 /* DemoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DemoViewController.m; sourceTree = "<group>"; };
 		7DFB6B061CAEC1BF00C2F0D3 /* CustomTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomTableView.h; sourceTree = "<group>"; };
@@ -136,8 +136,8 @@
 			children = (
 				7DFB6AF21CAEBCEB00C2F0D3 /* SwipeTableView.h */,
 				7DFB6AF31CAEBCEB00C2F0D3 /* SwipeTableView.m */,
-				7DFB6AF51CAEBCFA00C2F0D3 /* UIView+Frame.h */,
-				7DFB6AF61CAEBCFA00C2F0D3 /* UIView+Frame.m */,
+				7DFB6AF51CAEBCFA00C2F0D3 /* UIView+SwipeTableViewFrame.h */,
+				7DFB6AF61CAEBCFA00C2F0D3 /* UIView+SwipeTableViewFrame.m */,
 			);
 			path = SwipeTableView;
 			sourceTree = "<group>";
@@ -263,7 +263,7 @@
 			files = (
 				7DFB6AD11CAEBCC600C2F0D3 /* AppDelegate.m in Sources */,
 				7DFB6AF41CAEBCEB00C2F0D3 /* SwipeTableView.m in Sources */,
-				7DFB6AF71CAEBCFA00C2F0D3 /* UIView+Frame.m in Sources */,
+				7DFB6AF71CAEBCFA00C2F0D3 /* UIView+SwipeTableViewFrame.m in Sources */,
 				7DFB6B0B1CAEC1D700C2F0D3 /* CustomCollectionView.m in Sources */,
 				7D0B0AD21CF9DD9900CBC1B4 /* CustomSegmentControl.m in Sources */,
 				7D71D7951CAF6BA30012D296 /* DemoListController.m in Sources */,
