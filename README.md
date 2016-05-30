@@ -19,18 +19,18 @@ pod 'SwipeTableView'
 
   - 1.先设置一个contentView，这里采用UICollectionView，作为视图的内容载体。
 
-  - 2.每一个可以所有滑动切换的itemView，作为UICollectionView的cell，这样便实现了左右滑动
+  - 2.创建UIScrollView子类的itemView，作为UICollectionView的cell，这样便实现了左右滑动
 
-  - 3.支持左右滑动之后，关键的问题是滑动后相邻item的对齐问题，这里采用在itemView生成重用的时候，根据前后两个itemView的contentOffset作比较，然后统一后一个itemView的contentOffset与前一个相同。这样就实现了滚动滑动后前后itemView的offset是对齐的。
-  - 4.对于header与可以悬停的顶部bar的实现，是在contentView（即根容器视图）上添加。然后对当前的itemView的contentOffset进行KVO，这样在当前itemView的contentOffset发生变化时，去改变header与bar的Y坐标值，实现同步滚动与悬停效果。
+  - 3.支持左右滑动之后，关键的问题是滑动后相邻item的对齐问题，这里采用在itemView生成重用的时候，比较前后两个itemView的contentOffset，然后设置后一个itemView的contentOffset与前一个相同。这样就实现了左右滑动后前后itemView的offset是对齐的。
+  - 4.对于header与可以悬停的顶部bar的实现，是在contentView（即根容器视图）上添加控件。然后对当前的itemView的contentOffset进行KVO，这样在当前itemView的contentOffset发生变化时，去改变header与bar的Y坐标值，实现同步滚动与悬停效果。
 
 ## Basic usage
 
 * 使用方式类似UITableView，需要实现 `SwipeTableViewDataSource` 代理的两个方法：
-  - `- (NSInteger)numberOfItemsInSwipeTableView:(SwipeTableView *)swipeView` 
+  - `- (NSInteger)numberOfItemsInSwipeTableView:(SwipeTableView *)swipeView`      
     返回列表item的个数
 
-  - `- (UIScrollView *)swipeTableView:(SwipeTableView *)swipeView viewForItemAtIndex:(NSInteger)index reusingView:(UIScrollView *)view` 
+  - `- (UIScrollView *)swipeTableView:(SwipeTableView *)swipeView viewForItemAtIndex:(NSInteger)index reusingView:(UIScrollView *)view`     
     返回每个item对应的itemView，返回的视图类型需要时`UIScrollView`的子类：`UITableView`或者`UICollectionView`。这里采用重用机制，需要根据reusingView来创建单一的itemView。
 
 * `SwipeTableViewDelegate` 代理提供了`SwipeTableVeiw`相关的代理操作，可以自行根据需要实现相关代理。
