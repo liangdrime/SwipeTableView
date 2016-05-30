@@ -56,14 +56,16 @@ NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
     UIButton * back = [UIButton buttonWithType:UIButtonTypeCustom];
     back.frame = CGRectMake(10, 0, 40, 40);
     back.top = _shouldHiddenNavigationBar?25:74;
-    back.backgroundColor = RGBColorAlpha(10, 230, 0, 0.95);
+    back.backgroundColor = RGBColorAlpha(10, 202, 0, 0.95);
     back.layer.cornerRadius = back.height/2;
     back.layer.masksToBounds = YES;
-    back.titleLabel.font = [UIFont systemFontOfSize:14];
+    back.titleLabel.font = [UIFont boldSystemFontOfSize:14];
     [back setTitle:@"Back" forState:UIControlStateNormal];
-    [back setTitleColor:RGBColor(236, 255, 236) forState:UIControlStateNormal];
+    [back setTitleColor:RGBColor(255, 255, 215) forState:UIControlStateNormal];
     [back addTarget:self action:@selector(back) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:back];
+    
+    [self.navigationController.navigationBar setTintColor:RGBColor(234, 39, 0)];
     
     // edge gesture
     [_swipeTableView.contentView.panGestureRecognizer requireGestureRecognizerToFail:self.screenEdgePanGestureRecognizer];
