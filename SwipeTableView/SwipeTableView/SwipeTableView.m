@@ -42,6 +42,11 @@
 @property (nonatomic, strong) NSMutableDictionary * contentOffsetQuene;
 
 /*!
+ *  记录item的contentSize
+ */
+@property (nonatomic, strong) NSMutableDictionary * contentSizeQuene;
+
+/*!
  *  记录item所要求的最小contentSize
  */
 @property (nonatomic, strong) NSMutableDictionary * contentMinSizeQuene;
@@ -92,7 +97,8 @@ static void * SwipeTableViewItemContentSizeContext             = &SwipeTableView
     [self addSubview:autoAdjustInsetsView];
     [self addSubview:_contentView];
     
-    self.contentOffsetQuene = [NSMutableDictionary dictionaryWithCapacity:0];
+    self.contentOffsetQuene  = [NSMutableDictionary dictionaryWithCapacity:0];
+    self.contentSizeQuene    = [NSMutableDictionary dictionaryWithCapacity:0];
     self.contentMinSizeQuene = [NSMutableDictionary dictionaryWithCapacity:0];
     _swipeHeaderTopInset = 64;
     _headerInset = 0;
@@ -193,7 +199,7 @@ static void * SwipeTableViewItemContentSizeContext             = &SwipeTableView
     CGPoint contentOffset = self.currentItemView.contentOffset;
     CGSize contentSize    = self.currentItemView.contentSize;
     self.contentOffsetQuene[@(_currentItemIndex)] = [NSValue valueWithCGPoint:contentOffset];
-    self.contentMinSizeQuene[@(_currentItemIndex)] = [NSValue valueWithCGSize:contentSize];
+    self.contentSizeQuene[@(_currentItemIndex)]   = [NSValue valueWithCGSize:contentSize];
     // scroll to target item index
     /*！
      * 此处要先设置状态，因为scrollviewToItem的方法会导致先调用scrollViewDidScroll:然后再cellForRow重用item
@@ -259,7 +265,9 @@ static void * SwipeTableViewItemContentSizeContext             = &SwipeTableView
         [subView addObserver:self forKeyPath:@"contentSize" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:SwipeTableViewItemContentSizeContext];
         _currentItemIndex           = indexPath.row;
         _currentItemView            = subView;
-        _switchPageWithoutAnimation = !_switchPageWithoutAnimation;
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            _switchPageWithoutAnimation = !_switchPageWithoutAnimation;
+        });
     }
     
     // make the itemview'contentoffset same
@@ -295,8 +303,14 @@ static void * SwipeTableViewItemContentSizeContext             = &SwipeTableView
         self.contentOffsetQuene[@(lastIndex)] = [NSValue valueWithCGPoint:contentOffset];
     }else {
         // 非滚动切换item，由于重用关系前后itemView是同一个
-        contentOffset   = [self.contentOffsetQuene[@(lastIndex)] CGPointValue];
-        itemContentSize = [self.contentMinSizeQuene[@(index)] CGSizeValue];
+        contentOffset = [self.contentOffsetQuene[@(lastIndex)] CGPointValue];
+        // 取出之前存储的contentSize，如果没有就用当前itemView的contentSize
+        NSValue * contentSizeObj = self.contentSizeQuene[@(index)];
+        if (nil != contentSizeObj) {
+            itemContentSize = [contentSizeObj CGSizeValue];
+        }else {
+            itemContentSize = itemView.contentSize;
+        }
     }
     
     // 取出记录的offset
@@ -328,7 +342,9 @@ static void * SwipeTableViewItemContentSizeContext             = &SwipeTableView
     
     // set shoudVisible item contentOffset and contentSzie
     if (_shouldAdjustContentSize) {
-        _contentMinSizeQuene[@(index)] = [NSValue valueWithCGSize:itemContentSize];
+        CGSize minRequireContentSize   = CGSizeMake(itemContentSize.width, minRequireHeight);
+        _contentSizeQuene[@(index)]    = [NSValue valueWithCGSize:itemContentSize];
+        _contentMinSizeQuene[@(index)] = [NSValue valueWithCGSize:minRequireContentSize];
         itemView.contentSize           = itemContentSize;
         _isAdjustingcontentSize        = YES;
         // 自适应contentSize的状态在当前事件循环之后解除
@@ -374,7 +390,7 @@ static void * SwipeTableViewItemContentSizeContext             = &SwipeTableView
                 CGPoint requireOffset     = [offsetObj CGPointValue];
                 // round 之后，解决像素影响问题
                 if (round(contentOffsetY) != round(requireOffset.y)) {
-                    scrollView.contentOffset = requireOffset;
+                    scrollView.contentOffset = CGPointMake(scrollView.contentOffset.x, round(requireOffset.y));
                 }
             }
         }
@@ -384,9 +400,14 @@ static void * SwipeTableViewItemContentSizeContext             = &SwipeTableView
     if (context == SwipeTableViewItemContentSizeContext) {
         // adjust contentSize
         if (_shouldAdjustContentSize) {
+            // 当前scrollview所对应的index
+            NSInteger index = _currentItemIndex;
+            if (object != _currentItemView) {
+                index   = _shouldVisibleItemIndex;
+            }
             UIScrollView * scrollView = object;
             CGFloat contentSizeH      = scrollView.contentSize.height;
-            CGSize minRequireSize     = [_contentMinSizeQuene[@(_shouldVisibleItemIndex)] CGSizeValue];
+            CGSize minRequireSize     = [_contentMinSizeQuene[@(index)] CGSizeValue];
             if (contentSizeH < minRequireSize.height) {
                 _isAdjustingcontentSize = YES;
                 scrollView.contentSize = minRequireSize;
