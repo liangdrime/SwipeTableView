@@ -28,7 +28,7 @@ It is a swipe view with tableview items,so it support scroll vertical and horizo
   s.source       = { :git => "https://github.com/Roylee-ML/SwipeTableView.git", :tag => s.version.to_s }
 
 
-  s.source_files  = "SwipeTableView/*"
+  s.source_files  = "SwipeTableView/SwipeTableView*"
   # s.public_header_files = "Classes/**/*.h"
 
   # s.framework  = "UIKit"
