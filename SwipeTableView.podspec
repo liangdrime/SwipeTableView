@@ -1,15 +1,14 @@
 Pod::Spec.new do |s|
 
   s.name         = "SwipeTableView"
-  s.version      = "0.1.0"
+  s.version      = "0.1.1"
   s.summary      = "A swipe view with tableview oc iOS."
   s.description  = <<-DESC
 It is a swipe view with tableview items,so it support scroll vertical and horizontal.It's used just like a tableview to set header or swithcbar. 
                    DESC
 
   s.homepage     = "https://github.com/Roylee-ML/SwipeTableView"
-  # s.screenshots  = "https://github.com/Roylee-ML/SwipeTableView/screenshots_1.gif", "https://github.com/Roylee-ML/SwipeTableView/screenshots_2.gif"
-
+  # s.screenshots  = "https://github.com/Roylee-ML/SwipeTableView/blob/master/ScreenShot/screenshot.gif"
   s.license      = "MIT"
   # s.license      = { :type => "MIT", :file => "FILE_LICENSE" }
   s.author             = { "Roylee-ML" => "roylee.stillway@gmail.com" }
