@@ -32,6 +32,9 @@
                             @"title":@"AdjustContentSize",
                             @"actionIdfy":kAdjustContentSizeToFitMaxItemIdentifier,},
                         @{
+                            @"title":@"DisabledBarScroll",
+                            @"actionIdfy":kDisabledSwipeHeaderBarScrollIdentifier,},
+                        @{
                             @"title":@"HiddenNavigationBar",
                             @"actionIdfy":kHiddenNavigationBarIdentifier,
                             }];
@@ -58,6 +61,7 @@
     demoVC.actionIdentifier = _dataSource[indexPath.row][@"actionIdfy"];
     demoVC.title            = _dataSource[indexPath.row][@"title"];
     [super prepareForSegue:segue sender:sender];
+    [self.tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 
 - (void)didReceiveMemoryWarning {

@@ -16,6 +16,7 @@
 NSString const * kShouldReuseableViewIdentifier = @"setIsJustOneKindOfClassView";
 NSString const * kHybridItemViewsIdentifier = @"doNothing";
 NSString const * kAdjustContentSizeToFitMaxItemIdentifier = @"setFitItemsContentSize";
+NSString const * kDisabledSwipeHeaderBarScrollIdentifier = @"setSwipeHeaderBarScrollDisabled";
 NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
 
 @interface DemoViewController ()<SwipeTableViewDataSource,SwipeTableViewDelegate,UIGestureRecognizerDelegate>
@@ -24,6 +25,7 @@ NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
 @property (nonatomic, assign) BOOL isJustOneKindOfClassView;
 @property (nonatomic, assign) BOOL shouldHiddenNavigationBar;
 @property (nonatomic, assign) BOOL shouldFitItemsContentSize;
+@property (nonatomic, assign) BOOL swipeBarScrollDisabled;
 @property (nonatomic, strong) UIImageView * tableViewHeader;
 @property (nonatomic, strong) CustomSegmentControl * segmentBar;
 
@@ -39,8 +41,9 @@ NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
     _swipeTableView.delegate = self;
     _swipeTableView.dataSource = self;
     _swipeTableView.shouldAdjustContentSize = _shouldFitItemsContentSize;
-    _swipeTableView.swipeHeaderView = self.tableViewHeader;
+    _swipeTableView.swipeHeaderView = _swipeBarScrollDisabled?nil:self.tableViewHeader;
     _swipeTableView.swipeHeaderBar = self.segmentBar;
+    _swipeTableView.swipeHeaderBarScrollDisabled = _swipeBarScrollDisabled;
     if (_shouldHiddenNavigationBar) {
         _swipeTableView.swipeHeaderTopInset = 0;
     }
@@ -49,8 +52,8 @@ NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
     // nav bar
     UIBarButtonItem * rightBarItem = [[UIBarButtonItem alloc]initWithTitle:@"- Header" style:UIBarButtonItemStylePlain target:self action:@selector(setSwipeTableHeader:)];
     UIBarButtonItem * leftBarItem = [[UIBarButtonItem alloc]initWithTitle:@"- Bar" style:UIBarButtonItemStylePlain target:self action:@selector(setSwipeTableBar:)];
-    self.navigationItem.leftBarButtonItem = leftBarItem;
-    self.navigationItem.rightBarButtonItem = rightBarItem;
+    self.navigationItem.leftBarButtonItem = _swipeBarScrollDisabled?nil:leftBarItem;
+    self.navigationItem.rightBarButtonItem = _swipeBarScrollDisabled?nil:rightBarItem;
     
     // back
     UIButton * back = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -60,6 +63,7 @@ NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
     back.layer.cornerRadius = back.height/2;
     back.layer.masksToBounds = YES;
     back.titleLabel.font = [UIFont boldSystemFontOfSize:14];
+    back.hidden = _swipeBarScrollDisabled;
     [back setTitle:@"Back" forState:UIControlStateNormal];
     [back setTitleColor:RGBColor(255, 255, 215) forState:UIControlStateNormal];
     [back addTarget:self action:@selector(back) forControlEvents:UIControlEventTouchUpInside];
@@ -101,6 +105,10 @@ NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
 - (void)setFitItemsContentSize {
     _shouldFitItemsContentSize = YES;
     _swipeTableView.shouldAdjustContentSize = _shouldFitItemsContentSize;
+}
+
+- (void)setSwipeHeaderBarScrollDisabled {
+    _swipeBarScrollDisabled = YES;
 }
 
 - (void)shouldHidenNavigationBar {

@@ -69,7 +69,7 @@ pod 'SwipeTableView'
 
 ## Demo Info
 
-* 使用的详细用法在SwipeTableViewDemo文件夹中，提供了四种示例：
+* 使用的详细用法在SwipeTableViewDemo文件夹中，提供了五种示例：
 
   - `SingleOneKindView`   
      数据源提供的是单一类型的itemView，这里默认提供的是 `CustomTableView` （`UITableView`的子类），并且每一个itemView的数据行数有多有少，因此在滑动到数据少的itemView时，再次触碰界面，当前的itemView会有回弹的动作（由于contentSize小的缘故）。
@@ -80,10 +80,13 @@ pod 'SwipeTableView'
   - `AdjustContentSize`   
      自适应调整cotentOffszie属性，这里不同的itemView的数据行数有多有少，当滑动到数据较少的itemView时，再次触碰界面并不会导致当前itemView的回弹，这里当前数据少的itemView已经做了最小contentSize的设置。
 
+  - `DisabledBarScroll`         
+     取消顶部控制条的跟随滚动，只有在swipeHeaderView是nil的条件下才能生效。这样可以实现一个类似网易新闻首页的滚动菜单列表的布局。
+
   - `HiddenNavigationBar` 
      隐藏导航。自定义了一个返回按钮（支持手势滑动返回）。
 
-  - Demo支持添加移除header（定义的`UIImageView`）与bar（自定义的 `CutomSegmentControl` ）的功能。
+  -  Demo支持添加移除header（定义的`UIImageView`）与bar（自定义的 `CutomSegmentControl` ）的功能。
 
 ## License
 

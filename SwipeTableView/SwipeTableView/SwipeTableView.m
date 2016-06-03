@@ -127,7 +127,11 @@ static void * SwipeTableViewItemContentSizeContext             = &SwipeTableView
     
     self.contentView.frame = self.bounds;
     self.layout.itemSize = self.bounds.size;
+    self.swipeHeaderBarScrollDisabled &= nil == _swipeHeaderView;
     self.swipeHeaderBar.top = _swipeHeaderView.bottom;
+    if (_swipeHeaderBarScrollDisabled) {
+        _swipeHeaderBar.top = _swipeHeaderTopInset;
+    }
 }
 
 - (void)didMoveToSuperview {
@@ -179,6 +183,10 @@ static void * SwipeTableViewItemContentSizeContext             = &SwipeTableView
 - (void)setAlwaysBounceHorizontal:(BOOL)alwaysBounceHorizontal {
     _alwaysBounceHorizontal = alwaysBounceHorizontal;
     self.contentView.alwaysBounceHorizontal = alwaysBounceHorizontal;
+}
+
+- (void)setSwipeHeaderBarScrollDisabled:(BOOL)swipeHeaderBarScrollDisabled {
+    _swipeHeaderBarScrollDisabled = swipeHeaderBarScrollDisabled && nil == _swipeHeaderView;
 }
 
 - (void)setScrollEnabled:(BOOL)scrollEnabled {
@@ -361,17 +369,19 @@ static void * SwipeTableViewItemContentSizeContext             = &SwipeTableView
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context {
     if (context == SwipeTableViewItemContentOffsetContext) {
         
-        CGFloat newOffsetY        = [change[NSKeyValueChangeNewKey] CGPointValue].y;
-        CGFloat topMarginInset    = _swipeHeaderTopInset + _barInset;
-        UIView * headerBottomView = _swipeHeaderBar?_swipeHeaderBar:_swipeHeaderView;
-        
-        if (newOffsetY < -topMarginInset) {
-            headerBottomView.bottom = fabs(newOffsetY);
-        }else {
-            headerBottomView.bottom = topMarginInset;
-        }
-        if (_swipeHeaderBar) {
-            _swipeHeaderView.bottom = _swipeHeaderBar.top;
+        if (!_swipeHeaderBarScrollDisabled) {
+            CGFloat newOffsetY        = [change[NSKeyValueChangeNewKey] CGPointValue].y;
+            CGFloat topMarginInset    = _swipeHeaderTopInset + _barInset;
+            UIView * headerBottomView = _swipeHeaderBar?_swipeHeaderBar:_swipeHeaderView;
+            
+            if (newOffsetY < -topMarginInset) {
+                headerBottomView.bottom = fabs(newOffsetY);
+            }else {
+                headerBottomView.bottom = topMarginInset;
+            }
+            if (_swipeHeaderBar) {
+                _swipeHeaderView.bottom = _swipeHeaderBar.top;
+            }
         }
         
         /*
