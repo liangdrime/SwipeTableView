@@ -22,7 +22,10 @@ pod 'SwipeTableView'
   - 2.创建UIScrollView子类的itemView，作为UICollectionView的cell，这样便实现了左右滑动
 
   - 3.支持左右滑动之后，关键的问题是滑动后相邻item的对齐问题，这里采用在itemView生成重用的时候，比较前后两个itemView的contentOffset，然后设置后一个itemView的contentOffset与前一个相同。这样就实现了左右滑动后前后itemView的offset是对齐的。
+
   - 4.对于header与可以悬停的顶部bar的实现，是在contentView（即根容器视图）上添加控件。然后对当前的itemView的contentOffset进行KVO，这样在当前itemView的contentOffset发生变化时，去改变header与bar的Y坐标值，实现同步滚动与悬停效果。
+
+  - 5.由于项目为了兼容UITableView与UICollectionView，同时保留UITableView设置tableHeaderView的特性，常用的下拉刷新控件将不兼容。为了支持常用的下拉刷新控件，解决方案见 [Issue #1](https://github.com/Roylee-ML/SwipeTableView/issues/1)
 
 ## Basic usage
 
