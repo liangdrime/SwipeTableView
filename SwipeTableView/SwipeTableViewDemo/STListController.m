@@ -1,21 +1,21 @@
 //
-//  DemoListController.m
+//  STListController.m
 //  SwipeTableView
 //
 //  Created by Roy lee on 16/4/2.
 //  Copyright © 2016年 Roy lee. All rights reserved.
 //
 
-#import "DemoListController.h"
-#import "DemoViewController.h"
+#import "STListController.h"
+#import "STViewController.h"
 
-@interface DemoListController ()
+@interface STListController ()
 
 @property (nonatomic, strong) NSArray * dataSource;
 
 @end
 
-@implementation DemoListController
+@implementation STListController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -55,7 +55,7 @@
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
     // Get the new view controller using [segue destinationViewController].
     // Pass the selected object to the new view controller.
-    DemoViewController * demoVC = [segue destinationViewController];
+    STViewController * demoVC = [segue destinationViewController];
     UITableViewCell * cell = sender;
     NSIndexPath * indexPath = [self.tableView indexPathForCell:cell];
     demoVC.actionIdentifier = _dataSource[indexPath.row][@"actionIdfy"];

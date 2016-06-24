@@ -1,5 +1,5 @@
 //
-//  DemoViewController.h
+//  STViewController.h
 //  SwipeTableView
 //
 //  Created by Roy lee on 16/4/1.
@@ -16,9 +16,10 @@ UIKIT_EXTERN NSString const * kAdjustContentSizeToFitMaxItemIdentifier;
 UIKIT_EXTERN NSString const * kDisabledSwipeHeaderBarScrollIdentifier;
 UIKIT_EXTERN NSString const * kHiddenNavigationBarIdentifier;
 
-@interface DemoViewController : UIViewController
+@interface STViewController : UIViewController
 
 @property (nonatomic, strong) NSString * actionIdentifier;
+@property (nonatomic, strong) UIImageView * headerImageView;
 
 @end
 

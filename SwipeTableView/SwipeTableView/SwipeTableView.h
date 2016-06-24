@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "SwipeHeaderView.h"
 
 @protocol SwipeTableViewDataSource;
 @protocol SwipeTableViewDelegate;
@@ -16,8 +17,14 @@
 @property (nonatomic, assign) id<SwipeTableViewDataSource>dataSource;
 @property (nonatomic, strong, readonly) UICollectionView * contentView;
 
+/*****************************************************************************************************/
+/** 如果项目想要支持常用的下拉刷新控件，如MJRefresh等。需要在项目PCH文件或者当前.h文件中设置如下的宏：#define ST_PULLTOREFRESH_ENABLED **/
+/*****************************************************************************************************/
+//#define ST_PULLTOREFRESH_ENABLED
+
 /*!
  *  自定义显示在swipeView顶端的headerView，可以通过setter方法动态设置
+ *  如果想要支持拖动swipeHeaderView，滚动当前页面的currentItemView，需要自定义的header继承自'SwipeHeaderView'，或者以'SwipeHeaderView'的实例作为父视图
  */
 @property (nonatomic, strong) UIView * swipeHeaderView;
 
@@ -70,7 +77,7 @@
 @protocol SwipeTableViewDataSource <NSObject>
 
 - (NSInteger)numberOfItemsInSwipeTableView:(SwipeTableView *)swipeView;
-- (UIScrollView *)swipeTableView:(SwipeTableView *)swipeView viewForItemAtIndex:(NSInteger)index reusingView:(UIScrollView *)view;
+- (UITableView *)swipeTableView:(SwipeTableView *)swipeView viewForItemAtIndex:(NSInteger)index reusingView:(UIScrollView *)view;
 
 @end
 

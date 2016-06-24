@@ -1,17 +1,19 @@
 //
-//  DemoViewController.m
+//  STViewController.m
 //  SwipeTableView
 //
 //  Created by Roy lee on 16/4/1.
 //  Copyright © 2016年 Roy lee. All rights reserved.
 //
 
-#import "DemoViewController.h"
+#import "STViewController.h"
 #import "SwipeTableView.h"
 #import "CustomTableView.h"
 #import "CustomCollectionView.h"
 #import "CustomSegmentControl.h"
 #import "UIView+SwipeTableViewFrame.h"
+#import "STImageController.h"
+#import "STTransitions.h"
 
 NSString const * kShouldReuseableViewIdentifier = @"setIsJustOneKindOfClassView";
 NSString const * kHybridItemViewsIdentifier = @"doNothing";
@@ -19,19 +21,19 @@ NSString const * kAdjustContentSizeToFitMaxItemIdentifier = @"setFitItemsContent
 NSString const * kDisabledSwipeHeaderBarScrollIdentifier = @"setSwipeHeaderBarScrollDisabled";
 NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
 
-@interface DemoViewController ()<SwipeTableViewDataSource,SwipeTableViewDelegate,UIGestureRecognizerDelegate>
+@interface STViewController ()<SwipeTableViewDataSource,SwipeTableViewDelegate,UIGestureRecognizerDelegate,UIViewControllerTransitioningDelegate>
 
 @property (nonatomic, strong) SwipeTableView * swipeTableView;
 @property (nonatomic, assign) BOOL isJustOneKindOfClassView;
 @property (nonatomic, assign) BOOL shouldHiddenNavigationBar;
 @property (nonatomic, assign) BOOL shouldFitItemsContentSize;
 @property (nonatomic, assign) BOOL swipeBarScrollDisabled;
-@property (nonatomic, strong) UIImageView * tableViewHeader;
+@property (nonatomic, strong) SwipeHeaderView * tableViewHeader;
 @property (nonatomic, strong) CustomSegmentControl * segmentBar;
 
 @end
 
-@implementation DemoViewController
+@implementation STViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -88,6 +90,57 @@ NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
     return screenEdgePanGestureRecognizer;
 }
 
+#pragma mark - Header & Bar
+
+- (UIView *)tableViewHeader {
+    if (nil == _tableViewHeader) {
+        UIImage * headerImage = [UIImage imageNamed:@"onepiece_kiudai"];
+        // swipe header
+        self.tableViewHeader = [[SwipeHeaderView alloc]init];
+        _tableViewHeader.frame = CGRectMake(0, 0, kScreenWidth, kScreenWidth * (headerImage.size.height/headerImage.size.width));
+        _tableViewHeader.backgroundColor = [UIColor whiteColor];
+        
+        // image view
+        self.headerImageView = [[UIImageView alloc]initWithImage:headerImage];
+        _headerImageView.userInteractionEnabled = YES;
+        _headerImageView.frame = _tableViewHeader.bounds;
+        
+        // title label
+        UILabel * title = [[UILabel alloc]init];
+        title.textColor = RGBColor(255, 255, 255);
+        title.font = [UIFont boldSystemFontOfSize:17];
+        title.text = @"Tap To Full Screen";
+        title.textAlignment = NSTextAlignmentCenter;
+        title.size = CGSizeMake(200, 30);
+        title.centerX = _headerImageView.centerX;
+        title.bottom = _headerImageView.bottom - 20;
+        
+        // tap gesture
+        UITapGestureRecognizer * tap = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(tapHeader:)];
+        
+        [_tableViewHeader addSubview:_headerImageView];
+        [_tableViewHeader addSubview:title];
+        [_headerImageView addGestureRecognizer:tap];
+        [self shimmerHeaderTitle:title];
+    }
+    return _tableViewHeader;
+}
+
+- (CustomSegmentControl * )segmentBar {
+    if (nil == _segmentBar) {
+        self.segmentBar = [[CustomSegmentControl alloc]initWithItems:@[@"Item0",@"Item1",@"Item2",@"Item3"]];
+        _segmentBar.size = CGSizeMake(kScreenWidth, 40);
+        _segmentBar.font = [UIFont systemFontOfSize:15];
+        _segmentBar.textColor = RGBColor(100, 100, 100);
+        _segmentBar.selectedTextColor = RGBColor(0, 0, 0);
+        _segmentBar.backgroundColor = RGBColor(249, 251, 198);
+        _segmentBar.selectionIndicatorColor = RGBColor(249, 104, 92);
+        _segmentBar.selectedSegmentIndex = _swipeTableView.currentItemIndex;
+        [_segmentBar addTarget:self action:@selector(changeSwipeViewIndex:) forControlEvents:UIControlEventValueChanged];
+    }
+    return _segmentBar;
+}
+
 #pragma mark -
 
 - (void)setActionIdentifier:(NSString *)actionIdentifier {
@@ -121,31 +174,25 @@ NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
     [self.navigationController popViewControllerAnimated:YES];
 }
 
-#pragma mark - Header & Bar
-
-- (UIView *)tableViewHeader {
-    if (nil == _tableViewHeader) {
-        UIImage * headerImage = [UIImage imageNamed:@"onepiece_kiudai"];
-        self.tableViewHeader = [[UIImageView alloc]initWithImage:headerImage];
-        _tableViewHeader.frame = CGRectMake(0, 0, kScreenWidth, kScreenWidth * (headerImage.size.height/headerImage.size.width));
-        _tableViewHeader.backgroundColor = [UIColor purpleColor];
-    }
-    return _tableViewHeader;
+- (void)tapHeader:(UITapGestureRecognizer *)tap {
+    STImageController * imageVC = [[STImageController alloc]init];
+    imageVC.transitioningDelegate = self;
+    [self presentViewController:imageVC animated:YES completion:nil];
 }
 
-- (CustomSegmentControl * )segmentBar {
-    if (nil == _segmentBar) {
-        self.segmentBar = [[CustomSegmentControl alloc]initWithItems:@[@"Item0",@"Item1",@"Item2",@"Item3"]];
-        _segmentBar.size = CGSizeMake(kScreenWidth, 40);
-        _segmentBar.font = [UIFont systemFontOfSize:15];
-        _segmentBar.textColor = RGBColor(100, 100, 100);
-        _segmentBar.selectedTextColor = RGBColor(0, 0, 0);
-        _segmentBar.backgroundColor = RGBColor(249, 251, 198);
-        _segmentBar.selectionIndicatorColor = RGBColor(249, 104, 92);
-        _segmentBar.selectedSegmentIndex = _swipeTableView.currentItemIndex;
-        [_segmentBar addTarget:self action:@selector(changeSwipeViewIndex:) forControlEvents:UIControlEventValueChanged];
-    }
-    return _segmentBar;
+- (void)shimmerHeaderTitle:(UILabel *)title {
+    __weak typeof(self) weakSelf = self;
+    [UIView animateWithDuration:0.75f delay:0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
+        title.transform = CGAffineTransformMakeScale(0.98, 0.98);
+        title.alpha = 0.3;
+    } completion:^(BOOL finished) {
+        [UIView animateWithDuration:0.75f delay:0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
+            title.alpha = 1.0;
+            title.transform = CGAffineTransformIdentity;
+        } completion:^(BOOL finished) {
+            [weakSelf shimmerHeaderTitle:title];
+        }];
+    }];
 }
 
 - (void)setSwipeTableHeader:(UIBarButtonItem *)barItem {
@@ -232,6 +279,19 @@ NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
 
 - (void)swipeTableViewCurrentItemIndexDidChange:(SwipeTableView *)swipeView {
     _segmentBar.selectedSegmentIndex = swipeView.currentItemIndex;
+}
+
+
+#pragma  mark - UIViewControllerTransitioningDelegate
+
+- (id<UIViewControllerAnimatedTransitioning>)animationControllerForPresentedController:(UIViewController *)presented
+                                                                  presentingController:(UIViewController *)presenting sourceController:(UIViewController *)source {
+    
+    return [[STTransitions alloc]initWithTransitionDuration:0.55f isPresenting:YES];
+}
+
+- (id <UIViewControllerAnimatedTransitioning>)animationControllerForDismissedController:(UIViewController *)dismissed {
+    return [[STTransitions alloc]initWithTransitionDuration:0.5f isPresenting:NO];
 }
 
 - (void)viewWillAppear:(BOOL)animated {

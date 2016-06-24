@@ -1,5 +1,5 @@
 //
-//  DemoListController.h
+//  STListController.h
 //  SwipeTableView
 //
 //  Created by Roy lee on 16/4/2.
@@ -8,6 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-@interface DemoListController : UITableViewController
+@interface STListController : UITableViewController
 
 @end
