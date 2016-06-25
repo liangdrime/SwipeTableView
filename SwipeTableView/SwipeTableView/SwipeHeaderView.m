@@ -9,12 +9,14 @@
 #import "SwipeHeaderView.h"
 #import "SwipeTableView.h"
 
-static CGFloat rubberBandDistance(CGFloat offset, CGFloat dimension) {
+static CGFloat rubberBandRate(CGFloat offset) {
     
-    const CGFloat constant = 0.55f;
-    CGFloat result = (constant * fabs(offset) * dimension) / (dimension + constant * fabs(offset));
-    // The algorithm expects a positive offset, so we have to negate the result if the offset was negative.
-    return offset < 0.0f ? -result : result;
+    const CGFloat constant = 0.15f;
+    const CGFloat dimension = 10.0f;
+    const CGFloat startRate = 0.85f;
+    // 计算拖动视图translation的增量比率，起始值为startRate（此时offset为0）；随着frame超出的距离offset的增大，增量比率减小
+    CGFloat result = dimension * startRate / (dimension + constant * fabs(offset));
+    return result;
 }
 
 @interface STDynamicItem : NSObject <UIDynamicItem>
@@ -48,7 +50,6 @@ static CGFloat rubberBandDistance(CGFloat offset, CGFloat dimension) {
 @property (nonatomic, strong) UIDynamicItemBehavior * decelerationBehavior;
 @property (nonatomic, strong) UIAttachmentBehavior * springBehavior;
 @property (nonatomic, strong) STDynamicItem *dynamicItem;
-@property (nonatomic, assign) CGPoint orginFrameOrgin;
 @property (nonatomic, assign) CGRect newFrame;
 @property (nonatomic, assign) BOOL tracking;
 @property (nonatomic, assign) BOOL dragging;
@@ -86,7 +87,6 @@ static void * SwipeHeaderViewPanGestureRecognizerStateContext = &SwipeHeaderView
         case UIGestureRecognizerStateBegan:
         {
             [self endDecelerating];
-            self.orginFrameOrgin = self.frame.origin;
             self.tracking = YES;
         }
             // change offset and add RubberBanding effect
@@ -94,19 +94,21 @@ static void * SwipeHeaderViewPanGestureRecognizerStateContext = &SwipeHeaderView
         {
             self.tracking = NO;
             self.dragging = YES;
+            CGRect frame  = self.frame;
             CGPoint translation = [panGestureRecognizer translationInView:self.superview];
-            CGFloat newFrameOrginY = _orginFrameOrgin.y + translation.y;
-            CGPoint minFrameOrgin = [self minFrameOrgin];
-            CGPoint maxFrameOrgin = [self maxFrameOrgin];
+            CGFloat newFrameOrginY = frame.origin.y + translation.y;
+            CGPoint minFrameOrgin  = [self minFrameOrgin];
+            CGPoint maxFrameOrgin  = [self maxFrameOrgin];
             
             CGFloat minFrameOrginY = minFrameOrgin.y;
             CGFloat maxFrameOrginY = maxFrameOrgin.y;
             CGFloat constrainedOrignY = fmax(minFrameOrginY, fmin(newFrameOrginY, maxFrameOrginY));
-            CGFloat rubberBandedY = rubberBandDistance(newFrameOrginY - constrainedOrignY, CGRectGetHeight(UIScreen.mainScreen.bounds));
+            CGFloat rubberBandedRate  = rubberBandRate(newFrameOrginY - constrainedOrignY);
             
-            CGRect frame  = self.frame;
-            frame.origin  = CGPointMake(_orginFrameOrgin.x, constrainedOrignY + rubberBandedY);
+            frame.origin  = CGPointMake(frame.origin.x, frame.origin.y + translation.y * rubberBandedRate);
             self.newFrame = frame;
+            
+            [panGestureRecognizer setTranslation:CGPointMake(translation.x, 0) inView:self.superview];
         }
             break;
         case UIGestureRecognizerStateEnded:
@@ -125,7 +127,7 @@ static void * SwipeHeaderViewPanGestureRecognizerStateContext = &SwipeHeaderView
             __weak typeof(self) weakSelf = self;
             _decelerationBehavior.action = ^{
                 CGPoint center = weakSelf.dynamicItem.center;
-                center.x       = weakSelf.orginFrameOrgin.x;
+                center.x       = weakSelf.frame.origin.x;
                 CGRect frame   = weakSelf.frame;
                 frame.origin   = center;
                 weakSelf.newFrame = frame;
