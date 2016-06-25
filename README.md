@@ -43,8 +43,8 @@ pod 'SwipeTableView'
 * 现在可以一行代码支持常用的下拉刷新控件了，只需要在项目的PCH文件中或者在`SwipeTableView`的.h文件中设置如下的宏即可：
 ```objc
     #define ST_PULLTOREFRESH_ENABLED
-```
-  但由于现在第三方下拉刷新的控件实现各异，在支持第三放下拉刷新控件的同时，`swipeHeaderView`并不能支持`SwipeHeaderView`，即`swipeHeaderView`并不能是`SwipeHeaderView`及其子类的实例。（同时希望大家参与解决此问题）
+```          
+    但由于现在第三方下拉刷新的控件实现各异，在支持第三放下拉刷新控件的同时，`swipeHeaderView`并不能支持`SwipeHeaderView`，即`swipeHeaderView`并不能是`SwipeHeaderView`及其子类的实例。（同时希望大家参与解决此问题）
 
 * 示例：
    - 初始化并设置header与bar
