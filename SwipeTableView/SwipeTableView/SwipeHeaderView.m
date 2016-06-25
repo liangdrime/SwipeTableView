@@ -41,7 +41,7 @@ static CGFloat rubberBandDistance(CGFloat offset, CGFloat dimension) {
 
 
 
-@interface SwipeHeaderView ()
+@interface SwipeHeaderView ()<UIDynamicAnimatorDelegate>
 
 @property (nonatomic, strong) UIPanGestureRecognizer * panGestureRecognizer;
 @property (nonatomic, strong) UIDynamicAnimator * animator;
@@ -49,10 +49,20 @@ static CGFloat rubberBandDistance(CGFloat offset, CGFloat dimension) {
 @property (nonatomic, strong) UIAttachmentBehavior * springBehavior;
 @property (nonatomic, strong) STDynamicItem *dynamicItem;
 @property (nonatomic, assign) CGPoint orginFrameOrgin;
+@property (nonatomic, assign) CGRect newFrame;
+@property (nonatomic, assign) BOOL tracking;
+@property (nonatomic, assign) BOOL dragging;
+@property (nonatomic, assign) BOOL decelerating;
 
 @end
 
+static void * SwipeHeaderViewPanGestureRecognizerStateContext = &SwipeHeaderViewPanGestureRecognizerStateContext;
+
 @implementation SwipeHeaderView
+
+- (void)dealloc {
+    [self.panGestureRecognizer removeObserver:self forKeyPath:@"state"];
+}
 
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
@@ -60,8 +70,10 @@ static CGFloat rubberBandDistance(CGFloat offset, CGFloat dimension) {
         // pan gesture
         self.panGestureRecognizer = [[UIPanGestureRecognizer alloc]initWithTarget:self action:@selector(handlePanGesture:)];
         [self addGestureRecognizer:_panGestureRecognizer];
+        [self.panGestureRecognizer addObserver:self forKeyPath:@"state" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:SwipeHeaderViewPanGestureRecognizerStateContext];
         // animator
         self.animator = [[UIDynamicAnimator alloc]initWithReferenceView:self];
+        self.animator.delegate = self;
         self.dynamicItem = [[STDynamicItem alloc]init];
     }
     return self;
@@ -70,17 +82,18 @@ static CGFloat rubberBandDistance(CGFloat offset, CGFloat dimension) {
 - (void)handlePanGesture:(UIPanGestureRecognizer *)panGestureRecognizer {
     
     switch (panGestureRecognizer.state) {
-        // remove animator
+            // remove animator
         case UIGestureRecognizerStateBegan:
         {
-            [self.animator removeAllBehaviors];
-            self.decelerationBehavior = nil;
-            self.springBehavior = nil;
+            [self endDecelerating];
             self.orginFrameOrgin = self.frame.origin;
+            self.tracking = YES;
         }
-        // change offset and add RubberBanding effect
+            // change offset and add RubberBanding effect
         case UIGestureRecognizerStateChanged:
         {
+            self.tracking = NO;
+            self.dragging = YES;
             CGPoint translation = [panGestureRecognizer translationInView:self.superview];
             CGFloat newFrameOrginY = _orginFrameOrgin.y + translation.y;
             CGPoint minFrameOrgin = [self minFrameOrgin];
@@ -91,13 +104,15 @@ static CGFloat rubberBandDistance(CGFloat offset, CGFloat dimension) {
             CGFloat constrainedOrignY = fmax(minFrameOrginY, fmin(newFrameOrginY, maxFrameOrginY));
             CGFloat rubberBandedY = rubberBandDistance(newFrameOrginY - constrainedOrignY, CGRectGetHeight(UIScreen.mainScreen.bounds));
             
-            CGRect frame = self.frame;
-            frame.origin = CGPointMake(_orginFrameOrgin.x, constrainedOrignY + rubberBandedY);
-            self.frame   = frame;
+            CGRect frame  = self.frame;
+            frame.origin  = CGPointMake(_orginFrameOrgin.x, constrainedOrignY + rubberBandedY);
+            self.newFrame = frame;
         }
             break;
         case UIGestureRecognizerStateEnded:
         {
+            self.tracking = NO;
+            self.dragging = NO;
             CGPoint velocity = [panGestureRecognizer velocityInView:self];
             // only support vertical
             velocity.x = 0;
@@ -110,10 +125,10 @@ static CGFloat rubberBandDistance(CGFloat offset, CGFloat dimension) {
             __weak typeof(self) weakSelf = self;
             _decelerationBehavior.action = ^{
                 CGPoint center = weakSelf.dynamicItem.center;
-                center.x = weakSelf.orginFrameOrgin.x;
-                CGRect frame = weakSelf.frame;
-                frame.origin = center;
-                weakSelf.frame   = frame;
+                center.x       = weakSelf.orginFrameOrgin.x;
+                CGRect frame   = weakSelf.frame;
+                frame.origin   = center;
+                weakSelf.newFrame = frame;
             };
             
             [self.animator addBehavior:_decelerationBehavior];
@@ -121,12 +136,20 @@ static CGFloat rubberBandDistance(CGFloat offset, CGFloat dimension) {
             break;
             
         default:
+        {
+            self.tracking = NO;
+            self.dragging = NO;
+        }
             break;
+    }
+    
+    if (_delegate && [_delegate respondsToSelector:@selector(swipeHeaderView:didPan:)]) {
+        [_delegate swipeHeaderView:self didPan:panGestureRecognizer];
     }
 }
 
-- (void)setFrame:(CGRect)frame {
-    [super setFrame:frame];
+- (void)setNewFrame:(CGRect)frame {
+    [self setFrame:frame];
     
     CGPoint minFrameOrgin = [self minFrameOrgin];
     CGPoint maxFrameOrgin = [self maxFrameOrgin];
@@ -179,6 +202,8 @@ static CGFloat rubberBandDistance(CGFloat offset, CGFloat dimension) {
 
 - (void)endDecelerating {
     [self.animator removeAllBehaviors];
+    [self setDecelerationBehavior:nil];
+    [self setSpringBehavior:nil];
 }
 
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
@@ -190,4 +215,29 @@ static CGFloat rubberBandDistance(CGFloat offset, CGFloat dimension) {
     return view;
 }
 
+#pragma mark - KVO
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context {
+    if (context == SwipeHeaderViewPanGestureRecognizerStateContext) {
+        if (_delegate && [_delegate respondsToSelector:@selector(swipeHeaderView:didPanGestureRecognizerStateChanged:)]) {
+            [_delegate swipeHeaderView:self didPanGestureRecognizerStateChanged:object];
+        }
+    }
+}
+
+#pragma mark - UIDynamicAnimatorDelegate
+
+- (void)dynamicAnimatorWillResume:(UIDynamicAnimator *)animator {
+    self.decelerating = YES;
+}
+
+- (void)dynamicAnimatorDidPause:(UIDynamicAnimator *)animator {
+    self.decelerating = NO;
+}
+
 @end
+
+
+
+
+

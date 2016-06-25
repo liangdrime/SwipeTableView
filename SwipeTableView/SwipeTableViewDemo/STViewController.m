@@ -237,7 +237,7 @@ NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
 }
 
 - (UIScrollView *)swipeTableView:(SwipeTableView *)swipeView viewForItemAtIndex:(NSInteger)index reusingView:(UIScrollView *)view {
-    NSInteger numberOfRows = 10;
+    NSInteger numberOfRows = 12;
     if (_isJustOneKindOfClassView || _shouldFitItemsContentSize || _shouldHiddenNavigationBar) {
         // 重用
         if (nil == view) {
@@ -287,11 +287,11 @@ NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
 - (id<UIViewControllerAnimatedTransitioning>)animationControllerForPresentedController:(UIViewController *)presented
                                                                   presentingController:(UIViewController *)presenting sourceController:(UIViewController *)source {
     
-    return [[STTransitions alloc]initWithTransitionDuration:0.55f isPresenting:YES];
+    return [[STTransitions alloc]initWithTransitionDuration:0.55f fromView:self.headerImageView isPresenting:YES];
 }
 
 - (id <UIViewControllerAnimatedTransitioning>)animationControllerForDismissedController:(UIViewController *)dismissed {
-    return [[STTransitions alloc]initWithTransitionDuration:0.5f isPresenting:NO];
+    return [[STTransitions alloc]initWithTransitionDuration:0.5f fromView:self.headerImageView isPresenting:NO];
 }
 
 - (void)viewWillAppear:(BOOL)animated {

@@ -11,6 +11,6 @@
 
 @interface STTransitions : NSObject <UIViewControllerAnimatedTransitioning>
 
-- (instancetype)initWithTransitionDuration:(NSTimeInterval)transitionDuration isPresenting:(BOOL)present;
+- (instancetype)initWithTransitionDuration:(NSTimeInterval)transitionDuration fromView:(UIView *)fromView isPresenting:(BOOL)present;
 
 @end

@@ -7,28 +7,34 @@
 //
 
 #import "STTransitions.h"
-#import "STViewController.h"
 #import "STImageController.h"
 
 #define kScreenWidth    [UIScreen mainScreen].bounds.size.width
 #define kScreenHeight   [UIScreen mainScreen].bounds.size.height
 
+@interface UIView (UIImageView)
+- (UIImageView *)imageView;
+@end
+
+
 @interface STTransitions ()
 
-@property (nonatomic,assign) NSTimeInterval transitionDuration;
-@property (nonatomic,assign) CGFloat startingAlpha;
-@property (nonatomic,assign) BOOL isPresenting;
-@property (nonatomic,retain) id transitionContext;
+@property (nonatomic, assign) NSTimeInterval transitionDuration;
+@property (nonatomic, assign) CGFloat startingAlpha;
+@property (nonatomic, assign) BOOL isPresenting;
+@property (nonatomic, strong) id transitionContext;
+@property (nonatomic, strong) UIView * fromView;
 
 @end
 
 @implementation STTransitions
 
-- (instancetype)initWithTransitionDuration:(NSTimeInterval)transitionDuration isPresenting:(BOOL)present {
+- (instancetype)initWithTransitionDuration:(NSTimeInterval)transitionDuration fromView:(UIView *)fromView isPresenting:(BOOL)present {
     self = [super init];
     if (self) {
         _transitionDuration = transitionDuration;
         _isPresenting = present;;
+        _fromView = fromView;
     }
     return self;
 }
@@ -45,9 +51,8 @@
     UIView * toView = toVC.view;
     
     if (_isPresenting) {
-        STViewController * infoVC = (STViewController *)[(UINavigationController *)fromVC viewControllers].lastObject;
         STImageController * imageVC = (STImageController *)toVC;
-        UIImageView * fromImageView = infoVC.headerImageView;
+        UIImageView * fromImageView = _fromView.imageView;
         UIImageView * toImageView = imageVC.imageView;
         CGFloat imageH = fromImageView.image.size.height/fromImageView.image.size.width * kScreenWidth;
         CGRect toFrame = CGRectMake(0, (kScreenHeight - imageH)/2, kScreenWidth, imageH);
@@ -74,10 +79,8 @@
         }];
     }else {
         STImageController * imageVC = (STImageController *)fromVC;
-        STViewController * infoVC = (STViewController *)[(UINavigationController *)toVC viewControllers].lastObject;
-        
         UIImageView * fromImageView = imageVC.imageView;
-        UIImageView * toImageView = infoVC.headerImageView;
+        UIImageView * toImageView = _fromView.imageView;
         UIImageView * transitionView = [[UIImageView alloc]initWithImage:fromImageView.image];
         
         fromView.alpha = 1.0f;
@@ -101,6 +104,23 @@
     }
 }
 
+
+@end
+
+
+@implementation UIView (UIImageView)
+
+- (UIImageView *)imageView {
+    if ([self isKindOfClass:UIImageView.class]) {
+        return (UIImageView *)self;
+    }
+    for (UIView * subView in self.subviews) {
+        if ([subView isKindOfClass:UIImageView.class]) {
+            return (UIImageView *)subView;
+        }
+    }
+    return nil;
+}
 
 @end
 

@@ -27,6 +27,8 @@ pod 'SwipeTableView'
 
   - 5.由于项目为了兼容UITableView与UICollectionView，同时保留UITableView设置tableHeaderView的特性，常用的下拉刷新控件将不兼容。为了支持常用的下拉刷新控件，解决方案见 [Issue #1](https://github.com/Roylee-ML/SwipeTableView/issues/1)
 
+  - 6.通过用户反映的问题[`issue#2`](https://github.com/Roylee-ML/SwipeTableView/issues/2)，在`0.1`版本中滑动`swipeHeaderView`并不能触发当前页面的`scrollView`跟随滚动。在`0.2`版本中，采用`UIKit Dynamic`物理动画引擎实现自定义`UIScrollView`效果解决上述问题，[`参考文章`](http://philcai.com/2016/03/15/%E7%94%A8UIKit-Dynamics%E6%A8%A1%E4%BB%BFUIScrollView/) [`英文博客`](http://holko.pl/2014/07/06/inertia-bouncing-rubber-banding-uikit-dynamics/)。
+
 ## Basic usage
 
 * 使用方式类似UITableView，需要实现 `SwipeTableViewDataSource` 代理的两个方法：
@@ -37,6 +39,12 @@ pod 'SwipeTableView'
     返回每个item对应的itemView，返回的视图类型需要时`UIScrollView`的子类：`UITableView`或者`UICollectionView`。这里采用重用机制，需要根据reusingView来创建单一的itemView。
 
 * `SwipeTableViewDelegate` 代理提供了`SwipeTableVeiw`相关的代理操作，可以自行根据需要实现相关代理。
+
+* 现在可以一行代码支持常用的下拉刷新控件了，只需要在项目的PCH文件中或者在`SwipeTableView`的.h文件中设置如下的宏即可：
+```objc
+    #define ST_PULLTOREFRESH_ENABLED
+```
+  但由于现在第三方下拉刷新的控件实现各异，在支持第三放下拉刷新控件的同时，`swipeHeaderView`并不能支持`SwipeHeaderView`，即`swipeHeaderView`并不能是`SwipeHeaderView`及其子类的实例。（同时希望大家参与解决此问题）
 
 * 示例：
    - 初始化并设置header与bar
@@ -90,6 +98,8 @@ pod 'SwipeTableView'
      隐藏导航。自定义了一个返回按钮（支持手势滑动返回）。
 
   -  Demo支持添加移除header（定义的`UIImageView`）与bar（自定义的 `CutomSegmentControl` ）的功能。
+
+  -  示例代码新增点击图片全屏查看。
 
 ## License
 

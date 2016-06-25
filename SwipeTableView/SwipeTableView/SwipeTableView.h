@@ -18,7 +18,11 @@
 @property (nonatomic, strong, readonly) UICollectionView * contentView;
 
 /*****************************************************************************************************/
-/** 如果项目想要支持常用的下拉刷新控件，如MJRefresh等。需要在项目PCH文件或者当前.h文件中设置如下的宏：#define ST_PULLTOREFRESH_ENABLED **/
+/**
+ 如果项目想要支持常用的下拉刷新控件，如MJRefresh等。需要满足以下条件：
+ ①.需要在项目PCH文件或者当前.h文件中设置如下的宏：#define ST_PULLTOREFRESH_ENABLED
+ ②.此时'SwipeTableview'并不支持'SwipeHeaderView'，所以属性swipeHeaderView不能是'SwipeHeaderView'及其子类
+ */
 /*****************************************************************************************************/
 //#define ST_PULLTOREFRESH_ENABLED
 

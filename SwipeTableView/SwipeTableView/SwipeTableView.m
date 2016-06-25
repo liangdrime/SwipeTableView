@@ -160,10 +160,15 @@ static void * SwipeTableViewItemContentSizeContext             = &SwipeTableView
         _swipeHeaderView.y += _swipeHeaderTopInset;
         _headerInset        = _swipeHeaderView.bounds.size.height;
         
-        if ([swipeHeaderView isKindOfClass:SwipeHeaderView.class]) {
+        BOOL isSwipeHeaderView = [swipeHeaderView isKindOfClass:SwipeHeaderView.class];
+        if (isSwipeHeaderView) {
+#if !defined(ST_PULLTOREFRESH_ENABLED)
             [(SwipeHeaderView *)swipeHeaderView setDelegate:self];
+#else
+            NSAssert(!isSwipeHeaderView, @"如果支持常用下拉刷新控件的，'swipeHeaderView' 不能是 'SwipeHeaderView' 及其子类的实例对象！");
+#endif
         }
-        
+
         [self reloadData];
         [self layoutIfNeeded];
     }
@@ -485,9 +490,7 @@ static void * SwipeTableViewItemContentSizeContext             = &SwipeTableView
             }
         }
         
-    }
-    
-    if (context == SwipeTableViewItemContentSizeContext) {
+    }else if (context == SwipeTableViewItemContentSizeContext) {
         // adjust contentSize
         if (_shouldAdjustContentSize) {
             // 当前scrollview所对应的index
