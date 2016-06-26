@@ -28,7 +28,11 @@ NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
 @property (nonatomic, assign) BOOL shouldHiddenNavigationBar;
 @property (nonatomic, assign) BOOL shouldFitItemsContentSize;
 @property (nonatomic, assign) BOOL swipeBarScrollDisabled;
+#if !defined(ST_PULLTOREFRESH_ENABLED)
 @property (nonatomic, strong) SwipeHeaderView * tableViewHeader;
+#else
+@property (nonatomic, strong) UIView * tableViewHeader;
+#endif
 @property (nonatomic, strong) CustomSegmentControl * segmentBar;
 
 @end
@@ -96,7 +100,11 @@ NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
     if (nil == _tableViewHeader) {
         UIImage * headerImage = [UIImage imageNamed:@"onepiece_kiudai"];
         // swipe header
+#if !defined(ST_PULLTOREFRESH_ENABLED)
         self.tableViewHeader = [[SwipeHeaderView alloc]init];
+#else
+        self.tableViewHeader = [[UIView alloc]init];
+#endif
         _tableViewHeader.frame = CGRectMake(0, 0, kScreenWidth, kScreenWidth * (headerImage.size.height/headerImage.size.width));
         _tableViewHeader.backgroundColor = [UIColor whiteColor];
         

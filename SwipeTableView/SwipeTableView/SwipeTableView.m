@@ -269,9 +269,10 @@ static void * SwipeTableViewItemContentSizeContext             = &SwipeTableView
             objc_setAssociatedObject(newSubView, SwipeTableViewItemTopInsetKey, @(YES), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         }else {
             // update
-            CGFloat deltTopInset = topInset - contentInset.top;
-            contentInset.top += deltTopInset;
+            CGFloat deltaTopInset = topInset - contentInset.top;
+            contentInset.top += deltaTopInset;
             newSubView.contentInset = contentInset;
+            newSubView.scrollIndicatorInsets = contentInset;
         }
         
         if (newSubView != subView) {
