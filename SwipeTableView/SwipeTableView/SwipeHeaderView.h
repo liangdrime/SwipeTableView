@@ -14,6 +14,7 @@
 - (CGPoint)minSwipeHeaderViewFrameOrgin;
 - (CGPoint)maxSwipeHeaderViewFrameOrgin;
 
+@optional
 - (void)swipeHeaderViewDidFrameChanged:(SwipeHeaderView *)headerView;
 - (void)swipeHeaderView:(SwipeHeaderView *)headerView didPan:(UIPanGestureRecognizer *)pan;
 - (void)swipeHeaderView:(SwipeHeaderView *)headerView didPanGestureRecognizerStateChanged:(UIPanGestureRecognizer *)pan;

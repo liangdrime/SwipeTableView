@@ -211,7 +211,7 @@ static void * SwipeHeaderViewPanGestureRecognizerStateContext = &SwipeHeaderView
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
     UIView * view = [super hitTest:point withEvent:event];
     // tap outside of the header view
-    if (nil == view) {
+    if (!CGRectContainsPoint(self.bounds, point)) {
         [self endDecelerating];
     }
     return view;
