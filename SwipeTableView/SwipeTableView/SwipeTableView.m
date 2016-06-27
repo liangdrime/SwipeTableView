@@ -117,6 +117,7 @@ static void * SwipeTableViewItemContentSizeContext             = &SwipeTableView
     _barInset = 0;
     _currentItemIndex = 0;
     _switchPageWithoutAnimation = YES;
+    _adaptMinContentSizeForBounds = YES;
     _cunrrentItemIndexpath  = [NSIndexPath indexPathForItem:0 inSection:0];
 }
 
@@ -410,7 +411,7 @@ static void * SwipeTableViewItemContentSizeContext             = &SwipeTableView
     // adjust contentsize
     CGFloat contentHeight        = itemView.height + itemContentOffset.y;    // scrollview内容的高度
     CGFloat maxVisibleRectHeight = itemView.height - (_swipeHeaderTopInset + _barInset);  // 显示屏幕的最大高度
-    CGFloat minRequireHeight     = MIN(maxVisibleRectHeight, contentHeight);   // 最小要求的contentsize的高度
+    CGFloat minRequireHeight     = _adaptMinContentSizeForBounds?maxVisibleRectHeight:MIN(maxVisibleRectHeight, contentHeight);     // 最小要求的contentsize的高度
     itemContentSize.height       = MAX(minRequireHeight, itemContentSize.height);  // 重设contentsize的高度
     
     // save current data
