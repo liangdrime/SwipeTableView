@@ -28,12 +28,10 @@ NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
 @property (nonatomic, assign) BOOL shouldHiddenNavigationBar;
 @property (nonatomic, assign) BOOL shouldFitItemsContentSize;
 @property (nonatomic, assign) BOOL swipeBarScrollDisabled;
-#if !defined(ST_PULLTOREFRESH_ENABLED)
 @property (nonatomic, strong) SwipeHeaderView * tableViewHeader;
-#else
-@property (nonatomic, strong) UIView * tableViewHeader;
-#endif
 @property (nonatomic, strong) CustomSegmentControl * segmentBar;
+@property (nonatomic, strong) CustomTableView * tableView;
+@property (nonatomic, strong) CustomCollectionView * collectionView;
 
 @end
 
@@ -100,11 +98,7 @@ NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
     if (nil == _tableViewHeader) {
         UIImage * headerImage = [UIImage imageNamed:@"onepiece_kiudai"];
         // swipe header
-#if !defined(ST_PULLTOREFRESH_ENABLED)
         self.tableViewHeader = [[SwipeHeaderView alloc]init];
-#else
-        self.tableViewHeader = [[UIView alloc]init];
-#endif
         _tableViewHeader.frame = CGRectMake(0, 0, kScreenWidth, kScreenWidth * (headerImage.size.height/headerImage.size.width));
         _tableViewHeader.backgroundColor = [UIColor whiteColor];
         
@@ -234,6 +228,22 @@ NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
     }
 }
 
+- (CustomTableView *)tableView {
+    if (nil == _tableView) {
+        _tableView = [[CustomTableView alloc]initWithFrame:_swipeTableView.bounds style:UITableViewStylePlain];
+        _tableView.backgroundColor = RGBColor(255, 255, 225);
+    }
+    return _tableView;
+}
+
+- (CustomCollectionView *)collectionView {
+    if (nil == _collectionView) {
+        _collectionView = [[CustomCollectionView alloc]initWithFrame:_swipeTableView.bounds];
+        _collectionView.backgroundColor = RGBColor(255, 255, 225);
+    }
+    return _collectionView;
+}
+
 - (void)changeSwipeViewIndex:(UISegmentedControl *)seg {
     [_swipeTableView scrollToItemAtIndex:seg.selectedSegmentIndex animated:NO];
 }
@@ -262,23 +272,12 @@ NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
     }else {
         // 混合的itemview只有同类型的item采用重用
         if (index == 0 || index == 2) {
-            CustomTableView * tableView = [swipeView viewWithTag:1000];
-            if (nil == tableView) {
-                tableView = [[CustomTableView alloc]initWithFrame:swipeView.bounds style:UITableViewStylePlain];
-                tableView.backgroundColor = RGBColor(255, 255, 225);
-                tableView.tag = 1000;
-                tableView.numberOfRows = numberOfRows;
-            }
-            view = tableView;
+            // 懒加载保证同样类型的item只创建一次，以达到重用
+            self.tableView.numberOfRows = numberOfRows;
+            view = self.tableView;
         }else {
-            CustomCollectionView * collectionView = [swipeView viewWithTag:1001];
-            if (nil == collectionView) {
-                collectionView = [[CustomCollectionView alloc]initWithFrame:swipeView.bounds];
-                collectionView.backgroundColor = RGBColor(255, 255, 225);
-                collectionView.tag = 1001;
-                collectionView.numberOfItems = 2 *numberOfRows;
-            }
-            view = collectionView;
+            self.collectionView.numberOfItems = 2 *numberOfRows;
+            view = self.collectionView;
         }
     }
     [view performSelector:@selector(reloadData)];

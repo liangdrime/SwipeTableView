@@ -22,6 +22,12 @@
 - (UITableView *)tableView;
 @end
 
+@interface UIScrollView (PanGestureRecognizer)
+- (SwipeTableView *)swipeTableView;
+void STSwizzleMethod(Class c, SEL origSEL, SEL newSEL);
+@end
+
+
 
 @interface SwipeTableView ()<UICollectionViewDelegate,UICollectionViewDataSource,UIScrollViewDelegate,SwipeHeaderViewDelegate>
 
@@ -163,11 +169,7 @@ static void * SwipeTableViewItemContentSizeContext             = &SwipeTableView
         
         BOOL isSwipeHeaderView = [swipeHeaderView isKindOfClass:SwipeHeaderView.class];
         if (isSwipeHeaderView) {
-#if !defined(ST_PULLTOREFRESH_ENABLED)
             [(SwipeHeaderView *)swipeHeaderView setDelegate:self];
-#else
-            NSAssert(!isSwipeHeaderView, @"如果支持常用下拉刷新控件的，'swipeHeaderView' 不能是 'SwipeHeaderView' 及其子类的实例对象！");
-#endif
         }
 
         [self reloadData];
@@ -219,7 +221,7 @@ static void * SwipeTableViewItemContentSizeContext             = &SwipeTableView
 #pragma mark -
 
 - (void)reloadData {
-#if !defined(ST_PULLTOREFRESH_ENABLED)
+#if !defined(ST_PULLTOREFRESH_HEADER_HEIGHT)
     CGFloat headerOffsetY = - (_headerInset + _swipeHeaderTopInset + _barInset);
 #else
     CGFloat headerOffsetY = - _swipeHeaderTopInset;
@@ -254,7 +256,7 @@ static void * SwipeTableViewItemContentSizeContext             = &SwipeTableView
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     UICollectionViewCell * cell = [collectionView dequeueReusableCellWithReuseIdentifier:SwipeContentViewCellIdfy forIndexPath:indexPath];
-#if !defined(ST_PULLTOREFRESH_ENABLED)
+#if !defined(ST_PULLTOREFRESH_HEADER_HEIGHT)
     UIScrollView * subView = cell.scrollView;
     if (_dataSource && [_dataSource respondsToSelector:@selector(swipeTableView:viewForItemAtIndex:reusingView:)]) {
         UIScrollView * newSubView = [_dataSource swipeTableView:self viewForItemAtIndex:indexPath.row reusingView:subView];
@@ -387,7 +389,7 @@ static void * SwipeTableViewItemContentSizeContext             = &SwipeTableView
     }
     
     // 取出记录的offset
-#if !defined(ST_PULLTOREFRESH_ENABLED)
+#if !defined(ST_PULLTOREFRESH_HEADER_HEIGHT)
     CGFloat topMarginOffsetY  = - (_swipeHeaderTopInset + _barInset);
 #else
     CGFloat topMarginOffsetY  = _headerInset - _swipeHeaderTopInset;
@@ -443,7 +445,7 @@ static void * SwipeTableViewItemContentSizeContext             = &SwipeTableView
         }
         if (!_swipeHeaderBarScrollDisabled) {
             CGFloat newOffsetY        = [change[NSKeyValueChangeNewKey] CGPointValue].y;
-#if !defined(ST_PULLTOREFRESH_ENABLED)
+#if !defined(ST_PULLTOREFRESH_HEADER_HEIGHT)
             CGFloat topMarginInset    = _swipeHeaderTopInset + _barInset;
             UIView * headerBottomView = _swipeHeaderBar?_swipeHeaderBar:_swipeHeaderView;
             
@@ -517,7 +519,7 @@ static void * SwipeTableViewItemContentSizeContext             = &SwipeTableView
 #pragma mark - SwipeHeaderViewDelegate
 
 - (CGPoint)minSwipeHeaderViewFrameOrgin {
-#if !defined(ST_PULLTOREFRESH_ENABLED)
+#if !defined(ST_PULLTOREFRESH_HEADER_HEIGHT)
     CGFloat minOrginY = - ((self.currentItemView.contentSize.height + _headerInset + _barInset) - self.currentItemView.bounds.size.height);
 #else
     CGFloat minOrginY = - (self.currentItemView.contentSize.height - self.currentItemView.bounds.size.height);
@@ -533,7 +535,7 @@ static void * SwipeTableViewItemContentSizeContext             = &SwipeTableView
 
 - (void)swipeHeaderViewDidFrameChanged:(SwipeHeaderView *)headerView {
     
-#if !defined(ST_PULLTOREFRESH_ENABLED)
+#if !defined(ST_PULLTOREFRESH_HEADER_HEIGHT)
     CGFloat offsetY = - (headerView.frame.origin.y + _headerInset + _barInset);
 #else
     CGFloat offsetY = - headerView.frame.origin.y;
@@ -545,6 +547,19 @@ static void * SwipeTableViewItemContentSizeContext             = &SwipeTableView
     contentOffset.y       = offsetY;
     self.currentItemView.contentOffset = contentOffset;
     _contentOffsetKVODisabled = NO;
+}
+
+- (void)swipeHeaderView:(SwipeHeaderView *)headerView didPan:(UIPanGestureRecognizer *)pan {
+#if defined(ST_PULLTOREFRESH_HEADER_HEIGHT)
+    CGFloat offsetY = - headerView.frame.origin.y;
+    if (offsetY < - (_swipeHeaderTopInset + ST_PULLTOREFRESH_HEADER_HEIGHT)) {
+        [headerView endDecelerating];
+        if (pan.state == UIGestureRecognizerStateEnded) {
+            CGPoint contentOffset = self.currentItemView.contentOffset;
+            self.currentItemView.contentOffset = contentOffset;  // call KVO to enable the pull-to-refresh
+        }
+    }
+#endif
 }
 
 #pragma mark - UIScrollView M
@@ -654,6 +669,67 @@ static void * SwipeTableViewItemContentSizeContext             = &SwipeTableView
     }
     return tableView;
 }
+@end
+
+@implementation UIScrollView (PanGestureRecognizer)
+
++ (void)load {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        STSwizzleMethod([self class],
+                        @selector(isDragging),
+                        @selector(st_isDragging));
+    });
+}
+
+- (BOOL)st_isDragging {
+    SwipeTableView * swipeTableView = self.swipeTableView;
+    UIView * headerView = swipeTableView.swipeHeaderView;
+    if ([headerView isKindOfClass:SwipeHeaderView.class]) {
+        SwipeHeaderView * header = (SwipeHeaderView *)headerView;
+        if (header.isDragging && self == swipeTableView.currentItemView) {
+            return YES;
+        }
+        return [self st_isDragging];
+    }
+    return [self st_isDragging];
+}
+
+- (SwipeTableView *)swipeTableView {
+    for (UIView * nextRes = self; nextRes; nextRes = nextRes.superview) {
+        if ([nextRes isKindOfClass:SwipeTableView.class]) {
+            return (SwipeTableView *)nextRes;
+        }
+    }
+    return nil;
+}
+
+void STSwizzleMethod(Class c, SEL origSEL, SEL newSEL) {
+    Method origMethod = class_getInstanceMethod(c, origSEL);
+    Method newMethod = nil;
+    if (!origMethod) {
+        origMethod = class_getClassMethod(c, origSEL);
+        if (!origMethod) {
+            return;
+        }
+        newMethod = class_getClassMethod(c, newSEL);
+        if (!newMethod) {
+            return;
+        }
+    }else{
+        newMethod = class_getInstanceMethod(c, newSEL);
+        if (!newMethod) {
+            return;
+        }
+    }
+    
+    if(class_addMethod(c, origSEL, method_getImplementation(newMethod), method_getTypeEncoding(newMethod))){
+        class_replaceMethod(c, newSEL, method_getImplementation(origMethod), method_getTypeEncoding(origMethod));
+    }else{
+        method_exchangeImplementations(origMethod, newMethod);
+    }
+}
+
 @end
 
 

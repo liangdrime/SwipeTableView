@@ -25,7 +25,7 @@ pod 'SwipeTableView'
 
   - 4.对于header与可以悬停的顶部bar的实现，是在contentView（即根容器视图）上添加控件。然后对当前的itemView的contentOffset进行KVO，这样在当前itemView的contentOffset发生变化时，去改变header与bar的Y坐标值，实现同步滚动与悬停效果。
 
-  - 5.由于项目为了兼容UITableView与UICollectionView，同时保留UITableView设置tableHeaderView的特性，常用的下拉刷新控件将不兼容。<p><del>为了支持常用的下拉刷新控件，解决方案见 [`Issue #1`](https://github.com/Roylee-ML/SwipeTableView/issues/1)</del></p>在最新的`0.2`版本中，只需要定义一个宏即可支持常用的下拉刷新控件（注：此时UITableView本身的tableHeaderView属性不能使用）。
+  - 5.由于项目为了兼容UITableView与UICollectionView，同时保留UITableView设置tableHeaderView的特性，常用的下拉刷新控件将不兼容。<p><del>为了支持常用的下拉刷新控件，解决方案见 [`Issue #1`](https://github.com/Roylee-ML/SwipeTableView/issues/1)</del></p>在最新的`0.2`以上版本中，只需要定义一个宏即可支持常用的下拉刷新控件（注：此时UITableView本身的tableHeaderView属性不能使用）。
 
   - 6.通过用户反映的问题[`issue#2`](https://github.com/Roylee-ML/SwipeTableView/issues/2)，在`0.1`版本中滑动`swipeHeaderView`并不能触发当前页面的`scrollView`跟随滚动。在`0.2`版本中，采用`UIKit Dynamic`物理动画引擎实现自定义`UIScrollView`效果解决上述问题，[`参考文章`](http://philcai.com/2016/03/15/%E7%94%A8UIKit-Dynamics%E6%A8%A1%E4%BB%BFUIScrollView/) [`英文博客`](http://holko.pl/2014/07/06/inertia-bouncing-rubber-banding-uikit-dynamics/)。
 
@@ -42,8 +42,9 @@ pod 'SwipeTableView'
 
 * 现在可以一行代码支持常用的下拉刷新控件了，只需要在项目的PCH文件中或者在`SwipeTableView`的.h文件中设置如下的宏即可：
 ```objc
-#define ST_PULLTOREFRESH_ENABLED          
-（注：由于现在第三方下拉刷新的控件实现各异，在支持第三方下拉刷新控件的同时，`swipeHeaderView`并不能支持`SwipeHeaderView`，即`swipeHeaderView`并不能是`SwipeHeaderView`及其子类的实例。（同时希望大家参与解决此问题））
+#define ST_PULLTOREFRESH_HEADER_HEIGHT xx      
+上述宏中的`xx`要与您使用的第三方下拉刷新控件的refreshHeader高度相同：      
+`MJRefresh` 为 `MJRefreshHeaderHeight`，`SVPullToRefresh` 为 `SVPullToRefreshViewHeight`（目前只测试了这两个）
 ```
 
 * 示例：

@@ -20,11 +20,13 @@
 /*****************************************************************************************************/
 /**
  如果项目想要支持常用的下拉刷新控件，如MJRefresh等。需要满足以下条件：
- ①.需要在项目PCH文件或者当前.h文件中设置如下的宏：#define ST_PULLTOREFRESH_ENABLED
- ②.此时'SwipeTableview'并不支持'SwipeHeaderView'，所以属性swipeHeaderView不能是'SwipeHeaderView'及其子类
+ 
+ ①.需要在项目PCH文件或者当前.h文件中设置如下的宏：#define ST_PULLTOREFRESH_HEADER_HEIGHT  xx
+ ②.定义的宏中`xx`要与您使用的第三方下拉刷新控件的refreshHeader高度相同：
+   `MJRefresh` 为 `MJRefreshHeaderHeight`，`SVPullToRefresh` 为 `SVPullToRefreshViewHeight`
  */
 /*****************************************************************************************************/
-//#define ST_PULLTOREFRESH_ENABLED
+//#define ST_PULLTOREFRESH_HEADER_HEIGHT  54.0
 
 /*!
  *  自定义显示在swipeView顶端的headerView，可以通过setter方法动态设置
@@ -87,7 +89,7 @@
 @protocol SwipeTableViewDataSource <NSObject>
 
 - (NSInteger)numberOfItemsInSwipeTableView:(SwipeTableView *)swipeView;
-- (UITableView *)swipeTableView:(SwipeTableView *)swipeView viewForItemAtIndex:(NSInteger)index reusingView:(UIScrollView *)view;
+- (UIScrollView *)swipeTableView:(SwipeTableView *)swipeView viewForItemAtIndex:(NSInteger)index reusingView:(UIScrollView *)view;
 
 @end
 
