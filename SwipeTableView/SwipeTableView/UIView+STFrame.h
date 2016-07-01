@@ -1,5 +1,5 @@
 //
-//  UIView+Frame.h
+//  UIView+STFrame.h
 //  SwipeTableView
 //
 //  Created by Roy lee on 16/4/1.
@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface UIView (SwipeTableViewFrame)
+@interface UIView (STFrame)
 
 @property (nonatomic, assign) CGFloat x;
 @property (nonatomic, assign) CGFloat y;

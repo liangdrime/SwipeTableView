@@ -28,6 +28,7 @@ pod 'SwipeTableView'
   - 5.由于项目为了兼容UITableView与UICollectionView，同时保留UITableView设置tableHeaderView的特性，常用的下拉刷新控件将不兼容。<p><del>为了支持常用的下拉刷新控件，解决方案见 [`Issue #1`](https://github.com/Roylee-ML/SwipeTableView/issues/1)</del></p>在最新的`0.2`以上版本中，只需要定义一个宏即可支持常用的下拉刷新控件（注：此时UITableView本身的tableHeaderView属性不能使用）。
 
   - 6.通过用户反映的问题[`issue#2`](https://github.com/Roylee-ML/SwipeTableView/issues/2)，在`0.1`版本中滑动`swipeHeaderView`并不能触发当前页面的`scrollView`跟随滚动。在`0.2`版本中，采用`UIKit Dynamic`物理动画引擎实现自定义`UIScrollView`效果解决上述问题，[`参考文章`](http://philcai.com/2016/03/15/%E7%94%A8UIKit-Dynamics%E6%A8%A1%E4%BB%BFUIScrollView/) [`英文博客`](http://holko.pl/2014/07/06/inertia-bouncing-rubber-banding-uikit-dynamics/)。
+  - 7.为了保证在混合模式下(即`UITableView`与`UICollectionView`并用)，设置了自适应`shouldAdjustContentSize`属性或者支持下拉刷新，用户使用的`UICollectionView`需要时`STCollectionView`及其子类的实例。
 
 ## Basic usage
 
@@ -47,16 +48,18 @@ pod 'SwipeTableView'
 `MJRefresh` 为 `MJRefreshHeaderHeight`，`SVPullToRefresh` 为 `SVPullToRefreshViewHeight`（目前只测试了这两个）
 ```
 
+* 混合 item 模式，并支持自适应 contentSize 或者下拉刷新，`UICollectionView`需要时`STCollectionView`及其子类的实例，并需要代理与数据源需要遵守`STCollectionViewDataSource` & `STCollectionViewDelegate`协议，实现相关协议方法。
+
 * 示例：
    - 初始化并设置header与bar
 ```objc
-    self.swipeTableView = [[SwipeTableView alloc]initWithFrame:self.view.bounds];
-    _swipeTableView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-    _swipeTableView.delegate = self;
-    _swipeTableView.dataSource = self;
-    _swipeTableView.shouldAdjustContentSize = _shouldFitItemsContentSize;
-    _swipeTableView.swipeHeaderView = self.tableViewHeader;
-    _swipeTableView.swipeHeaderBar = self.segmentBar;
+self.swipeTableView = [[SwipeTableView alloc]initWithFrame:self.view.bounds];
+_swipeTableView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+_swipeTableView.delegate = self;
+_swipeTableView.dataSource = self;
+_swipeTableView.shouldAdjustContentSize = _shouldFitItemsContentSize;
+_swipeTableView.swipeHeaderView = self.tableViewHeader;
+_swipeTableView.swipeHeaderBar = self.segmentBar;
 ```
    - 实现代理：
 ```objc
@@ -78,6 +81,118 @@ pod 'SwipeTableView'
     return tableView;
 }
 ```
+   - `STCollectionView`使用方法：
+```objc
+MyCollectionView.h
+
+@interface MyCollectionView : STCollectionView
+
+@property (nonatomic, assign) NSInteger numberOfItems;
+@property (nonatomic, assign) BOOL isWaterFlow;
+
+@end
+
+
+
+MyCollectionView.m
+
+- (instancetype)initWithFrame:(CGRect)frame {
+
+    self = [super initWithFrame:frame];
+    if (self) {
+        STCollectionViewFlowLayout * layout = self.st_collectionViewLayout;
+        layout.minimumInteritemSpacing = 5;
+        layout.minimumLineSpacing = 5;
+        layout.sectionInset = UIEdgeInsetsMake(5, 5, 5, 5);
+        self.stDelegate = self;
+        self.stDataSource = self;
+        [self registerClass:UICollectionViewCell.class forCellWithReuseIdentifier:@"item"];
+        [self registerClass:UICollectionReusableView.class forSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:@"header"];
+       [self registerClass:UICollectionReusableView.class forSupplementaryViewOfKind:UICollectionElementKindSectionFooter withReuseIdentifier:@"footer"];
+    }
+    return self;
+}
+
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView layout:(STCollectionViewFlowLayout *)layout numberOfColumnsInSection:(NSInteger)section {
+    return _numberOfColumns;
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath {
+    return CGSizeMake(0, 100);
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section {
+    return CGSizeMake(kScreenWidth, 35);
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout referenceSizeForFooterInSection:(NSInteger)section {
+    return CGSizeMake(kScreenWidth, 35);
+}
+
+- (UICollectionReusableView *)stCollectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath {
+    UICollectionReusableView * reusableView = nil;
+    if ([kind isEqualToString:UICollectionElementKindSectionHeader]) {
+        reusableView = [collectionView dequeueReusableSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:@"header" forIndexPath:indexPath];
+        // custom UI......
+    }else if ([kind isEqualToString:UICollectionElementKindSectionFooter]) {
+        reusableView = [collectionView dequeueReusableSupplementaryViewOfKind:UICollectionElementKindSectionFooter withReuseIdentifier:@"footer" forIndexPath:indexPath];
+        // custom UI......
+    }
+    return reusableView;
+}
+
+- (NSInteger)numberOfSectionsInStCollectionView:(UICollectionView *)collectionView {
+    return _numberOfSections;
+} 
+
+- (NSInteger)stCollectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
+    return _numberOfItems;
+}
+
+- (UICollectionViewCell *)stCollectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
+    UICollectionViewCell * cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"item" forIndexPath:indexPath];
+    // do something .......
+    return cell;
+}
+
+```
+
+* 如果`STCollectionViewFlowLayout`已经不能满足`UICollectionView`的布局的话，用户自定义的`flowlayout`需要继承自`STCollectionViewFlowLayout`，并在重写相应方法的时候需要调用父类方法，并需要遵循一定规则，如下：
+
+```objc
+- (void)prepareLayout {
+    [super prepareLayout];
+    // do something in sub class......
+}
+
+- (NSArray *)layoutAttributesForElementsInRect:(CGRect)rect {
+    NSArray * superAttrs = [super layoutAttributesForElementsInRect:rect];
+    NSMutableArray * itemAttrs = [superAttrs mutableCopy];
+
+    // filter subClassAttrs to rect
+    NSArray * filteredSubClassAttrs = ........;
+
+    [itemAttrs addObjectsFromArray:fittesSubClassAttrs];
+
+    return itemAttrs;
+}
+
+- (CGSize)collectionViewContentSize {
+    CGSize superSize = [super collectionViewContentSize];
+
+    CGSize subClassSize = .......;
+    subClassSize.height += superSize.height;
+
+    // fit mincontentSize
+    STCollectionView * collectionView = (STCollectionView *)self.collectionView;
+    subClassSize.height = fmax(subClassSize.height, collectionView.minRequireContentSize.height);
+
+    return subClassSize;
+}
+
+```
+
 
 ## Demo Info
 
@@ -89,8 +204,8 @@ pod 'SwipeTableView'
   - `HybridItemViews`     
      数据源提供的itemView类型是混合的，即 `CustomTableView` 与 `CustomCollectionView` （`UICollectionView`的子类）。
 
-  - `AdjustContentSize`   
-     自适应调整cotentOffszie属性，这里不同的itemView的数据行数有多有少，当滑动到数据较少的itemView时，再次触碰界面并不会导致当前itemView的回弹，这里当前数据少的itemView已经做了最小contentSize的设置。
+  - <p><del>`AdjustContentSize`   
+     自适应调整cotentOffszie属性，这里不同的itemView的数据行数有多有少，当滑动到数据较少的itemView时，再次触碰界面并不会导致当前itemView的回弹，这里当前数据少的itemView已经做了最小contentSize的设置。</del></p>在0.2.3版本中去除了 demo 中的这一模块，默认除了`SingleOneKindView`模式下全部是自适应 contentSize。
 
   - `DisabledBarScroll`         
      取消顶部控制条的跟随滚动，只有在swipeHeaderView是nil的条件下才能生效。这样可以实现一个类似网易新闻首页的滚动菜单列表的布局。

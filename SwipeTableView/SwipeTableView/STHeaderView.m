@@ -1,12 +1,12 @@
 //
-//  SwipeHeaderView.m
+//  STHeaderView.m
 //  SwipeTableView
 //
 //  Created by Roy lee on 16/6/24.
 //  Copyright © 2016年 Roy lee. All rights reserved.
 //
 
-#import "SwipeHeaderView.h"
+#import "STHeaderView.h"
 #import "SwipeTableView.h"
 
 static CGFloat rubberBandRate(CGFloat offset) {
@@ -43,7 +43,7 @@ static CGFloat rubberBandRate(CGFloat offset) {
 
 
 
-@interface SwipeHeaderView ()<UIDynamicAnimatorDelegate>
+@interface STHeaderView ()<UIDynamicAnimatorDelegate>
 
 @property (nonatomic, strong) UIPanGestureRecognizer * panGestureRecognizer;
 @property (nonatomic, strong) UIDynamicAnimator * animator;
@@ -57,9 +57,9 @@ static CGFloat rubberBandRate(CGFloat offset) {
 
 @end
 
-static void * SwipeHeaderViewPanGestureRecognizerStateContext = &SwipeHeaderViewPanGestureRecognizerStateContext;
+static void * STHeaderViewPanGestureRecognizerStateContext = &STHeaderViewPanGestureRecognizerStateContext;
 
-@implementation SwipeHeaderView
+@implementation STHeaderView
 
 - (void)dealloc {
     [self.panGestureRecognizer removeObserver:self forKeyPath:@"state"];
@@ -71,7 +71,7 @@ static void * SwipeHeaderViewPanGestureRecognizerStateContext = &SwipeHeaderView
         // pan gesture
         self.panGestureRecognizer = [[UIPanGestureRecognizer alloc]initWithTarget:self action:@selector(handlePanGesture:)];
         [self addGestureRecognizer:_panGestureRecognizer];
-        [self.panGestureRecognizer addObserver:self forKeyPath:@"state" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:SwipeHeaderViewPanGestureRecognizerStateContext];
+        [self.panGestureRecognizer addObserver:self forKeyPath:@"state" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:STHeaderViewPanGestureRecognizerStateContext];
         // animator
         self.animator = [[UIDynamicAnimator alloc]initWithReferenceView:self];
         self.animator.delegate = self;
@@ -145,8 +145,8 @@ static void * SwipeHeaderViewPanGestureRecognizerStateContext = &SwipeHeaderView
             break;
     }
     
-    if (_delegate && [_delegate respondsToSelector:@selector(swipeHeaderView:didPan:)]) {
-        [_delegate swipeHeaderView:self didPan:panGestureRecognizer];
+    if (_delegate && [_delegate respondsToSelector:@selector(headerView:didPan:)]) {
+        [_delegate headerView:self didPan:panGestureRecognizer];
     }
 }
 
@@ -181,23 +181,23 @@ static void * SwipeHeaderViewPanGestureRecognizerStateContext = &SwipeHeaderView
         [self.animator addBehavior:_springBehavior];
     }
     
-    if (_delegate && [_delegate respondsToSelector:@selector(swipeHeaderViewDidFrameChanged:)]) {
-        [_delegate swipeHeaderViewDidFrameChanged:self];
+    if (_delegate && [_delegate respondsToSelector:@selector(headerViewDidFrameChanged:)]) {
+        [_delegate headerViewDidFrameChanged:self];
     }
 }
 
 - (CGPoint)minFrameOrgin {
     CGPoint orgin = CGPointMake(0, 0);
-    if (_delegate && [_delegate respondsToSelector:@selector(minSwipeHeaderViewFrameOrgin)]) {
-        orgin = [_delegate minSwipeHeaderViewFrameOrgin];
+    if (_delegate && [_delegate respondsToSelector:@selector(minHeaderViewFrameOrgin)]) {
+        orgin = [_delegate minHeaderViewFrameOrgin];
     }
     return orgin;
 }
 
 - (CGPoint)maxFrameOrgin {
     CGPoint orgin = CGPointMake(0, 0);
-    if (_delegate && [_delegate respondsToSelector:@selector(maxSwipeHeaderViewFrameOrgin)]) {
-        orgin = [_delegate maxSwipeHeaderViewFrameOrgin];
+    if (_delegate && [_delegate respondsToSelector:@selector(maxHeaderViewFrameOrgin)]) {
+        orgin = [_delegate maxHeaderViewFrameOrgin];
     }
     return orgin;
 }
@@ -220,9 +220,9 @@ static void * SwipeHeaderViewPanGestureRecognizerStateContext = &SwipeHeaderView
 #pragma mark - KVO
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context {
-    if (context == SwipeHeaderViewPanGestureRecognizerStateContext) {
-        if (_delegate && [_delegate respondsToSelector:@selector(swipeHeaderView:didPanGestureRecognizerStateChanged:)]) {
-            [_delegate swipeHeaderView:self didPanGestureRecognizerStateChanged:object];
+    if (context == STHeaderViewPanGestureRecognizerStateContext) {
+        if (_delegate && [_delegate respondsToSelector:@selector(headerView:didPanGestureRecognizerStateChanged:)]) {
+            [_delegate headerView:self didPanGestureRecognizerStateChanged:object];
         }
     }
 }

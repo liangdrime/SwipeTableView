@@ -7,53 +7,140 @@
 //
 
 #import "CustomCollectionView.h"
-#import "UIView+SwipeTableViewFrame.h"
+#import "UIView+STFrame.h"
+
 #define RGBColor(r,g,b)     [UIColor colorWithRed:r/255.0 green:g/255.0 blue:b/255.0 alpha:1]
 
-@interface CustomCollectionView ()<UICollectionViewDataSource,UICollectionViewDelegate>
+@interface CustomCollectionView ()<STCollectionViewDataSource,STCollectionViewDelegate>
+
+@property (nonatomic, strong) NSMutableArray * itemSizes;
 
 @end
 @implementation CustomCollectionView
 
 - (instancetype)initWithFrame:(CGRect)frame {
-    UICollectionViewFlowLayout * layout = [[UICollectionViewFlowLayout alloc]init];
-    layout.minimumInteritemSpacing = 10;
-    layout.minimumLineSpacing = 10;
-    layout.sectionInset = UIEdgeInsetsMake(0, 10, 10, 10);
-    layout.itemSize = CGSizeMake((kScreenWidth - 20 - 20)/3, (kScreenWidth - 20 - 20)/3);
     
-    self = [super initWithFrame:frame collectionViewLayout:layout];
+    self = [super initWithFrame:frame];
     if (self) {
-        self.delegate = self;
-        self.dataSource = self;
-        [self registerClass:UICollectionViewCell.class forCellWithReuseIdentifier:@"item"];
+        [self commonInit];
     }
     return self;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)_layout {
-    UICollectionViewFlowLayout * layout = [[UICollectionViewFlowLayout alloc]init];
-    layout.minimumInteritemSpacing = 10;
-    layout.minimumLineSpacing = 10;
-    layout.sectionInset = UIEdgeInsetsMake(0, 10, 10, 10);
-    layout.itemSize = CGSizeMake((kScreenWidth - 20 - 20)/3, (kScreenWidth - 20 - 20)/3);
-    
-    self = [super initWithFrame:frame collectionViewLayout:layout];
+    self = [super initWithFrame:frame collectionViewLayout:_layout];
     if (self) {
-        self.delegate = self;
-        self.dataSource = self;
-        [self registerClass:UICollectionViewCell.class forCellWithReuseIdentifier:@"item"];
+        [self commonInit];
     }
     return self;
 }
 
-- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
+- (void)commonInit {
+    STCollectionViewFlowLayout * layout = self.st_collectionViewLayout;
+    layout.minimumInteritemSpacing = 5;
+    layout.minimumLineSpacing = 5;
+    layout.sectionInset = UIEdgeInsetsMake(5, 5, 5, 5);
+    self.stDelegate = self;
+    self.stDataSource = self;
+    [self registerClass:UICollectionViewCell.class forCellWithReuseIdentifier:@"item"];
+    [self registerClass:UICollectionReusableView.class forSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:@"header"];
+    [self registerClass:UICollectionReusableView.class forSupplementaryViewOfKind:UICollectionElementKindSectionFooter withReuseIdentifier:@"footer"];
+}
+
+- (NSMutableArray *)itemSizes {
+    if (nil == _itemSizes) {
+        _itemSizes = [NSMutableArray array];
+        [_itemSizes addObject:[NSValue valueWithCGSize:CGSizeMake(100, 100)]];
+        [_itemSizes addObject:[NSValue valueWithCGSize:CGSizeMake(100, 80)]];
+        [_itemSizes addObject:[NSValue valueWithCGSize:CGSizeMake(100, 70)]];
+        [_itemSizes addObject:[NSValue valueWithCGSize:CGSizeMake(100, 90)]];
+        
+//        [_itemSizes addObject:[NSValue valueWithCGSize:CGSizeMake(100, 100)]];
+//        [_itemSizes addObject:[NSValue valueWithCGSize:CGSizeMake(100, 100)]];
+//        [_itemSizes addObject:[NSValue valueWithCGSize:CGSizeMake(100, 100)]];
+//        [_itemSizes addObject:[NSValue valueWithCGSize:CGSizeMake(100, 100)]];
+
+    }
+    return _itemSizes;
+}
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView layout:(STCollectionViewFlowLayout *)layout numberOfColumnsInSection:(NSInteger)section {
+    return 4;
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath {
+    if (_isWaterFlow) {
+        return [[self.itemSizes objectAtIndex:indexPath.row % 4] CGSizeValue];
+    }
+    return CGSizeMake(0, 100);
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section {
+    return CGSizeMake(kScreenWidth, 35);
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout referenceSizeForFooterInSection:(NSInteger)section {
+    return CGSizeMake(kScreenWidth, 35);
+}
+
+- (UICollectionReusableView *)stCollectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath {
+    UICollectionReusableView * reusableView = nil;
+    if ([kind isEqualToString:UICollectionElementKindSectionHeader]) {
+        reusableView = [collectionView dequeueReusableSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:@"header" forIndexPath:indexPath];
+        UILabel * title = [reusableView viewWithTag:777];
+        if (nil == title) {
+            title = [UILabel new];
+            title.tag = 777;
+            title.backgroundColor = RGBColor(113, 198, 113);
+            title.textColor = [UIColor whiteColor];
+            title.font = [UIFont systemFontOfSize:16];
+            title.textAlignment = NSTextAlignmentCenter;
+            [reusableView addSubview:title];
+        }
+        title.frame = reusableView.bounds;
+        title.text = [NSString stringWithFormat:@"Header %ld",indexPath.section];
+    }else if ([kind isEqualToString:UICollectionElementKindSectionFooter]) {
+        reusableView = [collectionView dequeueReusableSupplementaryViewOfKind:UICollectionElementKindSectionFooter withReuseIdentifier:@"footer" forIndexPath:indexPath];
+        UILabel * footer = [reusableView viewWithTag:999];
+        if (nil == footer) {
+            footer = [UILabel new];
+            footer.tag = 999;
+            footer.backgroundColor = RGBColor(197, 193, 170);
+            footer.textColor = [UIColor whiteColor];
+            footer.font = [UIFont systemFontOfSize:16];
+            footer.textAlignment = NSTextAlignmentCenter;
+            [reusableView addSubview:footer];
+        }
+        footer.frame = reusableView.bounds;
+        footer.text = [NSString stringWithFormat:@"Footer %ld",indexPath.section];
+    }
+    return reusableView;
+}
+
+- (NSInteger)numberOfSectionsInStCollectionView:(UICollectionView *)collectionView {
+    return 2;
+} 
+
+- (NSInteger)stCollectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
     return _numberOfItems;
 }
 
-- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
+- (UICollectionViewCell *)stCollectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     UICollectionViewCell * cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"item" forIndexPath:indexPath];
     cell.backgroundColor = RGBColor(150, 215, 200);
+    // title
+    UILabel * title = [cell viewWithTag:888];
+    if (nil == title) {
+        title = [UILabel new];
+        title.tag = 888;
+        title.size = CGSizeMake(80, 40);
+        title.textColor = [UIColor whiteColor];
+        title.textAlignment = NSTextAlignmentCenter;
+        title.font = [UIFont systemFontOfSize:16];
+        [cell addSubview:title];
+    }
+    title.center = CGPointMake(cell.width/2, cell.height/2);
+    title.text = [NSString stringWithFormat:@"Item %ld",indexPath.item];
     return cell;
 }
 

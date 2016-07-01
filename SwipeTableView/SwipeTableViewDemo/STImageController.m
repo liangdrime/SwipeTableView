@@ -7,7 +7,7 @@
 //
 
 #import "STImageController.h"
-#import "UIView+SwipeTableViewFrame.h"
+#import "UIView+STFrame.h"
 
 @interface STImageController ()
 

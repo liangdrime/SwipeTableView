@@ -11,13 +11,12 @@
 #import "CustomTableView.h"
 #import "CustomCollectionView.h"
 #import "CustomSegmentControl.h"
-#import "UIView+SwipeTableViewFrame.h"
+#import "UIView+STFrame.h"
 #import "STImageController.h"
 #import "STTransitions.h"
 
 NSString const * kShouldReuseableViewIdentifier = @"setIsJustOneKindOfClassView";
 NSString const * kHybridItemViewsIdentifier = @"doNothing";
-NSString const * kAdjustContentSizeToFitMaxItemIdentifier = @"setFitItemsContentSize";
 NSString const * kDisabledSwipeHeaderBarScrollIdentifier = @"setSwipeHeaderBarScrollDisabled";
 NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
 
@@ -26,12 +25,13 @@ NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
 @property (nonatomic, strong) SwipeTableView * swipeTableView;
 @property (nonatomic, assign) BOOL isJustOneKindOfClassView;
 @property (nonatomic, assign) BOOL shouldHiddenNavigationBar;
-@property (nonatomic, assign) BOOL shouldFitItemsContentSize;
 @property (nonatomic, assign) BOOL swipeBarScrollDisabled;
-@property (nonatomic, strong) SwipeHeaderView * tableViewHeader;
+@property (nonatomic, strong) STHeaderView * tableViewHeader;
 @property (nonatomic, strong) CustomSegmentControl * segmentBar;
 @property (nonatomic, strong) CustomTableView * tableView;
 @property (nonatomic, strong) CustomCollectionView * collectionView;
+
+@property (nonatomic, strong) NSMutableDictionary * itemDic;
 
 @end
 
@@ -40,11 +40,13 @@ NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    _itemDic = [@{} mutableCopy];
+    
     self.swipeTableView = [[SwipeTableView alloc]initWithFrame:self.view.bounds];
     _swipeTableView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     _swipeTableView.delegate = self;
     _swipeTableView.dataSource = self;
-    _swipeTableView.shouldAdjustContentSize = _shouldFitItemsContentSize;
+    _swipeTableView.shouldAdjustContentSize = !_isJustOneKindOfClassView;
     _swipeTableView.swipeHeaderView = _swipeBarScrollDisabled?nil:self.tableViewHeader;
     _swipeTableView.swipeHeaderBar = self.segmentBar;
     _swipeTableView.swipeHeaderBarScrollDisabled = _swipeBarScrollDisabled;
@@ -98,7 +100,7 @@ NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
     if (nil == _tableViewHeader) {
         UIImage * headerImage = [UIImage imageNamed:@"onepiece_kiudai"];
         // swipe header
-        self.tableViewHeader = [[SwipeHeaderView alloc]init];
+        self.tableViewHeader = [[STHeaderView alloc]init];
         _tableViewHeader.frame = CGRectMake(0, 0, kScreenWidth, kScreenWidth * (headerImage.size.height/headerImage.size.width));
         _tableViewHeader.backgroundColor = [UIColor whiteColor];
         
@@ -155,11 +157,6 @@ NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
 
 - (void)setIsJustOneKindOfClassView {
     _isJustOneKindOfClassView = YES;
-}
-
-- (void)setFitItemsContentSize {
-    _shouldFitItemsContentSize = YES;
-    _swipeTableView.shouldAdjustContentSize = _shouldFitItemsContentSize;
 }
 
 - (void)setSwipeHeaderBarScrollDisabled {
@@ -256,7 +253,7 @@ NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
 
 - (UIScrollView *)swipeTableView:(SwipeTableView *)swipeView viewForItemAtIndex:(NSInteger)index reusingView:(UIScrollView *)view {
     NSInteger numberOfRows = 12;
-    if (_isJustOneKindOfClassView || _shouldFitItemsContentSize || _shouldHiddenNavigationBar) {
+    if (_isJustOneKindOfClassView || _shouldHiddenNavigationBar) {
         // 重用
         if (nil == view) {
             CustomTableView * tableView = [[CustomTableView alloc]initWithFrame:swipeView.bounds style:UITableViewStylePlain];
@@ -276,7 +273,8 @@ NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
             self.tableView.numberOfRows = numberOfRows;
             view = self.tableView;
         }else {
-            self.collectionView.numberOfItems = 2 *numberOfRows;
+            self.collectionView.numberOfItems = (index == 1)?(numberOfRows + 4):numberOfRows;
+            self.collectionView.isWaterFlow   = index == 1;
             view = self.collectionView;
         }
     }

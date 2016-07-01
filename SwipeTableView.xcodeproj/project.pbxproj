@@ -9,11 +9,12 @@
 /* Begin PBXBuildFile section */
 		7D0B0AD21CF9DD9900CBC1B4 /* CustomSegmentControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 7D0B0AD11CF9DD9900CBC1B4 /* CustomSegmentControl.m */; };
 		7D0B0AD41CF9DDA600CBC1B4 /* onepiece_kiudai.png in Resources */ = {isa = PBXBuildFile; fileRef = 7D0B0AD31CF9DDA600CBC1B4 /* onepiece_kiudai.png */; };
+		7D1C83FC1D2416B7001859EB /* STCollectionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7D1C83FB1D2416B7001859EB /* STCollectionView.m */; };
 		7D239A051D1D8490004FF025 /* STImageController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7D2399FE1D1D8490004FF025 /* STImageController.m */; };
 		7D239A061D1D8490004FF025 /* STListController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7D239A001D1D8490004FF025 /* STListController.m */; };
 		7D239A071D1D8490004FF025 /* STTransitions.m in Sources */ = {isa = PBXBuildFile; fileRef = 7D239A021D1D8490004FF025 /* STTransitions.m */; };
 		7D239A081D1D8490004FF025 /* STViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7D239A041D1D8490004FF025 /* STViewController.m */; };
-		7D239A0B1D1D84DB004FF025 /* SwipeHeaderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7D239A0A1D1D84DB004FF025 /* SwipeHeaderView.m */; };
+		7D239A0B1D1D84DB004FF025 /* STHeaderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7D239A0A1D1D84DB004FF025 /* STHeaderView.m */; };
 		7DFB6ACE1CAEBCC600C2F0D3 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 7DFB6ACD1CAEBCC600C2F0D3 /* main.m */; };
 		7DFB6AD11CAEBCC600C2F0D3 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 7DFB6AD01CAEBCC600C2F0D3 /* AppDelegate.m */; };
 		7DFB6AD71CAEBCC600C2F0D3 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7DFB6AD51CAEBCC600C2F0D3 /* Main.storyboard */; };
@@ -21,7 +22,7 @@
 		7DFB6ADC1CAEBCC600C2F0D3 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7DFB6ADA1CAEBCC600C2F0D3 /* LaunchScreen.storyboard */; };
 		7DFB6AE71CAEBCC600C2F0D3 /* SwipeTableViewTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 7DFB6AE61CAEBCC600C2F0D3 /* SwipeTableViewTests.m */; };
 		7DFB6AF41CAEBCEB00C2F0D3 /* SwipeTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7DFB6AF31CAEBCEB00C2F0D3 /* SwipeTableView.m */; };
-		7DFB6AF71CAEBCFA00C2F0D3 /* UIView+SwipeTableViewFrame.m in Sources */ = {isa = PBXBuildFile; fileRef = 7DFB6AF61CAEBCFA00C2F0D3 /* UIView+SwipeTableViewFrame.m */; };
+		7DFB6AF71CAEBCFA00C2F0D3 /* UIView+STFrame.m in Sources */ = {isa = PBXBuildFile; fileRef = 7DFB6AF61CAEBCFA00C2F0D3 /* UIView+STFrame.m */; };
 		7DFB6B081CAEC1BF00C2F0D3 /* CustomTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7DFB6B071CAEC1BF00C2F0D3 /* CustomTableView.m */; };
 		7DFB6B0B1CAEC1D700C2F0D3 /* CustomCollectionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7DFB6B0A1CAEC1D700C2F0D3 /* CustomCollectionView.m */; };
 /* End PBXBuildFile section */
@@ -40,6 +41,8 @@
 		7D0B0AD01CF9DD9900CBC1B4 /* CustomSegmentControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomSegmentControl.h; sourceTree = "<group>"; };
 		7D0B0AD11CF9DD9900CBC1B4 /* CustomSegmentControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomSegmentControl.m; sourceTree = "<group>"; };
 		7D0B0AD31CF9DDA600CBC1B4 /* onepiece_kiudai.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = onepiece_kiudai.png; sourceTree = "<group>"; };
+		7D1C83FA1D2416B7001859EB /* STCollectionView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = STCollectionView.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		7D1C83FB1D2416B7001859EB /* STCollectionView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = STCollectionView.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		7D2399FD1D1D8490004FF025 /* STImageController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STImageController.h; sourceTree = "<group>"; };
 		7D2399FE1D1D8490004FF025 /* STImageController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STImageController.m; sourceTree = "<group>"; };
 		7D2399FF1D1D8490004FF025 /* STListController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STListController.h; sourceTree = "<group>"; };
@@ -48,8 +51,8 @@
 		7D239A021D1D8490004FF025 /* STTransitions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STTransitions.m; sourceTree = "<group>"; };
 		7D239A031D1D8490004FF025 /* STViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STViewController.h; sourceTree = "<group>"; };
 		7D239A041D1D8490004FF025 /* STViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STViewController.m; sourceTree = "<group>"; };
-		7D239A091D1D84DB004FF025 /* SwipeHeaderView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SwipeHeaderView.h; sourceTree = "<group>"; };
-		7D239A0A1D1D84DB004FF025 /* SwipeHeaderView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SwipeHeaderView.m; sourceTree = "<group>"; };
+		7D239A091D1D84DB004FF025 /* STHeaderView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STHeaderView.h; sourceTree = "<group>"; };
+		7D239A0A1D1D84DB004FF025 /* STHeaderView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STHeaderView.m; sourceTree = "<group>"; };
 		7DFB6AC91CAEBCC600C2F0D3 /* SwipeTableView.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwipeTableView.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7DFB6ACD1CAEBCC600C2F0D3 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		7DFB6ACF1CAEBCC600C2F0D3 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -62,13 +65,13 @@
 		7DFB6AE61CAEBCC600C2F0D3 /* SwipeTableViewTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SwipeTableViewTests.m; sourceTree = "<group>"; };
 		7DFB6AE81CAEBCC600C2F0D3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7DFB6AF21CAEBCEB00C2F0D3 /* SwipeTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SwipeTableView.h; sourceTree = "<group>"; };
-		7DFB6AF31CAEBCEB00C2F0D3 /* SwipeTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SwipeTableView.m; sourceTree = "<group>"; };
-		7DFB6AF51CAEBCFA00C2F0D3 /* UIView+SwipeTableViewFrame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+SwipeTableViewFrame.h"; sourceTree = "<group>"; };
-		7DFB6AF61CAEBCFA00C2F0D3 /* UIView+SwipeTableViewFrame.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+SwipeTableViewFrame.m"; sourceTree = "<group>"; };
+		7DFB6AF31CAEBCEB00C2F0D3 /* SwipeTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = SwipeTableView.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
+		7DFB6AF51CAEBCFA00C2F0D3 /* UIView+STFrame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+STFrame.h"; sourceTree = "<group>"; };
+		7DFB6AF61CAEBCFA00C2F0D3 /* UIView+STFrame.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+STFrame.m"; sourceTree = "<group>"; };
 		7DFB6B061CAEC1BF00C2F0D3 /* CustomTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomTableView.h; sourceTree = "<group>"; };
 		7DFB6B071CAEC1BF00C2F0D3 /* CustomTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomTableView.m; sourceTree = "<group>"; };
 		7DFB6B091CAEC1D700C2F0D3 /* CustomCollectionView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomCollectionView.h; sourceTree = "<group>"; };
-		7DFB6B0A1CAEC1D700C2F0D3 /* CustomCollectionView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomCollectionView.m; sourceTree = "<group>"; };
+		7DFB6B0A1CAEC1D700C2F0D3 /* CustomCollectionView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = CustomCollectionView.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -145,10 +148,12 @@
 			children = (
 				7DFB6AF21CAEBCEB00C2F0D3 /* SwipeTableView.h */,
 				7DFB6AF31CAEBCEB00C2F0D3 /* SwipeTableView.m */,
-				7D239A091D1D84DB004FF025 /* SwipeHeaderView.h */,
-				7D239A0A1D1D84DB004FF025 /* SwipeHeaderView.m */,
-				7DFB6AF51CAEBCFA00C2F0D3 /* UIView+SwipeTableViewFrame.h */,
-				7DFB6AF61CAEBCFA00C2F0D3 /* UIView+SwipeTableViewFrame.m */,
+				7D239A091D1D84DB004FF025 /* STHeaderView.h */,
+				7D239A0A1D1D84DB004FF025 /* STHeaderView.m */,
+				7D1C83FA1D2416B7001859EB /* STCollectionView.h */,
+				7D1C83FB1D2416B7001859EB /* STCollectionView.m */,
+				7DFB6AF51CAEBCFA00C2F0D3 /* UIView+STFrame.h */,
+				7DFB6AF61CAEBCFA00C2F0D3 /* UIView+STFrame.m */,
 			);
 			path = SwipeTableView;
 			sourceTree = "<group>";
@@ -279,12 +284,13 @@
 				7DFB6AD11CAEBCC600C2F0D3 /* AppDelegate.m in Sources */,
 				7D239A081D1D8490004FF025 /* STViewController.m in Sources */,
 				7DFB6AF41CAEBCEB00C2F0D3 /* SwipeTableView.m in Sources */,
-				7DFB6AF71CAEBCFA00C2F0D3 /* UIView+SwipeTableViewFrame.m in Sources */,
+				7DFB6AF71CAEBCFA00C2F0D3 /* UIView+STFrame.m in Sources */,
 				7DFB6B0B1CAEC1D700C2F0D3 /* CustomCollectionView.m in Sources */,
 				7D239A051D1D8490004FF025 /* STImageController.m in Sources */,
 				7D239A061D1D8490004FF025 /* STListController.m in Sources */,
 				7D0B0AD21CF9DD9900CBC1B4 /* CustomSegmentControl.m in Sources */,
-				7D239A0B1D1D84DB004FF025 /* SwipeHeaderView.m in Sources */,
+				7D239A0B1D1D84DB004FF025 /* STHeaderView.m in Sources */,
+				7D1C83FC1D2416B7001859EB /* STCollectionView.m in Sources */,
 				7D239A071D1D8490004FF025 /* STTransitions.m in Sources */,
 				7DFB6B081CAEC1BF00C2F0D3 /* CustomTableView.m in Sources */,
 				7DFB6ACE1CAEBCC600C2F0D3 /* main.m in Sources */,

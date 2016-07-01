@@ -7,12 +7,14 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "STCollectionView.h"
 
 #define kScreenWidth    [UIScreen mainScreen].bounds.size.width
 #define kScreenHeight   [UIScreen mainScreen].bounds.size.height
 
-@interface CustomCollectionView : UICollectionView
+@interface CustomCollectionView : STCollectionView
 
 @property (nonatomic, assign) NSInteger numberOfItems;
+@property (nonatomic, assign) BOOL isWaterFlow;
 
 @end

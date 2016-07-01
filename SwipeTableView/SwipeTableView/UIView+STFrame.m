@@ -1,12 +1,12 @@
 //
-//  UIView+Frame.m
+//  UIView+STFrame.m
 //  SwipeTableView
 //
 //  Created by Roy lee on 16/4/1.
 //  Copyright © 2016年 Roy lee. All rights reserved.
 //
 
-#import "UIView+SwipeTableViewFrame.h"
+#import "UIView+STFrame.h"
 
 @implementation UIView (Frame)
 

@@ -12,7 +12,6 @@
 
 UIKIT_EXTERN NSString const * kShouldReuseableViewIdentifier;
 UIKIT_EXTERN NSString const * kHybridItemViewsIdentifier;
-UIKIT_EXTERN NSString const * kAdjustContentSizeToFitMaxItemIdentifier;
 UIKIT_EXTERN NSString const * kDisabledSwipeHeaderBarScrollIdentifier;
 UIKIT_EXTERN NSString const * kHiddenNavigationBarIdentifier;
 

@@ -7,7 +7,7 @@
 //
 
 #import "CustomTableView.h"
-#import "UIView+SwipeTableViewFrame.h"
+#import "UIView+STFrame.h"
 #define RGBColor(r,g,b)     [UIColor colorWithRed:r/255.0 green:g/255.0 blue:b/255.0 alpha:1]
 
 @interface CustomTableView ()<UITableViewDataSource,UITableViewDelegate>

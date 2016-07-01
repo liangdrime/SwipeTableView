@@ -29,9 +29,6 @@
                             @"actionIdfy":kHybridItemViewsIdentifier,
                             },
                         @{
-                            @"title":@"AdjustContentSize",
-                            @"actionIdfy":kAdjustContentSizeToFitMaxItemIdentifier,},
-                        @{
                             @"title":@"DisabledBarScroll",
                             @"actionIdfy":kDisabledSwipeHeaderBarScrollIdentifier,},
                         @{
