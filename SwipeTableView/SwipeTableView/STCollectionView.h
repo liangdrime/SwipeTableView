@@ -102,13 +102,6 @@
                      layout:(STCollectionViewFlowLayout *)layout
    numberOfColumnsInSection:(NSInteger)section;
 
-@optional
-/**
- *  返回定义的辅助视图 header 的 size.
- *  请勿使用原有方法`collectionView:layout:referenceSizeForHeaderInSection:`.
- */
-- (CGSize)stCollectionView:(UICollectionView *)collectionView layout:(STCollectionViewFlowLayout *)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section;
-
 @end
 
 /**

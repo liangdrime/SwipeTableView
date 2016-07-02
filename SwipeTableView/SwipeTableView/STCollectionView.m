@@ -13,7 +13,7 @@ NSString *const STCollectionElementKindSectionHeader = @"STCollectionElementKind
 NSString *const STCollectionHeaderIdfy               = @"STCollectionHeaderIdfy";
 
 
-@interface STCollectionView ()<UICollectionViewDataSource,UICollectionViewDelegate,UICollectionViewDelegateFlowLayout,STCollectionViewFlowLayoutDelegate>
+@interface STCollectionView ()<UICollectionViewDataSource,UICollectionViewDelegate,UICollectionViewDelegateFlowLayout>
 
 @property (nonatomic, strong) UIView * collectionHeadView;
 @property (nonatomic, strong) STCollectionViewFlowLayout * st_collectionViewLayout;
