@@ -32,23 +32,23 @@ pod 'SwipeTableView'
 
 ## Basic usage
 
-**- 使用方式类似UITableView，需要实现 `SwipeTableViewDataSource` 代理的两个方法：**
+**1. 使用方式类似UITableView，需要实现 `SwipeTableViewDataSource` 代理的两个方法：**
   - `- (NSInteger)numberOfItemsInSwipeTableView:(SwipeTableView *)swipeView`      
     返回列表item的个数
 
   - `- (UIScrollView *)swipeTableView:(SwipeTableView *)swipeView viewForItemAtIndex:(NSInteger)index reusingView:(UIScrollView *)view`     
     返回每个item对应的itemView，返回的视图类型需要时`UIScrollView`的子类：`UITableView`或者`UICollectionView`。这里采用重用机制，需要根据reusingView来创建单一的itemView。
 
-**- `SwipeTableViewDelegate` 代理提供了`SwipeTableVeiw`相关的代理操作，可以自行根据需要实现相关代理。**
+**2. `SwipeTableViewDelegate` 代理提供了`SwipeTableVeiw`相关的代理操作，可以自行根据需要实现相关代理。**
 
-**- 现在可以一行代码支持常用的下拉刷新控件了，只需要在项目的PCH文件中或者在`SwipeTableView`的.h文件中设置如下的宏即可：**
+**3. 现在可以一行代码支持常用的下拉刷新控件了，只需要在项目的PCH文件中或者在`SwipeTableView`的.h文件中设置如下的宏即可：**
 ```objc
 #define ST_PULLTOREFRESH_HEADER_HEIGHT xx      
 上述宏中的`xx`要与您使用的第三方下拉刷新控件的refreshHeader高度相同：      
 `MJRefresh` 为 `MJRefreshHeaderHeight`，`SVPullToRefresh` 为 `SVPullToRefreshViewHeight`（目前只测试了这两个）
 ```
 
-**- 混合 item 模式，并支持自适应 contentSize 或者下拉刷新，`UICollectionView`需要时`STCollectionView`及其子类的实例，并需要代理与数据源需要遵守`STCollectionViewDataSource` & `STCollectionViewDelegate`协议，实现相关协议方法。**
+**4. 混合 item 模式，并支持自适应 contentSize 或者下拉刷新，`UICollectionView`需要时`STCollectionView`及其子类的实例，并需要代理与数据源需要遵守`STCollectionViewDataSource` & `STCollectionViewDelegate`协议，实现相关协议方法。**
 
 **示例：**
    - 初始化并设置header与bar
@@ -160,7 +160,7 @@ MyCollectionView.m
 
 ```
 
-**- 如果`STCollectionViewFlowLayout`已经不能满足`UICollectionView`的布局的话，用户自定义的`flowlayout`需要继承自`STCollectionViewFlowLayout`，并在重写相应方法的时候需要调用父类方法，并需要遵循一定规则，如下：**
+**5. 如果`STCollectionViewFlowLayout`已经不能满足`UICollectionView`的布局的话，用户自定义的`flowlayout`需要继承自`STCollectionViewFlowLayout`，并在重写相应方法的时候需要调用父类方法，并需要遵循一定规则，如下：**
 
 ```objc
 - (void)prepareLayout {
