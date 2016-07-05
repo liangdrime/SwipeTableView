@@ -87,6 +87,7 @@ static NSString * const SwipeContentViewCellIdfy               = @"SwipeContentV
 static const void *SwipeTableViewItemTopInsetKey               = &SwipeTableViewItemTopInsetKey;
 static void * SwipeTableViewItemContentOffsetContext           = &SwipeTableViewItemContentOffsetContext;
 static void * SwipeTableViewItemContentSizeContext             = &SwipeTableViewItemContentSizeContext;
+static void * SwipeTableViewItemPanGestureContext              = &SwipeTableViewItemPanGestureContext;
 
 @implementation SwipeTableView
 
@@ -337,10 +338,12 @@ static void * SwipeTableViewItemContentSizeContext             = &SwipeTableView
     // reuse item view observe
     [_shouldVisibleItemView removeObserver:self forKeyPath:@"contentOffset"];
     [_shouldVisibleItemView removeObserver:self forKeyPath:@"contentSize"];
+    [_shouldVisibleItemView removeObserver:self forKeyPath:@"panGestureRecognizer.state"];
     self.shouldVisibleItemIndex = indexPath.item;
     self.shouldVisibleItemView  = subView;
     [_shouldVisibleItemView addObserver:self forKeyPath:@"contentOffset" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:SwipeTableViewItemContentOffsetContext];
     [_shouldVisibleItemView addObserver:self forKeyPath:@"contentSize" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:SwipeTableViewItemContentSizeContext];
+    [_shouldVisibleItemView addObserver:self forKeyPath:@"panGestureRecognizer.state" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:SwipeTableViewItemPanGestureContext];
     
     UIScrollView * lastItemView = _currentItemView;
     NSInteger lastIndex         = _currentItemIndex;
@@ -349,8 +352,10 @@ static void * SwipeTableViewItemContentSizeContext             = &SwipeTableView
         // observe
         [_currentItemView removeObserver:self forKeyPath:@"contentOffset"];
         [_currentItemView removeObserver:self forKeyPath:@"contentSize"];
+        [_currentItemView removeObserver:self forKeyPath:@"panGestureRecognizer.state"];
         [subView addObserver:self forKeyPath:@"contentOffset" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:SwipeTableViewItemContentOffsetContext];
         [subView addObserver:self forKeyPath:@"contentSize" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:SwipeTableViewItemContentSizeContext];
+        [subView addObserver:self forKeyPath:@"panGestureRecognizer.state" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:SwipeTableViewItemPanGestureContext];
         self.currentItemIndex = indexPath.row;
         self.currentItemView  = subView;
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
@@ -456,6 +461,8 @@ static void * SwipeTableViewItemContentSizeContext             = &SwipeTableView
 #pragma mark - observe
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context {
+    
+    /** contentOffset */
     if (context == SwipeTableViewItemContentOffsetContext) {
         
         if (_contentOffsetKVODisabled) {
@@ -464,7 +471,6 @@ static void * SwipeTableViewItemContentSizeContext             = &SwipeTableView
         if (!_swipeHeaderBarScrollDisabled) {
             CGFloat newOffsetY        = [change[NSKeyValueChangeNewKey] CGPointValue].y;
 #if !defined(ST_PULLTOREFRESH_HEADER_HEIGHT)
-            CGFloat initialOffsetY    = - (_swipeHeaderTopInset + _headerInset + _barInset);
             CGFloat topMarginInset    = _swipeHeaderTopInset + _barInset;
             UIView * headerBottomView = _swipeHeaderBar?_swipeHeaderBar:_swipeHeaderView;
             
@@ -477,7 +483,6 @@ static void * SwipeTableViewItemContentSizeContext             = &SwipeTableView
                 _swipeHeaderView.bottom = _swipeHeaderBar.top;
             }
 #else
-            CGFloat initialOffsetY    = - _swipeHeaderTopInset;
             CGFloat topMarginOffset   = _headerInset - _swipeHeaderTopInset;
             UIView * headerTopView    = _swipeHeaderView?_swipeHeaderView:_swipeHeaderBar;
             
@@ -490,13 +495,6 @@ static void * SwipeTableViewItemContentSizeContext             = &SwipeTableView
                 }
             }
 #endif
-            /*
-             * 下拉的时候,移除当前 item 记录的 offset,防止在`shouldAdjustContentSize`模式下适应 offset 的时候使用旧的 offset.
-             */
-            CGFloat adjustConstant = 5.0f;  // 用于调整像素微小误差的影响,增加判断范围.
-            if (newOffsetY < initialOffsetY - adjustConstant) {
-                [_contentOffsetQuene removeObjectForKey:@(self.currentItemIndex)];
-            }
         }
         
         /*
@@ -520,7 +518,9 @@ static void * SwipeTableViewItemContentSizeContext             = &SwipeTableView
             }
         }
         
-    }else if (context == SwipeTableViewItemContentSizeContext) {
+    }
+    /** contentSize */
+    else if (context == SwipeTableViewItemContentSizeContext) {
         // adjust contentSize
         if (_shouldAdjustContentSize) {
             // 当前scrollview所对应的index
@@ -545,6 +545,22 @@ static void * SwipeTableViewItemContentSizeContext             = &SwipeTableView
                     _isAdjustingcontentSize = NO;
                 });
             }
+        }
+    }
+    /** panGestureRecognizer */
+    else if (context == SwipeTableViewItemPanGestureContext) {
+        UIGestureRecognizerState state = (UIGestureRecognizerState)[change[NSKeyValueChangeNewKey] integerValue];
+        switch (state) {
+            case UIGestureRecognizerStateBegan:
+            {
+                /*
+                 * 拖拽当前item的时候,移除当前item记录的offset,防止在`shouldAdjustContentSize`模式下适应offset的时候使用旧的offset.
+                 */
+                [_contentOffsetQuene removeObjectForKey:@(self.currentItemIndex)];
+            }
+                break;
+            default:
+                break;
         }
     }
 }
@@ -609,6 +625,7 @@ static void * SwipeTableViewItemContentSizeContext             = &SwipeTableView
         // observe
         [_currentItemView removeObserver:self forKeyPath:@"contentOffset"];
         [_currentItemView removeObserver:self forKeyPath:@"contentSize"];
+        [_currentItemView removeObserver:self forKeyPath:@"panGestureRecognizer.state"];
         
         _currentItemIndex = currentItemIndex;
         NSIndexPath *currentIndexPath = [NSIndexPath indexPathForItem:_currentItemIndex inSection:0];
@@ -616,6 +633,7 @@ static void * SwipeTableViewItemContentSizeContext             = &SwipeTableView
         
         [_currentItemView addObserver:self forKeyPath:@"contentOffset" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:SwipeTableViewItemContentOffsetContext];
         [_currentItemView addObserver:self forKeyPath:@"contentSize" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:SwipeTableViewItemContentSizeContext];
+        [_currentItemView addObserver:self forKeyPath:@"panGestureRecognizer.state" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:SwipeTableViewItemPanGestureContext];
         
         // did index change
         if (_delegate && [_delegate respondsToSelector:@selector(swipeTableViewCurrentItemIndexDidChange:)]) {
@@ -662,8 +680,10 @@ static void * SwipeTableViewItemContentSizeContext             = &SwipeTableView
     @try {
         [_currentItemView removeObserver:self forKeyPath:@"contentOffset"];
         [_currentItemView removeObserver:self forKeyPath:@"contentSize"];
+        [_currentItemView removeObserver:self forKeyPath:@"panGestureRecognizer.state"];
         [_shouldVisibleItemView removeObserver:self forKeyPath:@"contentOffset"];
         [_shouldVisibleItemView removeObserver:self forKeyPath:@"contentSize"];
+        [_shouldVisibleItemView removeObserver:self forKeyPath:@"panGestureRecognizer.state"];
     }
     @catch (NSException *exception) {
         
