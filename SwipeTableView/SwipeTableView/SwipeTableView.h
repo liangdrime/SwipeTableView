@@ -66,12 +66,6 @@
 @property (nonatomic, assign) BOOL shouldAdjustContentSize;
 
 /**
- *  调整当前item的contentSize的最小值是自身frame的高度，还是跟随前一个页面切换时的最大滚动位置
- *  如果设置为NO，当从页面1切换到页面2的时候，页面2的向上的滚动范围最大不会超过切换页面时的对齐范围。 默认值是YES
- */
-@property (nonatomic, assign) BOOL adaptMinContentSizeForBounds;
-
-/**
  *  swipeHeaderBar是否跟随滚动，默认为 NO。如果设置为YES，在没有STHeaderView的条件下，可以实现类似网易新闻首页效果
  */
 @property (nonatomic, assign) BOOL swipeHeaderBarScrollDisabled;

@@ -128,7 +128,6 @@ static void * SwipeTableViewItemPanGestureContext              = &SwipeTableView
     _barInset = 0;
     _currentItemIndex = 0;
     _switchPageWithoutAnimation = YES;
-    _adaptMinContentSizeForBounds = YES;
     _cunrrentItemIndexpath  = [NSIndexPath indexPathForItem:0 inSection:0];
 }
 
@@ -238,6 +237,9 @@ static void * SwipeTableViewItemPanGestureContext              = &SwipeTableView
 #else
     CGFloat headerOffsetY = - _swipeHeaderTopInset;
 #endif
+    [self.contentOffsetQuene removeAllObjects];
+    [self.contentSizeQuene removeAllObjects];
+    [self.contentMinSizeQuene removeAllObjects];
     [self.currentItemView setContentOffset:CGPointMake(0, headerOffsetY)];
     [self.contentView reloadData];
 }
@@ -385,25 +387,34 @@ static void * SwipeTableViewItemPanGestureContext              = &SwipeTableView
 #pragma mark -
 
 - (void)adjustItemViewContentOffset:(UIScrollView *)itemView atIndex:(NSInteger)index fromLastItemView:(UIScrollView *)lastItemView lastIndex:(NSInteger)lastIndex {
-    // adjust content offset
+    
+    /** 
+     *  First init or reloaddata,this condition will be executed when the item init or call the method `reloadData`.
+     */
     if (lastIndex == index) {
+#if !defined(ST_PULLTOREFRESH_HEADER_HEIGHT)
+        CGPoint initContentOffset = CGPointMake(0, -(_swipeHeaderTopInset + _headerInset + _barInset));
+#else
+        CGPoint initContentOffset = CGPointMake(0, - _swipeHeaderTopInset);
+#endif
+        // save current contentOffset before reset contentSize,to reset contentOffset when KVO contentSize.
+        _contentOffsetQuene[@(index)] = [NSValue valueWithCGPoint:initContentOffset];
+        // adjust contentSize
+        [self adjustItemViewContentSize:itemView atIndex:index];
+        
         return;
     }
+    
+    /** 
+     *  Adjust contentOffset
+     */
     // save current item contentoffset
     CGPoint contentOffset  = lastItemView.contentOffset;
-    CGSize itemContentSize = itemView.contentSize;
     if (lastItemView != itemView) {
         self.contentOffsetQuene[@(lastIndex)] = [NSValue valueWithCGPoint:contentOffset];
     }else {
         // 非滚动切换item，由于重用关系前后itemView是同一个
         contentOffset = [self.contentOffsetQuene[@(lastIndex)] CGPointValue];
-        // 取出之前存储的contentSize，如果没有就用当前itemView的contentSize
-        NSValue * contentSizeObj = self.contentSizeQuene[@(index)];
-        if (nil != contentSizeObj) {
-            itemContentSize = [contentSizeObj CGSizeValue];
-        }else {
-            itemContentSize = itemView.contentSize;
-        }
     }
     
     // 取出记录的offset
@@ -428,34 +439,45 @@ static void * SwipeTableViewItemPanGestureContext              = &SwipeTableView
         itemContentOffset.y = contentOffset.y;
     }
     
-    // adjust contentsize
-    CGFloat contentHeight        = itemView.height + itemContentOffset.y;    // scrollview内容的高度
-#if !defined(ST_PULLTOREFRESH_HEADER_HEIGHT)
-    CGFloat maxVisibleRectHeight = itemView.height - (_swipeHeaderTopInset + _barInset);  // 显示屏幕的最大高度
-#else
-    CGFloat maxVisibleRectHeight = itemView.height - _swipeHeaderTopInset + _headerInset;  // 显示屏幕的最大高度
-#endif
-    CGFloat minRequireHeight     = _adaptMinContentSizeForBounds?maxVisibleRectHeight:MIN(maxVisibleRectHeight, contentHeight);     // 最小要求的contentsize的高度
-    minRequireHeight            -= itemView.contentInset.bottom;   // 修正contentInset的bottom的影响
-    itemContentSize.height       = MAX(minRequireHeight, itemContentSize.height);  // 重设contentsize的高度
-    
-    // save current data
+    // save current contentOffset before reset contentSize,to reset contentOffset when KVO contentSize.
     _contentOffsetQuene[@(index)] = [NSValue valueWithCGPoint:itemContentOffset];
+    
+    
+    /** 
+     *  Adjust contentsize
+     */
+    [self adjustItemViewContentSize:itemView atIndex:index];
+    
+    // reset contentOffset after reset contentSize
+    itemView.contentOffset = itemContentOffset;
+    
+}
+
+- (void)adjustItemViewContentSize:(UIScrollView *)itemView atIndex:(NSInteger)index {
+    // get the min required height of contentSize
+#if !defined(ST_PULLTOREFRESH_HEADER_HEIGHT)
+    CGFloat minRequireHeight = itemView.height - (_swipeHeaderTopInset + _barInset);
+#else
+    CGFloat minRequireHeight = itemView.height - _swipeHeaderTopInset + _headerInset;
+#endif
+    // 修正contentInset的bottom的影响
+    minRequireHeight  -= itemView.contentInset.bottom;
+    // 重设contentsize的高度
+    CGSize contentSize = itemView.contentSize;
+    contentSize.height = MAX(minRequireHeight, contentSize.height);
     
     // set shoudVisible item contentOffset and contentSzie
     if (_shouldAdjustContentSize) {
-        CGSize minRequireContentSize   = CGSizeMake(itemContentSize.width, minRequireHeight);
-        _contentSizeQuene[@(index)]    = [NSValue valueWithCGSize:itemContentSize];
+        CGSize minRequireContentSize   = CGSizeMake(contentSize.width, minRequireHeight);
+        _contentSizeQuene[@(index)]    = [NSValue valueWithCGSize:contentSize];
         _contentMinSizeQuene[@(index)] = [NSValue valueWithCGSize:minRequireContentSize];
-        itemView.contentSize           = itemContentSize;
+        itemView.contentSize           = contentSize;
         _isAdjustingcontentSize        = YES;
         // 自适应contentSize的状态在当前事件循环之后解除
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             _isAdjustingcontentSize = NO;
         });
     }
-    itemView.contentOffset = itemContentOffset;
-    
 }
 
 #pragma mark - observe

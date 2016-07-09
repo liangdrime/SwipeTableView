@@ -27,7 +27,6 @@ NSString *const STCollectionHeaderIdfy               = @"STCollectionHeaderIdfy"
     STCollectionViewFlowLayout * flowLayout = [[STCollectionViewFlowLayout alloc]init];
     self = [super initWithFrame:frame collectionViewLayout:flowLayout];
     if (self) {
-        self.collectionViewLayout = flowLayout;
         [self registerClass:UICollectionReusableView.class forSupplementaryViewOfKind:STCollectionElementKindSectionHeader withReuseIdentifier:STCollectionHeaderIdfy];
         [self setDataSource:self];
         [self setDelegate:self];
@@ -49,8 +48,8 @@ NSString *const STCollectionHeaderIdfy               = @"STCollectionHeaderIdfy"
 
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout {
     self = [self initWithFrame:frame];
-    if (self) {
-        
+    if (!self) {
+        return nil;
     }
     return self;
 }
@@ -122,7 +121,11 @@ NSString *const STCollectionHeaderIdfy               = @"STCollectionHeaderIdfy"
     self.stDataSource = (id<STCollectionViewDataSource>)dataSource;
 }
 
-
+- (void)setMinRequireContentSize:(CGSize)minRequireContentSize {
+    _minRequireContentSize = minRequireContentSize;
+    [self.st_collectionViewLayout invalidateLayout];
+    
+}
 
 
 @end
