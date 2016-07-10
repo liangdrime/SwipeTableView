@@ -22,18 +22,19 @@
     
     self.dataSource = @[@{
                             @"title":@"SingleOneKindView",
-                            @"actionIdfy":kShouldReuseableViewIdentifier,
+                            @"type":@(STControllerTypeNormal),
                             },
                         @{
                             @"title":@"HybridItemViews",
-                            @"actionIdfy":kHybridItemViewsIdentifier,
+                            @"type":@(STControllerTypeHybrid),
                             },
                         @{
                             @"title":@"DisabledBarScroll",
-                            @"actionIdfy":kDisabledSwipeHeaderBarScrollIdentifier,},
+                            @"type":@(STControllerTypeDisableBarScroll),
+                            },
                         @{
                             @"title":@"HiddenNavigationBar",
-                            @"actionIdfy":kHiddenNavigationBarIdentifier,
+                            @"type":@(STControllerTypeHiddenNavBar),
                             }];
 }
 
@@ -53,9 +54,9 @@
     // Get the new view controller using [segue destinationViewController].
     // Pass the selected object to the new view controller.
     STViewController * demoVC = [segue destinationViewController];
-    UITableViewCell * cell = sender;
+    UITableViewCell * cell  = sender;
     NSIndexPath * indexPath = [self.tableView indexPathForCell:cell];
-    demoVC.actionIdentifier = _dataSource[indexPath.row][@"actionIdfy"];
+    demoVC.type             = (STControllerType)[_dataSource[indexPath.row][@"type"] integerValue];
     demoVC.title            = _dataSource[indexPath.row][@"title"];
     [super prepareForSegue:segue sender:sender];
     [self.tableView deselectRowAtIndexPath:indexPath animated:YES];

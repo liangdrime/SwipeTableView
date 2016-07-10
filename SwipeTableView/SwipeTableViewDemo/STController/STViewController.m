@@ -15,10 +15,6 @@
 #import "STImageController.h"
 #import "STTransitions.h"
 
-NSString const * kShouldReuseableViewIdentifier = @"setIsJustOneKindOfClassView";
-NSString const * kHybridItemViewsIdentifier = @"doNothing";
-NSString const * kDisabledSwipeHeaderBarScrollIdentifier = @"setSwipeHeaderBarScrollDisabled";
-NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
 
 @interface STViewController ()<SwipeTableViewDataSource,SwipeTableViewDelegate,UIGestureRecognizerDelegate,UIViewControllerTransitioningDelegate>
 
@@ -42,6 +38,7 @@ NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
     
     _itemDic = [@{} mutableCopy];
     
+    // init swipetableview
     self.swipeTableView = [[SwipeTableView alloc]initWithFrame:self.view.bounds];
     _swipeTableView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     _swipeTableView.delegate = self;
@@ -61,7 +58,7 @@ NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
     self.navigationItem.leftBarButtonItem = _swipeBarScrollDisabled?nil:leftBarItem;
     self.navigationItem.rightBarButtonItem = _swipeBarScrollDisabled?nil:rightBarItem;
     
-    // back
+    // back bt
     UIButton * back = [UIButton buttonWithType:UIButtonTypeCustom];
     back.frame = CGRectMake(10, 0, 40, 40);
     back.top = _shouldHiddenNavigationBar?25:74;
@@ -147,28 +144,6 @@ NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
 
 #pragma mark -
 
-- (void)setActionIdentifier:(NSString *)actionIdentifier {
-    _actionIdentifier = actionIdentifier;
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
-    [self performSelector:NSSelectorFromString(_actionIdentifier) withObject:nil];
-#pragma clang diagnostic pop
-}
-
-- (void)setIsJustOneKindOfClassView {
-    _isJustOneKindOfClassView = YES;
-}
-
-- (void)setSwipeHeaderBarScrollDisabled {
-    _swipeBarScrollDisabled = YES;
-}
-
-- (void)shouldHidenNavigationBar {
-    _shouldHiddenNavigationBar = YES;
-}
-
-- (void)doNothing{};
-
 - (void)back {
     [self.navigationController popViewControllerAnimated:YES];
 }
@@ -248,36 +223,47 @@ NSString const * kHiddenNavigationBarIdentifier = @"shouldHidenNavigationBar";
 #pragma mark - SwipeTableView M
 
 - (NSInteger)numberOfItemsInSwipeTableView:(SwipeTableView *)swipeView {
-    return 4;
+    return 3;
 }
 
 - (UIScrollView *)swipeTableView:(SwipeTableView *)swipeView viewForItemAtIndex:(NSInteger)index reusingView:(UIScrollView *)view {
     NSInteger numberOfRows = 12;
-    if (_isJustOneKindOfClassView || _shouldHiddenNavigationBar) {
-        // 重用
-        if (nil == view) {
-            CustomTableView * tableView = [[CustomTableView alloc]initWithFrame:swipeView.bounds style:UITableViewStylePlain];
-            tableView.backgroundColor = RGBColor(255, 255, 225);
-            view = tableView;
+    switch (_type) {
+        case STControllerTypeNormal:
+        {
+            // 重用
+            if (nil == view) {
+                CustomTableView * tableView = [[CustomTableView alloc]initWithFrame:swipeView.bounds style:UITableViewStylePlain];
+                tableView.backgroundColor = RGBColor(255, 255, 225);
+                view = tableView;
+            }
+            if (index == 1 || index == 3) {
+                numberOfRows = 5;
+            }
+            [view setValue:@(numberOfRows) forKey:@"numberOfRows"];
+            [view setValue:@(index) forKey:@"itemIndex"];
         }
-        if (index == 1 || index == 3) {
-            numberOfRows = 5;
+            break;
+        case STControllerTypeHybrid:
+        case STControllerTypeDisableBarScroll:
+        case STControllerTypeHiddenNavBar:
+        {
+            // 混合的itemview只有同类型的item采用重用
+            if (index == 0 || index == 2) {
+                // 懒加载保证同样类型的item只创建一次，以达到重用
+                self.tableView.numberOfRows = numberOfRows;
+                view = self.tableView;
+            }else {
+                self.collectionView.numberOfItems = (index == 1)?(numberOfRows + 4):numberOfRows;
+                self.collectionView.isWaterFlow   = index == 1;
+                view = self.collectionView;
+            }
         }
-        [view setValue:@(numberOfRows) forKey:@"numberOfRows"];
-        [view setValue:@(index) forKey:@"itemIndex"];
-        
-    }else {
-        // 混合的itemview只有同类型的item采用重用
-        if (index == 0 || index == 2) {
-            // 懒加载保证同样类型的item只创建一次，以达到重用
-            self.tableView.numberOfRows = numberOfRows;
-            view = self.tableView;
-        }else {
-            self.collectionView.numberOfItems = (index == 1)?(numberOfRows + 4):numberOfRows;
-            self.collectionView.isWaterFlow   = index == 1;
-            view = self.collectionView;
-        }
+            break;
+        default:
+            break;
     }
+    
     [view performSelector:@selector(reloadData)];
     return view;
 }

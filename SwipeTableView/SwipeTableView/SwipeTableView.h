@@ -26,7 +26,7 @@
    `MJRefresh` 为 `MJRefreshHeaderHeight`，`SVPullToRefresh` 为 `SVPullToRefreshViewHeight`
  */
 /*****************************************************************************************************/
-//#define ST_PULLTOREFRESH_HEADER_HEIGHT  54.0
+#define ST_PULLTOREFRESH_HEADER_HEIGHT  60.0
 
 /**
  *  自定义显示在swipeView顶端的headerView，可以通过setter方法动态设置
@@ -66,7 +66,7 @@
 @property (nonatomic, assign) BOOL shouldAdjustContentSize;
 
 /**
- *  swipeHeaderBar是否跟随滚动，默认为 NO。如果设置为YES，在没有STHeaderView的条件下，可以实现类似网易新闻首页效果
+ *  swipeHeaderBar是否跟随滚动，默认为 NO。如果设置为YES，在没有swipeHeaderView的条件下，可以实现类似网易新闻首页效果
  */
 @property (nonatomic, assign) BOOL swipeHeaderBarScrollDisabled;
 
@@ -99,6 +99,10 @@
 - (void)swipeTableViewDidEndScrollingAnimation:(SwipeTableView *)swipeView;
 - (BOOL)swipeTableView:(SwipeTableView *)swipeView shouldSelectItemAtIndex:(NSInteger)index;
 - (void)swipeTableView:(SwipeTableView *)swipeView didSelectItemAtIndex:(NSInteger)index;
+
+// pull to refresh
+- (BOOL)swipeTableView:(SwipeTableView *)swipeTableView shouldPullToRefreshAtIndex:(NSInteger)index; // default is YES if defined ST_PULLTOREFRESH_HEADER_HEIGHT,otherwise is NO.
+- (CGFloat)swipeTableView:(SwipeTableView *)swipeTableView heightForRefreshHeaderAtIndex:(NSInteger)index; // default is ST_PULLTOREFRESH_HEADER_HEIGHT if defined ST_PULLTOREFRESH_HEADER_HEIGHT,otherwise is CGFLOAT_MAX(not set pull to refesh).
 
 @end
 

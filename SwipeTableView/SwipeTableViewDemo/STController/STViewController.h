@@ -10,14 +10,16 @@
 #define RGBColorAlpha(r,g,b,f)   [UIColor colorWithRed:r/255.0 green:g/255.0 blue:b/255.0 alpha:f]
 #define RGBColor(r,g,b)          RGBColorAlpha(r,g,b,1)
 
-UIKIT_EXTERN NSString const * kShouldReuseableViewIdentifier;
-UIKIT_EXTERN NSString const * kHybridItemViewsIdentifier;
-UIKIT_EXTERN NSString const * kDisabledSwipeHeaderBarScrollIdentifier;
-UIKIT_EXTERN NSString const * kHiddenNavigationBarIdentifier;
+typedef NS_ENUM(NSInteger,STControllerType) {
+    STControllerTypeNormal,
+    STControllerTypeHybrid,
+    STControllerTypeDisableBarScroll,
+    STControllerTypeHiddenNavBar,
+};
 
 @interface STViewController : UIViewController
 
-@property (nonatomic, strong) NSString * actionIdentifier;
+@property (nonatomic, assign) STControllerType type;
 @property (nonatomic, strong) UIImageView * headerImageView;
 
 @end
