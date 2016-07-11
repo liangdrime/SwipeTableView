@@ -19,12 +19,7 @@
 - (UIScrollView *)scrollView;
 @end
 
-@interface UICollectionViewCell (UITableView)
-- (UITableView *)tableView;
-@end
-
 @interface UIScrollView (PanGestureRecognizer)
-- (SwipeTableView *)swipeTableView;
 - (void)setHeaderView:(UIView *)headerView;
 void STSwizzleMethod(Class c, SEL origSEL, SEL newSEL);
 @end
@@ -749,18 +744,23 @@ static void * SwipeTableViewItemPanGestureContext              = &SwipeTableView
 }
 @end
 
-@implementation UICollectionViewCell (UITableView)
-- (UITableView *)tableView {
-    UITableView * tableView = nil;
-    for (UIView * subView in self.contentView.subviews) {
-        if ([subView isKindOfClass:UITableView.class]) {
-            tableView = (UITableView *)subView;
-            break;
+
+@implementation UIScrollView (SwipeTableView)
+- (SwipeTableView *)swipeTableView {
+    SwipeTableView * swipeTableView = objc_getAssociatedObject(self, "swipeTableView");
+    if (nil != swipeTableView) {
+        return swipeTableView;
+    }
+    for (UIView * nextRes = self; nextRes; nextRes = nextRes.superview) {
+        if ([nextRes isKindOfClass:SwipeTableView.class]) {
+            objc_setAssociatedObject(self, "swipeTableView", nextRes, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+            return (SwipeTableView *)nextRes;
         }
     }
-    return tableView;
+    return nil;
 }
 @end
+
 
 @implementation UIScrollView (PanGestureRecognizer)
 
@@ -816,15 +816,6 @@ static void * SwipeTableViewItemPanGestureContext              = &SwipeTableView
         return [self st_isDecelerating];
     }
     return [self st_isDecelerating];
-}
-
-- (SwipeTableView *)swipeTableView {
-    for (UIView * nextRes = self; nextRes; nextRes = nextRes.superview) {
-        if ([nextRes isKindOfClass:SwipeTableView.class]) {
-            return (SwipeTableView *)nextRes;
-        }
-    }
-    return nil;
 }
 
 - (void)setHeaderView:(UIView *)headerView {

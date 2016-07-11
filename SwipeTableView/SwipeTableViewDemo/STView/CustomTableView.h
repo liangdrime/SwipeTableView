@@ -10,7 +10,6 @@
 
 @interface CustomTableView : UITableView
 
-@property (nonatomic, assign) NSInteger numberOfRows;
-@property (nonatomic, assign) NSInteger itemIndex;
+- (void)refreshWithData:(id)data atIndex:(NSInteger)index;
 
 @end

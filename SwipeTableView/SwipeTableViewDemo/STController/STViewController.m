@@ -14,6 +14,8 @@
 #import "UIView+STFrame.h"
 #import "STImageController.h"
 #import "STTransitions.h"
+#import "STRefresh.h"
+#import <objc/message.h>
 
 
 @interface STViewController ()<SwipeTableViewDataSource,SwipeTableViewDelegate,UIGestureRecognizerDelegate,UIViewControllerTransitioningDelegate>
@@ -26,8 +28,7 @@
 @property (nonatomic, strong) CustomSegmentControl * segmentBar;
 @property (nonatomic, strong) CustomTableView * tableView;
 @property (nonatomic, strong) CustomCollectionView * collectionView;
-
-@property (nonatomic, strong) NSMutableDictionary * itemDic;
+@property (nonatomic, strong) NSMutableDictionary * dataDic;
 
 @end
 
@@ -35,8 +36,6 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
-    _itemDic = [@{} mutableCopy];
     
     // init swipetableview
     self.swipeTableView = [[SwipeTableView alloc]initWithFrame:self.view.bounds];
@@ -76,6 +75,15 @@
     
     // edge gesture
     [_swipeTableView.contentView.panGestureRecognizer requireGestureRecognizerToFail:self.screenEdgePanGestureRecognizer];
+    
+    // init data
+    _dataDic = [@{} mutableCopy];
+    
+    // 根据滚动后的下标请求数据
+    [self getDataAtIndex:0];
+    
+    // 一次性请求所有item的数据
+//    [self getAllData];
 }
 
 - (UIScreenEdgePanGestureRecognizer *)screenEdgePanGestureRecognizer {
@@ -220,56 +228,144 @@
     [_swipeTableView scrollToItemAtIndex:seg.selectedSegmentIndex animated:NO];
 }
 
+#pragma mark - Data Reuqest
+
+// 请求数据（根据视图滚动到相应的index后再请求数据）
+- (void)getDataAtIndex:(NSInteger)index {
+    if (nil != _dataDic[@(index)]) {
+        return;
+    }
+    NSInteger numberOfRows = 0;
+    switch (index) {
+        case 0:
+            numberOfRows = _type == STControllerTypeNormal?8:10;
+            break;
+        case 1:
+            numberOfRows = _type == STControllerTypeNormal?10:8;
+            break;
+        case 2:
+            numberOfRows = _type == STControllerTypeNormal?5:6;
+            break;
+        case 3:
+            numberOfRows = _type == STControllerTypeNormal?12:12;
+            break;
+        default:
+            break;
+    }
+    // 请求数据后刷新相应的item
+    ((void (*)(void *, SEL, NSNumber *, NSInteger))objc_msgSend)((__bridge void *)(self.swipeTableView.currentItemView),@selector(refreshWithData:atIndex:), @(numberOfRows),index);
+    // 保存数据
+    [_dataDic setObject:@(numberOfRows) forKey:@(index)];
+}
+
+// 请求数据（一次性获取所有item的数据）
+- (void)getAllData {
+    if (_type == STControllerTypeNormal) {
+        [_dataDic setObject:@(8) forKey:@(0)];
+        [_dataDic setObject:@(10) forKey:@(1)];
+        [_dataDic setObject:@(5) forKey:@(2)];
+        [_dataDic setObject:@(12) forKey:@(3)];
+    }else {
+        [_dataDic setObject:@(10) forKey:@(0)];
+        [_dataDic setObject:@(12) forKey:@(1)];
+        [_dataDic setObject:@(8) forKey:@(2)];
+        [_dataDic setObject:@(14) forKey:@(3)];
+    }
+}
+
+
 #pragma mark - SwipeTableView M
 
 - (NSInteger)numberOfItemsInSwipeTableView:(SwipeTableView *)swipeView {
-    return 3;
+    return 4;
 }
 
 - (UIScrollView *)swipeTableView:(SwipeTableView *)swipeView viewForItemAtIndex:(NSInteger)index reusingView:(UIScrollView *)view {
-    NSInteger numberOfRows = 12;
     switch (_type) {
         case STControllerTypeNormal:
         {
+            
+            CustomTableView * tableView = (CustomTableView *)view;
             // 重用
-            if (nil == view) {
-                CustomTableView * tableView = [[CustomTableView alloc]initWithFrame:swipeView.bounds style:UITableViewStylePlain];
+            if (tableView == view) {
+                tableView = [[CustomTableView alloc]initWithFrame:swipeView.bounds style:UITableViewStylePlain];
                 tableView.backgroundColor = RGBColor(255, 255, 225);
-                view = tableView;
             }
-            if (index == 1 || index == 3) {
-                numberOfRows = 5;
-            }
-            [view setValue:@(numberOfRows) forKey:@"numberOfRows"];
-            [view setValue:@(index) forKey:@"itemIndex"];
+            
+            // 获取当前index下item的数据，进行数据刷新
+            id data = _dataDic[@(index)];
+            [tableView refreshWithData:data atIndex:index];
+            
+            view = tableView;
         }
             break;
         case STControllerTypeHybrid:
         case STControllerTypeDisableBarScroll:
         case STControllerTypeHiddenNavBar:
         {
+            
             // 混合的itemview只有同类型的item采用重用
             if (index == 0 || index == 2) {
+                
                 // 懒加载保证同样类型的item只创建一次，以达到重用
-                self.tableView.numberOfRows = numberOfRows;
-                view = self.tableView;
+                CustomTableView * tableView = self.tableView;
+                
+                // 获取当前index下item的数据，进行数据刷新
+                id data = _dataDic[@(index)];
+                [tableView refreshWithData:data atIndex:index];
+                
+                view = tableView;
             }else {
-                self.collectionView.numberOfItems = (index == 1)?(numberOfRows + 4):numberOfRows;
-                self.collectionView.isWaterFlow   = index == 1;
+                
+                CustomCollectionView * collectionView = self.collectionView;
+                
+                // 获取当前index下item的数据，进行数据刷新
+                id data = _dataDic[@(index)];
+                [collectionView refreshWithData:data atIndex:index];
+
                 view = self.collectionView;
             }
+            
         }
             break;
         default:
             break;
     }
     
-    [view performSelector:@selector(reloadData)];
+    // 自定义下拉刷新header的frame处理
+    [self configRefreshForItem:view];
+    
     return view;
 }
 
+// swipetableView index变化，改变seg的index
 - (void)swipeTableViewCurrentItemIndexDidChange:(SwipeTableView *)swipeView {
     _segmentBar.selectedSegmentIndex = swipeView.currentItemIndex;
+}
+
+// 滚动结束请求数据
+- (void)swipeTableViewDidEndDecelerating:(SwipeTableView *)swipeView {
+    [self getDataAtIndex:swipeView.currentItemIndex];
+}
+
+// 定义了 #define ST_PULLTOREFRESH_HEADER_HEIGHT，可以根据需求实现代理，如果未定义，并自定义下拉刷新，需要实现此代理
+- (BOOL)swipeTableView:(SwipeTableView *)swipeTableView shouldPullToRefreshAtIndex:(NSInteger)index {
+    return YES;
+}
+
+- (CGFloat)swipeTableView:(SwipeTableView *)swipeTableView heightForRefreshHeaderAtIndex:(NSInteger)index {
+    return kSTRefreshHeaderHeight;
+}
+
+/** 
+ *  采用自定义修改下拉刷新，此时不会定义宏 #define ST_PULLTOREFRESH_HEADER_HEIGHT 
+ *  对于一些下拉刷新控件，可能会在layouSubViews中设置RefreshHeader的frame。所以，需要在itemView中有效的方法中改变RefreshHeader的frame，如 `scrollViewDidScroll:`
+ */
+- (void)configRefreshForItem:(UIScrollView *)itemView {
+#if !defined(ST_PULLTOREFRESH_HEADER_HEIGHT)
+    STRefreshHeader * header = itemView.header;
+    header.y = - (header.height + (_segmentBar.height + _headerImageView.height));
+#endif
 }
 
 

@@ -248,16 +248,16 @@ static void * STRefreshcontentInsetContext              = &STRefreshcontentInset
             return;
         }
         moveOffsetY = - moveOffsetY;
-        NSLog(@"move offset ==== %f",moveOffsetY);
-        CGFloat pullPercent = fmin(moveOffsetY/kSTRefreshHeaderHeight, 1);
-        _circleLayer.strokeEnd = pullPercent;
-        _contentView.alpha = pullPercent;
-        _headerImageV.transform = CGAffineTransformMakeRotation(pullPercent * M_PI);
         _contentView.centerY = self.height - moveOffsetY/2;
-        
         
         // 拖拽
         if (self.scrollView.isDragging) {
+            
+            CGFloat pullPercent = fmin(moveOffsetY/kSTRefreshHeaderHeight, 1);
+            _circleLayer.strokeEnd = pullPercent;
+            _contentView.alpha = pullPercent;
+            _headerImageV.transform = CGAffineTransformMakeRotation(pullPercent * M_PI);
+            
             if (self.state == STRefreshStateRefeshing) {
                 return;
             }
@@ -279,13 +279,15 @@ static void * STRefreshcontentInsetContext              = &STRefreshcontentInset
 - (void)beganRefreshing {
     self.state = STRefreshStateRefeshing;
     [UIView animateWithDuration:0.25f delay:0 options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionCurveEaseInOut animations:^{
+        
+        self.contentView.centerY = self.height/2;
+        
         UIEdgeInsets contentInset = self.scrollView.contentInset;
         contentInset.top = _orginContentInsetTop + kSTRefreshHeaderHeight;
         
         self.scrollView.contentInset = contentInset;
         self.scrollView.contentOffset = CGPointMake(self.scrollView.contentOffset.x, - contentInset.top);
         
-        self.contentView.centerY = self.height/2;
     } completion:^(BOOL finished) {
         [self startLoadingAnimation];
         [self executeRefreshingCallback];
@@ -301,16 +303,17 @@ static void * STRefreshcontentInsetContext              = &STRefreshcontentInset
     [self stopLoadingAnimation];
     
     [UIView animateWithDuration:0.5f delay:0 options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionCurveEaseInOut animations:^{
+        
         UIEdgeInsets contentInset = self.scrollView.contentInset;
         contentInset.top -= kSTRefreshHeaderHeight;
-        
         self.scrollView.contentInset = contentInset;
         self.scrollView.contentOffset = CGPointMake(self.scrollView.contentOffset.x, - contentInset.top);
         
         self.contentView.centerY = self.height;
         self.contentView.alpha = 0;
-        self.headerImageV.transform = CGAffineTransformIdentity;
         self.circleLayer.strokeEnd = 0;
+        self.headerImageV.transform = CGAffineTransformRotate(self.headerImageV.transform, - M_PI);
+        
     } completion:^(BOOL finished) {
         
     }];

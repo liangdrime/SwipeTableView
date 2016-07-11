@@ -89,7 +89,7 @@ NSString *const STCollectionHeaderIdfy               = @"STCollectionHeaderIdfy"
     if (self.stDataSource && [_stDataSource respondsToSelector:@selector(numberOfSectionsInStCollectionView:)]) {
         sectionNum = [_stDataSource numberOfSectionsInStCollectionView:collectionView];
     }
-    return sectionNum;
+    return fmax(1, sectionNum);
 }
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {

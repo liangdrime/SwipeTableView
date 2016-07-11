@@ -9,10 +9,14 @@
 #import "CustomTableView.h"
 #import "UIView+STFrame.h"
 #import "STRefresh.h"
+#import "SwipeTableView.h"
 
 #define RGBColor(r,g,b)     [UIColor colorWithRed:r/255.0 green:g/255.0 blue:b/255.0 alpha:1]
 
 @interface CustomTableView ()<UITableViewDataSource,UITableViewDelegate>
+
+@property (nonatomic, assign) NSInteger itemIndex;
+@property (nonatomic, assign) NSInteger numberOfRows;
 
 @end
 
@@ -37,6 +41,13 @@
     return self;
 }
 
+- (void)refreshWithData:(id)numberOfRows atIndex:(NSInteger)index {
+    _numberOfRows = [numberOfRows integerValue];
+    _itemIndex = index;
+    
+    [self reloadData];
+}
+
 #pragma mark - UITableView M
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     return _numberOfRows;
@@ -59,6 +70,14 @@
     cell.textLabel.text = title;
     cell.textLabel.textColor = [UIColor whiteColor];
     return cell;
+}
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
+    STRefreshHeader * header = self.header;
+    CGFloat orginY = - (header.height + self.swipeTableView.swipeHeaderView.height + self.swipeTableView.swipeHeaderBar.height);
+    if (header.y != orginY) {
+        header.y = orginY;
+    }
 }
 
 @end

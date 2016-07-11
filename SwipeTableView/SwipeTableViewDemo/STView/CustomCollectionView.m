@@ -15,6 +15,8 @@
 @interface CustomCollectionView ()<STCollectionViewDataSource,STCollectionViewDelegate>
 
 @property (nonatomic, strong) NSMutableArray * itemSizes;
+@property (nonatomic, assign) NSInteger numberOfItems;
+@property (nonatomic, assign) BOOL isWaterFlow;
 
 @end
 @implementation CustomCollectionView
@@ -71,6 +73,18 @@
     return _itemSizes;
 }
 
+- (void)refreshWithData:(id)numberOfItems atIndex:(NSInteger)index {
+    _numberOfItems = [numberOfItems integerValue];
+    _isWaterFlow = index == 1;
+    
+    NSLog(@"data === %ld   index === %ld   isWaterFlow === %d",[numberOfItems integerValue],index,_isWaterFlow);
+    
+    [self reloadData];
+}
+
+
+#pragma mark - STCollectionView M
+
 - (NSInteger)collectionView:(UICollectionView *)collectionView layout:(STCollectionViewFlowLayout *)layout numberOfColumnsInSection:(NSInteger)section {
     return 4;
 }
@@ -83,14 +97,21 @@
 }
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section {
+    if (_numberOfItems <= 0) {
+        return CGSizeZero;
+    }
     return CGSizeMake(kScreenWidth, 35);
 }
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout referenceSizeForFooterInSection:(NSInteger)section {
+    if (_numberOfItems <= 0) {
+        return CGSizeZero;
+    }
     return CGSizeMake(kScreenWidth, 35);
 }
 
 - (UICollectionReusableView *)stCollectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath {
+    
     UICollectionReusableView * reusableView = nil;
     if ([kind isEqualToString:UICollectionElementKindSectionHeader]) {
         reusableView = [collectionView dequeueReusableSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:@"header" forIndexPath:indexPath];
@@ -125,6 +146,9 @@
 }
 
 - (NSInteger)numberOfSectionsInStCollectionView:(UICollectionView *)collectionView {
+    if (_numberOfItems <= 0) {
+        return 0;
+    }
     return 2;
 } 
 

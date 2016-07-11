@@ -14,7 +14,6 @@
 
 @interface CustomCollectionView : STCollectionView
 
-@property (nonatomic, assign) NSInteger numberOfItems;
-@property (nonatomic, assign) BOOL isWaterFlow;
+- (void)refreshWithData:(id)data atIndex:(NSInteger)index;
 
 @end

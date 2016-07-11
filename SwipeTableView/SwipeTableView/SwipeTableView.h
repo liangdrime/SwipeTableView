@@ -26,7 +26,7 @@
    `MJRefresh` 为 `MJRefreshHeaderHeight`，`SVPullToRefresh` 为 `SVPullToRefreshViewHeight`
  */
 /*****************************************************************************************************/
-#define ST_PULLTOREFRESH_HEADER_HEIGHT  60.0
+//#define ST_PULLTOREFRESH_HEADER_HEIGHT  60.0
 
 /**
  *  自定义显示在swipeView顶端的headerView，可以通过setter方法动态设置
@@ -100,9 +100,19 @@
 - (BOOL)swipeTableView:(SwipeTableView *)swipeView shouldSelectItemAtIndex:(NSInteger)index;
 - (void)swipeTableView:(SwipeTableView *)swipeView didSelectItemAtIndex:(NSInteger)index;
 
-// pull to refresh
+
+/**
+ *  ①.在没有设置宏 #define ST_PULLTOREFRESH_HEADER_HEIGHT 的时候，想要通过自定义下拉刷新控件，并改写下拉刷新控件frame的方式支持下拉刷新。下面的两个方法必须实现。
+ *  ②.在定义了宏 #define ST_PULLTOREFRESH_HEADER_HEIGHT 的条件下，这两个方法可以灵活的调整每个item的下拉刷新有无，以及刷新控件的高度（RefreshHeader全部显露的高度）
+ */
 - (BOOL)swipeTableView:(SwipeTableView *)swipeTableView shouldPullToRefreshAtIndex:(NSInteger)index; // default is YES if defined ST_PULLTOREFRESH_HEADER_HEIGHT,otherwise is NO.
 - (CGFloat)swipeTableView:(SwipeTableView *)swipeTableView heightForRefreshHeaderAtIndex:(NSInteger)index; // default is ST_PULLTOREFRESH_HEADER_HEIGHT if defined ST_PULLTOREFRESH_HEADER_HEIGHT,otherwise is CGFLOAT_MAX(not set pull to refesh).
 
+@end
+
+
+
+@interface UIScrollView (SwipeTableView)
+@property (nonatomic, readonly, weak) SwipeTableView * swipeTableView;
 @end
 
