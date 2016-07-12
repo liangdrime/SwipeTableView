@@ -111,7 +111,7 @@
 @end
 
 
-
+/** Weak refrence of SwipeTableView for UIScrollView */
 @interface UIScrollView (SwipeTableView)
 @property (nonatomic, readonly, weak) SwipeTableView * swipeTableView;
 @end

@@ -12,7 +12,7 @@
 #import "STCollectionView.h"
 
 #if !__has_feature(objc_arc)
-#error SVProgressHUD is ARC only. Either turn on ARC for the project or use -fobjc-arc flag
+#error SwipeTableView is ARC only. Either turn on ARC for the project or use -fobjc-arc flag
 #endif
 
 @interface UICollectionViewCell (ScrollView)
@@ -788,6 +788,7 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     for (UIView * nextRes = self; nextRes; nextRes = nextRes.superview) {
         if ([nextRes isKindOfClass:SwipeTableView.class]) {
             SwipeTableView * swipeTableView = (SwipeTableView *)nextRes;
+            // weak refrence by runtime.
             objc_setAssociatedObject(self, "swipeTableView", swipeTableView, OBJC_ASSOCIATION_ASSIGN);
             [swipeTableView st_runAtDealloc:^{
                 objc_setAssociatedObject(self, "swipeTableView", nil, OBJC_ASSOCIATION_ASSIGN);

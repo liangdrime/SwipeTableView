@@ -348,7 +348,10 @@
     [self getDataAtIndex:swipeView.currentItemIndex];
 }
 
-// 定义了 #define ST_PULLTOREFRESH_HEADER_HEIGHT，可以根据需求实现代理，如果未定义，并自定义下拉刷新，需要实现此代理
+/** 
+ *  以下两个代理，在未定义宏 #define ST_PULLTOREFRESH_HEADER_HEIGHT，并自定义下拉刷新的时候，必须实现 
+ *  如果设置了下拉刷新的宏，以下代理可根据需要实现即可
+ */
 - (BOOL)swipeTableView:(SwipeTableView *)swipeTableView shouldPullToRefreshAtIndex:(NSInteger)index {
     return YES;
 }
