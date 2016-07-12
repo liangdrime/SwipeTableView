@@ -17,11 +17,18 @@ pod 'SwipeTableView'
 <br>
 # Introduction
 
-##基本实现的原理：
+1. [实现原理](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/README.md#实现原理)
+2. [基本用法](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/README.md#基本使用使用方式类似UITableView)
+3. [下拉刷新](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/README.md#下拉刷新问题)
+4. [混合模式](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/README.md#混合模式（UItableView & UICollectionView & UIScrollView）)
+5. [示例代码](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/README.md#**示例代码**)
+6. [Demo介绍](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/README.md#使用的详细用法在SwipeTableViewDemo文件夹中，提供了五种示例：)
+
+<br>
+##实现的原理：
 >为了兼容下拉刷新，采用了两种实现方式，但基本构造都是一样的
       
 ###Model 1
----
 
 ![Model 1](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/ScreenShots/SwipeTableViewStruct1.png)
 
@@ -41,7 +48,6 @@ pod 'SwipeTableView'
  
  
 ###Model 2
----
 
 ![Model 2](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/ScreenShots/SwipeTableViewStruct2.png)
 
@@ -52,6 +58,7 @@ pod 'SwipeTableView'
 2.如何设置区分`Model 1`与`Model 2`模式？
 >正常条件下即为`Model 1`模式；在`SwipeTableView.h`中或者在工程PCH文件中设置宏`#define ST_PULLTOREFRESH_HEADER_HEIGHT xx`设置为`Modle 2`模式。
 
+<br>
 # Basic Usage
 
 ##基本使用使用方式类似UITableView
