@@ -83,12 +83,12 @@ pod 'SwipeTableView'
 <br>
 ##下拉刷新问题
 
-*下拉刷新有两种实现方式，一种用户自定义下拉刷新组件（局部修改自定义），一种是简单粗暴设置宏：*
+###下拉刷新有两种实现方式，一种用户自定义下拉刷新组件（局部修改自定义），一种是简单粗暴设置宏：
 
 <br>
 
 
-**一行代码支持常用的下拉刷新控件，只需要在项目的PCH文件中或者在`SwipeTableView.h`文件中设置如下的宏即**
+####一行代码支持常用的下拉刷新控件，只需要在项目的PCH文件中或者在`SwipeTableView.h`文件中设置如下的宏：
  
 ```objc
  #define ST_PULLTOREFRESH_HEADER_HEIGHT xx   
@@ -113,11 +113,11 @@ pod 'SwipeTableView'
 >返回对应item下拉刷新的临界高度，如果没有实现此代理，在设置`#define ST_PULLTOREFRESH_HEADER_HEIGHT xx`的时候默认是`ST_PULLTOREFRESH_HEADER_HEIGHT`的高度。如果没有设置宏，并且想要自定义修改下拉刷新，必须实现此代理，提供下拉刷新控件RefreshHeader的高度（RefreshHeader全部露出的高度），来通知`SwipeTableView`触发下拉刷新。
 
 <br>
-**如果想要更好的扩展性，以及喜欢自己研究的同学，可以尝试修改或者自定义下拉控件来解决下拉刷新的兼容问题，同时这里提供一些思路：**
+####如果想要更好的扩展性，以及喜欢自己研究的同学，可以尝试修改或者自定义下拉控件来解决下拉刷新的兼容问题，同时这里提供一些思路：
 
-如果下拉刷新控件的frame是固定的（比如header的frame），这样可以在初始化下拉刷新的header后者在数据源的代理中重设下拉header的frame。
+如果下拉刷新控件的frame是固定的（比如header的frame），这样可以在初始化下拉刷新的header或者在数据源的代理中重设下拉header的frame。
  
->获取下拉刷新的header，将header的frame原点减去`swipeHeaderView`与`swipeHeaderBar`的高度和（或者重写RefreshHeader的setFrame方法），就可以消除itemView contentInsets顶部留白top值的影响（否则添加的下拉header是隐藏在底部的）。
+>获取下拉刷新的header，将header的frame的y值减去`swipeHeaderView`与`swipeHeaderBar`的高度和（或者重写RefreshHeader的setFrame方法），就可以消除itemView contentInsets顶部留白top值的影响（否则添加的下拉header是隐藏在底部的）。
  
 ```
 - (UIScrollView *)swipeTableView:(SwipeTableView *)swipeView viewForItemAtIndex:(NSInteger)index reusingView:(UIScrollView *)view {
@@ -174,7 +174,7 @@ or
 
 <br>
 ##**示例代码**：
-**初始化并设置header与bar**
+###初始化并设置header与bar
 ```objc
 self.swipeTableView = [[SwipeTableView alloc]initWithFrame:[UIScreen mainScreen].bounds];
 _swipeTableView.delegate = self;
@@ -184,7 +184,7 @@ _swipeTableView.swipeHeaderView = self.tableViewHeader;
 _swipeTableView.swipeHeaderBar = self.segmentBar;
 ```
    
-**实现数据源代理：**
+###实现数据源代理：
 ```objc
 - (NSInteger)numberOfItemsInSwipeTableView:(SwipeTableView *)swipeView {
     return 4;
@@ -204,7 +204,7 @@ _swipeTableView.swipeHeaderBar = self.segmentBar;
 }
 ```
    
-**`STCollectionView`使用方法：**
+###`STCollectionView`使用方法：
 ```objc
 MyCollectionView.h
 
@@ -281,8 +281,8 @@ MyCollectionView.m
 
 ```
 
->如果`STCollectionViewFlowLayout`已经不能满足`UICollectionView`的布局的话，用户自定义的`flowlayout`需要继承自`STCollectionViewFlowLayout`，并在重写相应方法的时候需要调用父类方法，并需要遵循一定规则，如下：
-
+**如果`STCollectionViewFlowLayout`已经不能满足`UICollectionView`的布局的话，用户自定义的`flowlayout`需要继承自`STCollectionViewFlowLayout`，并在重写相应方法的时候需要调用父类方法，并需要遵循一定规则，如下：**
+   
 
 ```objc
 - (void)prepareLayout {
