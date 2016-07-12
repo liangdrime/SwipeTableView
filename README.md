@@ -19,7 +19,9 @@ pod 'SwipeTableView'
 >为了兼容下拉刷新，采用了两种实现方式，但基本构造都是一样的
       
 #####Model 1
-![Model 1](https://github.com/Roylee-ML/SwipeTableView/blob/master/ScreenShots/SwipeTableViewStruct1.png)
+---
+
+![Model 1](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/ScreenShots/SwipeTableViewStrcut1.png)
 
  1. 使用`UICollectionView`作为item的载体，实现左右滑动的功能。
 
@@ -34,8 +36,12 @@ pod 'SwipeTableView'
  5. 由于header在图层的最顶部，所以要实现滑动header的同时使当前itemView跟随滚动，需要根据header的frame的变化回调给当前的itemView来改变contentOffset，同时也要具有ScrollView的弹性等效果。
  >这里采用`UIKit Dynamic`物理动画引擎自定义`STHeaderView`实现自定义`UIScrollView`效果解决上述问题 [`参考文章`](http://philcai.com/2016/03/15/%E7%94%A8UIKit-Dynamics%E6%A8%A1%E4%BB%BFUIScrollView/) [`英文博客`](http://holko.pl/2014/07/06/inertia-bouncing-rubber-banding-uikit-dynamics/)。
  
+ 
+ 
 #####Model 2
-![Model 1](https://github.com/Roylee-ML/SwipeTableView/blob/master/ScreenShots/SwipeTableViewStruct2.png)
+---
+
+![Model 1]https://github.com/Roylee-ML/SwipeTableView/blob/refresh/ScreenShots/SwipeTableViewStrcut2.png)
 
 1. 在`Model 2`中，基本结构与`Model 1`一样，唯一的不同在于每个itemView顶部留白的的方式。
 >通过设置`UITabelView`的`tableHeaderView`，来提供顶部的占位留白，CollectionView采用自定义`STCollectionView`的`collectionHeaderView`来实现占位留白。（目前不支持`UIScrollView`）
@@ -44,76 +50,115 @@ pod 'SwipeTableView'
 
 ## Basic Usage
 
-####基本使用使用方式类似UITableView
-1. 实现 `SwipeTableViewDataSource` 代理的两个方法：
+###基本使用使用方式类似UITableView
+**实现 `SwipeTableViewDataSource` 代理的两个方法：**
 
 ```
 - (NSInteger)numberOfItemsInSwipeTableView:(SwipeTableView *)swipeView     
 ```
 >返回列表item的个数
 
+---
+   
 ```
 - (UIScrollView *)swipeTableView:(SwipeTableView *)swipeView viewForItemAtIndex:(NSInteger)index reusingView:(UIScrollView *)view
 ```    
 >返回对应index下的itemView，返回的视图类型需要是`UIScrollView`及其子类：`UITableView`或者`UICollectionView`。这里采用重用机制，需要根据reusingView来创建单一的itemView。
 
-2. 使用的`swipeHeaderView`必须是`STHeaderView`及其子类的实例。
+---
 
-####下拉刷新问题
-#####下拉刷新有两种实现方式，一种用户自定义下拉刷新组件（局部修改自定义），一种是简单粗暴设置宏：
+**使用的`swipeHeaderView`必须是`STHeaderView`及其子类的实例。**
+ 
 
- **1. 一行代码支持常用的下拉刷新控件，只需要在项目的PCH文件中或者在`SwipeTableView.h`文件中设置如下的宏即可**
+###下拉刷新问题
+
+*下拉刷新有两种实现方式，一种用户自定义下拉刷新组件（局部修改自定义），一种是简单粗暴设置宏：*
+
+---
+
+
+**一行代码支持常用的下拉刷新控件，只需要在项目的PCH文件中或者在`SwipeTableView.h`文件中设置如下的宏即可**
  
 ```objc
-<!--#define ST_PULLTOREFRESH_HEADER_HEIGHT xx -->     
+#define ST_PULLTOREFRESH_HEADER_HEIGHT xx   
 ```
 
 >上述宏中的`xx`要与您使用的第三方下拉刷新控件的refreshHeader高度相同：      
 `MJRefresh` 为 `MJRefreshHeaderHeight`，`SVPullToRefresh` 为 `SVPullToRefreshViewHeight`（注：此时视图结构为`Model 2`）
 
- - 新增下拉刷新代理，可以控制每个item下拉临界高度，并自由控制每个item是否支持下拉刷新
+---
+
+新增下拉刷新代理，可以控制每个item下拉临界高度，并自由控制每个item是否支持下拉刷新
  
  ```objc
  - (BOOL)swipeTableView:(SwipeTableView *)swipeTableView shouldPullToRefreshAtIndex:(NSInteger)index
  ```
  >根据item所在index，设置item是否支持下拉刷新。默认是YES，全部支持。
  
+---
+ 
 ```objc
 - (CGFloat)swipeTableView:(SwipeTableView *)swipeTableView heightForRefreshHeaderAtIndex:(NSInteger)index
 ``` 
 >返回对应item下拉刷新的临界高度，如果没有实现此代理，在设置`#define ST_PULLTOREFRESH_HEADER_HEIGHT xx`的时候默认是`ST_PULLTOREFRESH_HEADER_HEIGHT`的高度。如果没有设置宏，并且想要自定义修改下拉刷新，必须实现此代理，提供下拉刷新控件RefreshHeader的高度（RefreshHeader全部露出的高度），来通知`SwipeTableView`触发下拉刷新。
 
- **2. 如果想要更好的扩展性，以及喜欢自己研究的同学，可以尝试修改或者自定义下拉控件来解决下拉刷新的兼容问题，同时这里提供一些思路：**
- - 如果下拉刷新控件的frame是固定的（比如header的frame），这样可以在初始化下拉刷新的header后者在数据源的代理中重设下拉header的frame。
+**如果想要更好的扩展性，以及喜欢自己研究的同学，可以尝试修改或者自定义下拉控件来解决下拉刷新的兼容问题，同时这里提供一些思路：**
+
+如果下拉刷新控件的frame是固定的（比如header的frame），这样可以在初始化下拉刷新的header后者在数据源的代理中重设下拉header的frame。
  >获取下拉刷新的header，将header的frame原点减去`swipeHeaderView`与`swipeHeaderBar`的高度和（或者重写RefreshHeader的setFrame方法），就可以消除itemView contentInsets顶部留白top值的影响（否则添加的下拉header是隐藏在底部的）。
  
 ```
-STRefreshHeader * header = scrollView.header;
-header.y = - (header.height + (swipeHeaderView.height + swipeHeaderBar.height)); 
+- (UIScrollView *)swipeTableView:(SwipeTableView *)swipeView viewForItemAtIndex:(NSInteger)index reusingView:(UIScrollView *)view {
+   ...
+   STRefreshHeader * header = scrollView.header;
+   header.y = - (header.height + (swipeHeaderView.height + swipeHeaderBar.height));
+   ...
+}
+ 
 
 or
 
-STRefreshHeader * header = [STRefreshHeader headerWithRefreshingBlock:^(STRefreshHeader *header) {
+
+- (instancetype)initWithFrame:(CGRect)frame {
+   ...
+   STRefreshHeader * header = [STRefreshHeader headerWithRefreshingBlock:^(STRefreshHeader *header) {
 
 }];
-header.y = - (header.height + (swipeHeaderView.height + swipeHeaderBar.height)); 
-scrollView.header = header;
+   header.y = - (header.height + (swipeHeaderView.height + swipeHeaderBar.height)); 
+   scrollView.header = header;
+   ...
+}
 ``` 
- - 如何判断下拉刷新的控件的frame是不是固定不变的呢？
+
+对于一些下拉刷新控件，RefreshHeader的frame设置可能会在`layoutSubviews`中，所以，对于RefreshHeader frame的修改需要在执行完`layouSubviews`后有效的方法中执行，比如：
+   
+   
+```objc
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
+    STRefreshHeader * header = self.header;
+    CGFloat orginY = - (header.height + self.swipeTableView.swipeHeaderView.height + self.swipeTableView.swipeHeaderBar.height);
+    if (header.y != orginY) {
+        header.y = orginY;
+    }
+}
+```
+
+如何判断下拉刷新的控件的frame是不是固定不变的呢？
  >一是可以研究源码查看RefreshHeader的frame是否固定不变；另一个简单的方式是，在ScrollView的滚动代理中log RefreshHeader的frame（大部分的下拉控件的frame都是固定的）。
- - 如果使用的下拉刷新控件的frame是变化的（个人感觉极少数），那么只能更深层的修改下拉刷新控件或者自定义下拉刷新。也可以更直接的采用第一种设置宏的方式支持下拉刷新。
+ 
+如果使用的下拉刷新控件的frame是变化的（个人感觉极少数），那么只能更深层的修改下拉刷新控件或者自定义下拉刷新。也可以更直接的采用第一种设置宏的方式支持下拉刷新。
  
 
-####混合模式（UItableView & UICollectionView & UIScrollView）
+###混合模式（UItableView & UICollectionView & UIScrollView）
 
-1.在`Model 1`模式下，属于最基本的模式，可扩展性也是最强的，此时，支持`UITableView`、`UICollectionView`、`UIScrollView`。如果，同时设置`shouldAdjustContentSize`为YES，实现自适应contentSize，在`UICollectionView`内容不足的添加下，只能使用`STCollectionView`及其子类
+1. 在`Model 1`模式下，属于最基本的模式，可扩展性也是最强的，此时，支持`UITableView`、`UICollectionView`、`UIScrollView`。如果，同时设置`shouldAdjustContentSize`为YES，实现自适应contentSize，在`UICollectionView`内容不足的添加下，只能使用`STCollectionView`及其子类
 
->`UICollectionView`不支持通过contentSize属性设置contentSize。
+   >`UICollectionView`不支持通过contentSize属性设置contentSize。
 
-2.在`Model 2`模式下，`SwipeTableView`支持的collectionView必须是`STCollectionView`及其子类的实例，目前，不支持`UIScrollView`。
+2. 在`Model 2`模式下，`SwipeTableView`支持的collectionView必须是`STCollectionView`及其子类的实例，目前，不支持`UIScrollView`。
 
-####**示例代码**：
-#####1. 初始化并设置header与bar
+###**示例代码**：
+**初始化并设置header与bar**
 ```objc
 self.swipeTableView = [[SwipeTableView alloc]initWithFrame:[UIScreen mainScreen].bounds];
 _swipeTableView.delegate = self;
@@ -123,7 +168,7 @@ _swipeTableView.swipeHeaderView = self.tableViewHeader;
 _swipeTableView.swipeHeaderBar = self.segmentBar;
 ```
    
-#####2. 实现数据源代理：
+**实现数据源代理：**
 ```objc
 - (NSInteger)numberOfItemsInSwipeTableView:(SwipeTableView *)swipeView {
     return 4;
@@ -143,7 +188,7 @@ _swipeTableView.swipeHeaderBar = self.segmentBar;
 }
 ```
    
-#####3. `STCollectionView`使用方法：
+**`STCollectionView`使用方法：**
 ```objc
 MyCollectionView.h
 
@@ -221,6 +266,7 @@ MyCollectionView.m
 ```
 
 >如果`STCollectionViewFlowLayout`已经不能满足`UICollectionView`的布局的话，用户自定义的`flowlayout`需要继承自`STCollectionViewFlowLayout`，并在重写相应方法的时候需要调用父类方法，并需要遵循一定规则，如下：
+
 
 ```objc
 - (void)prepareLayout {
