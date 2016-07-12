@@ -24,6 +24,14 @@
 void STSwizzleMethod(Class c, SEL origSEL, SEL newSEL);
 @end
 
+#pragma mark - Weak Refrence
+@interface STBlockExecutor : NSObject {
+    void(^_block)();
+}
+- (id)initWithBlock:(void(^)())aBlock;
+@end
+
+
 
 
 @interface SwipeTableView ()<UICollectionViewDelegate,UICollectionViewDataSource,UIScrollViewDelegate,STHeaderViewDelegate>
@@ -78,11 +86,11 @@ void STSwizzleMethod(Class c, SEL origSEL, SEL newSEL);
 
 @end
 
-static NSString * const SwipeContentViewCellIdfy               = @"SwipeContentViewCellIdfy";
-static const void *SwipeTableViewItemTopInsetKey               = &SwipeTableViewItemTopInsetKey;
-static void * SwipeTableViewItemContentOffsetContext           = &SwipeTableViewItemContentOffsetContext;
-static void * SwipeTableViewItemContentSizeContext             = &SwipeTableViewItemContentSizeContext;
-static void * SwipeTableViewItemPanGestureContext              = &SwipeTableViewItemPanGestureContext;
+static NSString * const SwipeContentViewCellIdfy       = @"SwipeContentViewCellIdfy";
+static const void *SwipeTableViewItemTopInsetKey       = &SwipeTableViewItemTopInsetKey;
+static void * SwipeTableViewItemContentOffsetContext   = &SwipeTableViewItemContentOffsetContext;
+static void * SwipeTableViewItemContentSizeContext     = &SwipeTableViewItemContentSizeContext;
+static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanGestureContext;
 
 @implementation SwipeTableView
 
@@ -723,12 +731,38 @@ static void * SwipeTableViewItemPanGestureContext              = &SwipeTableView
     }
     [self setContentMinSizeQuene:nil];
     [self setContentOffsetQuene:nil];
+    
+}
+
+- (void)st_runAtDealloc:(void(^)())deallocBlock {
+    if (deallocBlock) {
+        STBlockExecutor * executor = [[STBlockExecutor alloc]initWithBlock:deallocBlock];
+        const void * key = &executor;
+        objc_setAssociatedObject(self,
+                                 key,
+                                 executor,
+                                 OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    }
 }
 
 @end
 
 
 
+
+@implementation STBlockExecutor
+- (id)initWithBlock:(void(^)())aBlock {
+    self = [super init];
+    if (self) {
+        _block = [aBlock copy];
+    }
+    return self;
+}
+
+- (void)dealloc {
+    _block ? _block() : nil;
+}
+@end
 
 
 @implementation UICollectionViewCell (ScrollView)
@@ -753,7 +787,11 @@ static void * SwipeTableViewItemPanGestureContext              = &SwipeTableView
     }
     for (UIView * nextRes = self; nextRes; nextRes = nextRes.superview) {
         if ([nextRes isKindOfClass:SwipeTableView.class]) {
-            objc_setAssociatedObject(self, "swipeTableView", nextRes, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+            SwipeTableView * swipeTableView = (SwipeTableView *)nextRes;
+            objc_setAssociatedObject(self, "swipeTableView", swipeTableView, OBJC_ASSOCIATION_ASSIGN);
+            [swipeTableView st_runAtDealloc:^{
+                objc_setAssociatedObject(self, "swipeTableView", nil, OBJC_ASSOCIATION_ASSIGN);
+            }];
             return (SwipeTableView *)nextRes;
         }
     }

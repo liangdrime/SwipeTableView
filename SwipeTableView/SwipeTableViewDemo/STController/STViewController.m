@@ -333,7 +333,7 @@
     }
     
     // 自定义下拉刷新header的frame处理
-    [self configRefreshForItem:view];
+    [self configRefreshHeaderForItem:view];
     
     return view;
 }
@@ -359,9 +359,9 @@
 
 /** 
  *  采用自定义修改下拉刷新，此时不会定义宏 #define ST_PULLTOREFRESH_HEADER_HEIGHT 
- *  对于一些下拉刷新控件，可能会在layouSubViews中设置RefreshHeader的frame。所以，需要在itemView中有效的方法中改变RefreshHeader的frame，如 `scrollViewDidScroll:`
+ *  对于一些下拉刷新控件，可能会在`layouSubViews`中设置RefreshHeader的frame。所以，需要在itemView有效的方法中改变RefreshHeader的frame，如 `scrollViewDidScroll:`
  */
-- (void)configRefreshForItem:(UIScrollView *)itemView {
+- (void)configRefreshHeaderForItem:(UIScrollView *)itemView {
 #if !defined(ST_PULLTOREFRESH_HEADER_HEIGHT)
     STRefreshHeader * header = itemView.header;
     header.y = - (header.height + (_segmentBar.height + _headerImageView.height));
