@@ -214,6 +214,13 @@ static void * STHeaderViewPanGestureRecognizerStateContext = &STHeaderViewPanGes
     if (!CGRectContainsPoint(self.bounds, point)) {
         [self endDecelerating];
     }
+    // tap inside of the header view
+    else {
+        // return self to response this event,when the header is decelerating.
+        if (self.isDecelerating) {
+            return self;
+        }
+    }
     return view;
 }
 
