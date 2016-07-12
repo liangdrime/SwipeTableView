@@ -88,7 +88,7 @@ pod 'SwipeTableView'
 <br>
 
 
-**一行代码支持常用的下拉刷新控件，只需要在项目的PCH文件中或者在`SwipeTableView.h`文件中设置如下的宏即可**
+<div style="color:#ffa54f;font-weight:900">一行代码支持常用的下拉刷新控件，只需要在项目的PCH文件中或者在`SwipeTableView.h`文件中设置如下的宏即可</div>
  
 ```objc
  #define ST_PULLTOREFRESH_HEADER_HEIGHT xx   
