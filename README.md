@@ -41,7 +41,7 @@ pod 'SwipeTableView'
 #####Model 2
 ---
 
-![Model 1]https://github.com/Roylee-ML/SwipeTableView/blob/refresh/ScreenShots/SwipeTableViewStruct2.png)
+![Model 2](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/ScreenShots/SwipeTableViewStruct2.png)
 
 1. 在`Model 2`中，基本结构与`Model 1`一样，唯一的不同在于每个itemView顶部留白的的方式。
 >通过设置`UITabelView`的`tableHeaderView`，来提供顶部的占位留白，CollectionView采用自定义`STCollectionView`的`collectionHeaderView`来实现占位留白。（目前不支持`UIScrollView`）
