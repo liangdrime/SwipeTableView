@@ -91,7 +91,7 @@ pod 'SwipeTableView'
 **一行代码支持常用的下拉刷新控件，只需要在项目的PCH文件中或者在`SwipeTableView.h`文件中设置如下的宏即可**
  
 ```objc
-<!--#define ST_PULLTOREFRESH_HEADER_HEIGHT xx-->   
+ #define ST_PULLTOREFRESH_HEADER_HEIGHT xx   
 ```
 
 >上述宏中的`xx`要与您使用的第三方下拉刷新控件的refreshHeader高度相同：      
