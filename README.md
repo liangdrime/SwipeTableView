@@ -17,11 +17,11 @@ pod 'SwipeTableView'
 <br>
 # Introduction
 
-1. [实现原理](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/README.md#实现原理)
+1. [实现原理](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/README.md#实现的原理：)
 2. [基本用法](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/README.md#基本使用使用方式类似UITableView)
 3. [下拉刷新](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/README.md#下拉刷新问题)
 4. [混合模式](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/README.md#混合模式（UItableView & UICollectionView & UIScrollView）)
-5. [示例代码](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/README.md#**示例代码**)
+5. [示例代码](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/README.md#示例代码)
 6. [Demo介绍](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/README.md#使用的详细用法在SwipeTableViewDemo文件夹中，提供了五种示例：)
 
 <br>
