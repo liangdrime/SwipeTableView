@@ -18,8 +18,8 @@ pod 'SwipeTableView'
 # Introduction
 
 1. [实现原理](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/README.md#实现的原理)
-2. [基本用法](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/README.md#使用方式类似uitableview)
-3. [下拉刷新](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/README.md#下拉刷新问题)
+2. [基本用法](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/README.md#怎样使用使用方式类似uitableview)
+3. [下拉刷新](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/README.md#如何支持下拉刷新)
 4. [混合模式](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/README.md#混合模式uitableview--uicollectionview--uiscrollview)
 5. [示例代码](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/README.md#示例代码)
 6. [Demo介绍](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/README.md#使用的详细用法在swipetableviewdemo文件夹中提供了五种示例)
@@ -61,7 +61,7 @@ pod 'SwipeTableView'
 <br>
 # Basic Usage
 
-##使用方式类似UITableView
+##怎样使用？使用方式类似UITableView
 
 **实现 `SwipeTableViewDataSource` 代理的两个方法：**
 
@@ -81,7 +81,7 @@ pod 'SwipeTableView'
 **使用的`swipeHeaderView`必须是`STHeaderView`及其子类的实例。**
  
 <br>
-##下拉刷新问题
+##如何支持下拉刷新？
 
 ###下拉刷新有两种实现方式，一种用户自定义下拉刷新组件（局部修改自定义），一种是简单粗暴设置宏：
 
