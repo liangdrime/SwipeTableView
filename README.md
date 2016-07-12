@@ -25,7 +25,7 @@ pod 'SwipeTableView'
 6. [Demo介绍](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/README.md#使用的详细用法在SwipeTableViewDemo文件夹中，提供了五种示例：)
 
 <br>
-##实现的原理：
+##[TOC]实现的原理：
 >为了兼容下拉刷新，采用了两种实现方式，但基本构造都是一样的
       
 ###Model 1
