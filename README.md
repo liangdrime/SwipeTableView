@@ -88,10 +88,10 @@ pod 'SwipeTableView'
 <br>
 
 
-####一行代码支持常用的下拉刷新控件，只需要在项目的PCH文件中或者在`SwipeTableView.h`文件中设置如下的宏：
+**1. 一行代码支持常用的下拉刷新控件，只需要在项目的PCH文件中或者在`SwipeTableView.h`文件中设置如下的宏：**
  
 ```objc
- #define ST_PULLTOREFRESH_HEADER_HEIGHT xx   
+#define ST_PULLTOREFRESH_HEADER_HEIGHT xx   
 ```
 
 >上述宏中的`xx`要与您使用的第三方下拉刷新控件的refreshHeader高度相同：      
@@ -101,19 +101,19 @@ pod 'SwipeTableView'
 
 新增下拉刷新代理，可以控制每个item下拉临界高度，并自由控制每个item是否支持下拉刷新
  
- ```objc
- - (BOOL)swipeTableView:(SwipeTableView *)swipeTableView shouldPullToRefreshAtIndex:(NSInteger)index
- ```
- >根据item所在index，设置item是否支持下拉刷新。默认是YES，全部支持。
+```objc
+- (BOOL)swipeTableView:(SwipeTableView *)swipeTableView shouldPullToRefreshAtIndex:(NSInteger)index
+```
+ >根据item所在index，设置item是否支持下拉刷新。**在设置`#define ST_PULLTOREFRESH_HEADER_HEIGHT xx`的时候默认是YES（全部支持），否则默认为NO。**
  
  
 ```objc
 - (CGFloat)swipeTableView:(SwipeTableView *)swipeTableView heightForRefreshHeaderAtIndex:(NSInteger)index
 ``` 
->返回对应item下拉刷新的临界高度，如果没有实现此代理，在设置`#define ST_PULLTOREFRESH_HEADER_HEIGHT xx`的时候默认是`ST_PULLTOREFRESH_HEADER_HEIGHT`的高度。如果没有设置宏，并且想要自定义修改下拉刷新，必须实现此代理，提供下拉刷新控件RefreshHeader的高度（RefreshHeader全部露出的高度），来通知`SwipeTableView`触发下拉刷新。
+>返回对应item下拉刷新的临界高度，如果没有实现此代理，在设置`#define ST_PULLTOREFRESH_HEADER_HEIGHT xx`的时候默认是`ST_PULLTOREFRESH_HEADER_HEIGHT`的高度。**如果没有设置宏，并且想要自定义修改下拉刷新，必须实现此代理，提供下拉刷新控件RefreshHeader的高度（RefreshHeader全部露出的高度），来通知`SwipeTableView`触发下拉刷新。**
 
 <br>
-####如果想要更好的扩展性，以及喜欢自己研究的同学，可以尝试修改或者自定义下拉控件来解决下拉刷新的兼容问题，同时这里提供一些思路：
+**2. 如果想要更好的扩展性，以及喜欢自己研究的同学，可以尝试修改或者自定义下拉控件来解决下拉刷新的兼容问题，同时这里提供一些思路：**
 
 如果下拉刷新控件的frame是固定的（比如header的frame），这样可以在初始化下拉刷新的header或者在数据源的代理中重设下拉header的frame。
  
@@ -142,7 +142,7 @@ or
 }
 ``` 
 
-对于一些下拉刷新控件，RefreshHeader的frame设置可能会在`layoutSubviews`中，所以，对于RefreshHeader frame的修改需要在执行完`layouSubviews`后有效的方法中执行，比如：
+对于一些下拉刷新控件，RefreshHeader的frame设置可能会在`layoutSubviews`中，所以，对RefreshHeader frame的修改,需要等执行完`layouSubviews`之后，在 <u>*有效的方法*</u> 中操作，比如：
    
    
 ```objc
@@ -166,11 +166,11 @@ or
 <br>
 ##混合模式（UItableView & UICollectionView & UIScrollView）
 
-1. 在`Model 1`模式下，属于最基本的模式，可扩展性也是最强的，此时，支持`UITableView`、`UICollectionView`、`UIScrollView`。如果，同时设置`shouldAdjustContentSize`为YES，实现自适应contentSize，在`UICollectionView`内容不足的添加下，只能使用`STCollectionView`及其子类
+1. 在`Model 1`模式下，属于最基本的模式，可扩展性也是最强的，此时，支持`UITableView`、`UICollectionView`、`UIScrollView`。**如果，同时设置`shouldAdjustContentSize`为YES，实现自适应contentSize，在`UICollectionView`内容不足的添加下，只能使用`STCollectionView`及其子类**
    
-   >`UICollectionView`不支持通过contentSize属性设置contentSize。
+   >**`UICollectionView`不支持通过contentSize属性设置contentSize。**
 
-2. 在`Model 2`模式下，`SwipeTableView`支持的collectionView必须是`STCollectionView`及其子类的实例，目前，不支持`UIScrollView`。
+2. 在`Model 2`模式下，**`SwipeTableView`支持的collectionView必须是`STCollectionView`及其子类的实例**，目前，不支持`UIScrollView`。
 
 <br>
 ##**示例代码**：
