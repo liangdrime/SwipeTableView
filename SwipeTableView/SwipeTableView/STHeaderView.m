@@ -68,16 +68,28 @@ static void * STHeaderViewPanGestureRecognizerStateContext = &STHeaderViewPanGes
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
-        // pan gesture
-        self.panGestureRecognizer = [[UIPanGestureRecognizer alloc]initWithTarget:self action:@selector(handlePanGesture:)];
-        [self addGestureRecognizer:_panGestureRecognizer];
-        [self.panGestureRecognizer addObserver:self forKeyPath:@"state" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:STHeaderViewPanGestureRecognizerStateContext];
-        // animator
-        self.animator = [[UIDynamicAnimator alloc]initWithReferenceView:self];
-        self.animator.delegate = self;
-        self.dynamicItem = [[STDynamicItem alloc]init];
+        [self commonInit];
     }
     return self;
+}
+
+- (instancetype)initWithCoder:(NSCoder *)aDecoder {
+    self = [super initWithCoder:aDecoder];
+    if (self) {
+        [self commonInit];
+    }
+    return self;
+}
+
+- (void)commonInit {
+    // pan gesture
+    self.panGestureRecognizer = [[UIPanGestureRecognizer alloc]initWithTarget:self action:@selector(handlePanGesture:)];
+    [self addGestureRecognizer:_panGestureRecognizer];
+    [self.panGestureRecognizer addObserver:self forKeyPath:@"state" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:STHeaderViewPanGestureRecognizerStateContext];
+    // animator
+    self.animator = [[UIDynamicAnimator alloc]initWithReferenceView:self];
+    self.animator.delegate = self;
+    self.dynamicItem = [[STDynamicItem alloc]init];
 }
 
 - (void)handlePanGesture:(UIPanGestureRecognizer *)panGestureRecognizer {

@@ -498,28 +498,32 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 #if !defined(ST_PULLTOREFRESH_HEADER_HEIGHT)
             CGFloat topMarginOffset    = _swipeHeaderTopInset + _barInset;
             // stick the bar
-            if (_swipeHeaderBar) {
-                if (newOffsetY < - topMarginOffset) {
-                    _swipeHeaderBar.bottom  = fabs(newOffsetY);
+            if (newOffsetY < - topMarginOffset) {
+                if (_swipeHeaderBar) {
+                    _swipeHeaderBar.bottom  = - newOffsetY;
                     _swipeHeaderView.bottom = _swipeHeaderBar.top;
                 }else {
-                    _swipeHeaderBar.bottom  = topMarginOffset;
-                    _swipeHeaderView.bottom = - (newOffsetY + _barInset);
+                    _swipeHeaderView.bottom = - newOffsetY;
                 }
             }else {
-                _swipeHeaderView.bottom = - newOffsetY;
+                _swipeHeaderBar.bottom  = topMarginOffset;
+                // 'fmax' is used to fix the bug below iOS8.3 : the position of the bar will not correct when the swipeHeaderView is outside of the screen. 
+                _swipeHeaderView.bottom = fmax(- (newOffsetY + _barInset), 0);
             }
 #else
             CGFloat topMarginOffset   = _headerInset - _swipeHeaderTopInset;
-            UIView * headerTopView    = _swipeHeaderView?_swipeHeaderView:_swipeHeaderBar;
-            
-            headerTopView.top = - newOffsetY;
-            if (newOffsetY > topMarginOffset) {
-                _swipeHeaderBar.top = _swipeHeaderTopInset;
-            }else {
+            // stick the bar
+            if (newOffsetY < topMarginOffset) {
                 if (_swipeHeaderView) {
-                    _swipeHeaderBar.top = _swipeHeaderView.bottom;
+                    _swipeHeaderView.top = - newOffsetY;
+                    _swipeHeaderBar.top  = _swipeHeaderView.bottom;
+                }else {
+                    _swipeHeaderBar.top  = - newOffsetY;
                 }
+            }else {
+                _swipeHeaderBar.top  = _swipeHeaderTopInset;
+                // 'fmax' is used to fix the bug below iOS8.3 : the position of the bar will not correct when the swipeHeaderView is outside of the screen.
+                _swipeHeaderView.top = fmax(- newOffsetY, - _headerInset);
             }
 #endif
         }

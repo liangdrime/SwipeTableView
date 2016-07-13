@@ -267,10 +267,17 @@ static void * STRefreshcontentInsetContext              = &STRefreshcontentInset
                 self.state = STRefreshStateWillRefesh;
             }
         }
-        // 松手
+        // 松手刷新 或 返回
         else {
             if (self.state == STRefreshStateWillRefesh) {
                 [self beganRefreshing];
+            }else if (self.state != STRefreshStateNormal) {
+                
+                CGFloat pullPercent = fmin(moveOffsetY/kSTRefreshHeaderHeight, 1);
+                _circleLayer.strokeEnd = pullPercent;
+                _contentView.alpha = pullPercent;
+                _headerImageV.transform = CGAffineTransformMakeRotation(pullPercent * M_PI);
+                
             }
         }
     }
