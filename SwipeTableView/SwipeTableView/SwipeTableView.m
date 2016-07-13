@@ -25,9 +25,8 @@ void STSwizzleMethod(Class c, SEL origSEL, SEL newSEL);
 @end
 
 #pragma mark - Weak Refrence
-@interface STBlockExecutor : NSObject {
-    void(^_block)();
-}
+@interface STBlockExecutor : NSObject
+@property (nonatomic, copy) void(^block)();
 - (id)initWithBlock:(void(^)())aBlock;
 @end
 
@@ -754,7 +753,7 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 - (id)initWithBlock:(void(^)())aBlock {
     self = [super init];
     if (self) {
-        _block = [aBlock copy];
+        self.block = aBlock;
     }
     return self;
 }
