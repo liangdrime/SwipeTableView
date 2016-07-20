@@ -33,9 +33,9 @@ pod 'SwipeTableView'
 ##实现的原理
 >为了兼容下拉刷新，采用了两种实现方式，但基本构造都是一样的
       
-###Model 1
+###Mode 1
 
-![Model 1](https://github.com/Roylee-ML/SwipeTableView/blob/master/ScreenShots/SwipeTableViewStruct1.png)
+![Mode 1](https://github.com/Roylee-ML/SwipeTableView/blob/master/ScreenShots/SwipeTableViewStruct1.png)
    
 1. 使用`UICollectionView`作为item的载体，实现左右滑动的功能。
 
@@ -52,9 +52,9 @@ pod 'SwipeTableView'
  
  
  
-###Model 2
+###Mode 2
 
-![Model 2](https://github.com/Roylee-ML/SwipeTableView/blob/master/ScreenShots/SwipeTableViewStruct2.png)
+![Mode 2](https://github.com/Roylee-ML/SwipeTableView/blob/master/ScreenShots/SwipeTableViewStruct2.png)
 
 1. 在`Model 2`中，基本结构与`Model 1`一样，唯一的不同在于每个itemView顶部留白的的方式。
 >通过设置`UITabelView`的`tableHeaderView`，来提供顶部的占位留白，CollectionView采用自定义`STCollectionView`的`collectionHeaderView`来实现占位留白。（目前不支持`UIScrollView`）
