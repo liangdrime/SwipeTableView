@@ -226,6 +226,8 @@
 
 - (void)changeSwipeViewIndex:(UISegmentedControl *)seg {
     [_swipeTableView scrollToItemAtIndex:seg.selectedSegmentIndex animated:NO];
+    // request data
+    [self getDataAtIndex:seg.selectedSegmentIndex];
 }
 
 #pragma mark - Data Reuqest
