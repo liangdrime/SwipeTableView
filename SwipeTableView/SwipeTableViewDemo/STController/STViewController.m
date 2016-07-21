@@ -21,9 +21,6 @@
 @interface STViewController ()<SwipeTableViewDataSource,SwipeTableViewDelegate,UIGestureRecognizerDelegate,UIViewControllerTransitioningDelegate>
 
 @property (nonatomic, strong) SwipeTableView * swipeTableView;
-@property (nonatomic, assign) BOOL isJustOneKindOfClassView;
-@property (nonatomic, assign) BOOL shouldHiddenNavigationBar;
-@property (nonatomic, assign) BOOL swipeBarScrollDisabled;
 @property (nonatomic, strong) STHeaderView * tableViewHeader;
 @property (nonatomic, strong) CustomSegmentControl * segmentBar;
 @property (nonatomic, strong) CustomTableView * tableView;
@@ -37,16 +34,19 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    BOOL disableBarScroll = _type == STControllerTypeDisableBarScroll;
+    BOOL hiddenNavigationBar = _type == STControllerTypeHiddenNavBar;
+    
     // init swipetableview
     self.swipeTableView = [[SwipeTableView alloc]initWithFrame:self.view.bounds];
     _swipeTableView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     _swipeTableView.delegate = self;
     _swipeTableView.dataSource = self;
-    _swipeTableView.shouldAdjustContentSize = !_isJustOneKindOfClassView;
-    _swipeTableView.swipeHeaderView = _swipeBarScrollDisabled?nil:self.tableViewHeader;
+    _swipeTableView.shouldAdjustContentSize = YES;
+    _swipeTableView.swipeHeaderView = disableBarScroll?nil:self.tableViewHeader;
     _swipeTableView.swipeHeaderBar = self.segmentBar;
-    _swipeTableView.swipeHeaderBarScrollDisabled = _swipeBarScrollDisabled;
-    if (_shouldHiddenNavigationBar) {
+    _swipeTableView.swipeHeaderBarScrollDisabled = disableBarScroll;
+    if (hiddenNavigationBar) {
         _swipeTableView.swipeHeaderTopInset = 0;
     }
     [self.view addSubview:_swipeTableView];
@@ -54,18 +54,18 @@
     // nav bar
     UIBarButtonItem * rightBarItem = [[UIBarButtonItem alloc]initWithTitle:@"- Header" style:UIBarButtonItemStylePlain target:self action:@selector(setSwipeTableHeader:)];
     UIBarButtonItem * leftBarItem = [[UIBarButtonItem alloc]initWithTitle:@"- Bar" style:UIBarButtonItemStylePlain target:self action:@selector(setSwipeTableBar:)];
-    self.navigationItem.leftBarButtonItem = _swipeBarScrollDisabled?nil:leftBarItem;
-    self.navigationItem.rightBarButtonItem = _swipeBarScrollDisabled?nil:rightBarItem;
+    self.navigationItem.leftBarButtonItem = disableBarScroll?nil:leftBarItem;
+    self.navigationItem.rightBarButtonItem = disableBarScroll?nil:rightBarItem;
     
     // back bt
     UIButton * back = [UIButton buttonWithType:UIButtonTypeCustom];
     back.frame = CGRectMake(10, 0, 40, 40);
-    back.top = _shouldHiddenNavigationBar?25:74;
+    back.top = hiddenNavigationBar?25:74;
     back.backgroundColor = RGBColorAlpha(10, 202, 0, 0.95);
     back.layer.cornerRadius = back.height/2;
     back.layer.masksToBounds = YES;
     back.titleLabel.font = [UIFont boldSystemFontOfSize:14];
-    back.hidden = _swipeBarScrollDisabled;
+    back.hidden = disableBarScroll;
     [back setTitle:@"Back" forState:UIControlStateNormal];
     [back setTitleColor:RGBColor(255, 255, 215) forState:UIControlStateNormal];
     [back addTarget:self action:@selector(back) forControlEvents:UIControlEventTouchUpInside];
@@ -226,6 +226,8 @@
 
 - (void)changeSwipeViewIndex:(UISegmentedControl *)seg {
     [_swipeTableView scrollToItemAtIndex:seg.selectedSegmentIndex animated:NO];
+    // request data at current index
+    [self getDataAtIndex:seg.selectedSegmentIndex];
 }
 
 #pragma mark - Data Reuqest
@@ -365,6 +367,10 @@
  *  对于一些下拉刷新控件，可能会在`layouSubViews`中设置RefreshHeader的frame。所以，需要在itemView有效的方法中改变RefreshHeader的frame，如 `scrollViewDidScroll:`
  */
 - (void)configRefreshHeaderForItem:(UIScrollView *)itemView {
+    if (_type == STControllerTypeDisableBarScroll) {
+        itemView.header = nil;
+        return;
+    }
 #if !defined(ST_PULLTOREFRESH_HEADER_HEIGHT)
     STRefreshHeader * header = itemView.header;
     header.y = - (header.height + (_segmentBar.height + _headerImageView.height));
@@ -386,7 +392,7 @@
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
-    [self.navigationController setNavigationBarHidden:_shouldHiddenNavigationBar animated:animated];
+    [self.navigationController setNavigationBarHidden:_type == STControllerTypeHiddenNavBar animated:animated];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
