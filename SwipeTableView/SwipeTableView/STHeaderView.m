@@ -104,7 +104,7 @@ static void * STHeaderViewPanGestureRecognizerStateContext = &STHeaderViewPanGes
             // change offset and add RubberBanding effect
         case UIGestureRecognizerStateChanged:
         {
-            self.tracking = NO;
+            self.tracking = YES;
             self.dragging = YES;
             CGRect frame  = self.frame;
             CGPoint translation = [panGestureRecognizer translationInView:self.superview];

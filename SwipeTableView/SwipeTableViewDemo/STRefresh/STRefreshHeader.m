@@ -256,7 +256,7 @@ static void * STRefreshcontentInsetContext              = &STRefreshcontentInset
             CGFloat pullPercent = fmin(moveOffsetY/kSTRefreshHeaderHeight, 1);
             _circleLayer.strokeEnd = pullPercent;
             _contentView.alpha = pullPercent;
-            _headerImageV.transform = CGAffineTransformMakeRotation(pullPercent * M_PI);
+            _headerImageV.transform = CGAffineTransformMakeRotation(pullPercent * (M_PI - 0.001));
             
             if (self.state == STRefreshStateRefeshing) {
                 return;
@@ -276,7 +276,7 @@ static void * STRefreshcontentInsetContext              = &STRefreshcontentInset
                 CGFloat pullPercent = fmin(moveOffsetY/kSTRefreshHeaderHeight, 1);
                 _circleLayer.strokeEnd = pullPercent;
                 _contentView.alpha = pullPercent;
-                _headerImageV.transform = CGAffineTransformMakeRotation(pullPercent * M_PI);
+                _headerImageV.transform = CGAffineTransformMakeRotation(pullPercent * (M_PI - 0.001));
                 
             }
         }
@@ -319,7 +319,7 @@ static void * STRefreshcontentInsetContext              = &STRefreshcontentInset
         self.contentView.centerY = self.height;
         self.contentView.alpha = 0;
         self.circleLayer.strokeEnd = 0;
-        self.headerImageV.transform = CGAffineTransformRotate(self.headerImageV.transform, - M_PI);
+        self.headerImageV.transform = CGAffineTransformIdentity;
         
     } completion:^(BOOL finished) {
         
