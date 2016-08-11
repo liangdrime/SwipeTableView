@@ -80,10 +80,10 @@
     _dataDic = [@{} mutableCopy];
     
     // 根据滚动后的下标请求数据
-    [self getDataAtIndex:0];
+//    [self getDataAtIndex:0];
     
     // 一次性请求所有item的数据
-//    [self getAllData];
+    [self getAllData];
 }
 
 - (UIScreenEdgePanGestureRecognizer *)screenEdgePanGestureRecognizer {
@@ -334,7 +334,7 @@
             break;
     }
     
-    // 自定义下拉刷新header的frame处理
+    // 在没有设定下拉刷新宏的条件下，自定义的下拉刷新需要做 refreshheader 的 frame 处理
     [self configRefreshHeaderForItem:view];
     
     return view;
