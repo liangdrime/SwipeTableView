@@ -8,7 +8,9 @@
 
 # Overview
 
-![Demo OverView1](https://github.com/Roylee-ML/SwipeTableView/blob/master/ScreenShots/screenshot1.gif)  ![Demo OverView2](https://github.com/Roylee-ML/SwipeTableView/blob/master/ScreenShots/screenshot2.gif)  ![Demo OverView2](https://github.com/Roylee-ML/SwipeTableView/blob/master/ScreenShots/screenshot3.gif)
+<img src="https://github.com/Roylee-ML/SwipeTableView/blob/master/ScreenShots/screenshot1.gif" width = "280" height = "500" alt="Demo OverView1" align=center />
+<img src="https://github.com/Roylee-ML/SwipeTableView/blob/master/ScreenShots/screenshot1.gif" width = "280" height = "500" alt="Demo OverView1" align=center />
+<img src="https://github.com/Roylee-ML/SwipeTableView/blob/master/ScreenShots/screenshot1.gif" width = "280" height = "500" alt="Demo OverView1" align=center />
 
 <br>
 # Quick start 
