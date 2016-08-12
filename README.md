@@ -22,12 +22,12 @@ pod 'SwipeTableView'
 <br>
 # Introduction
 
-1. [实现原理](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/README.md#实现的原理)
-2. [基本用法](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/README.md#怎样使用使用方式类似uitableview)
-3. [下拉刷新](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/README.md#如何支持下拉刷新)
-4. [混合模式](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/README.md#混合模式uitableview--uicollectionview--uiscrollview)
-5. [示例代码](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/README.md#示例代码)
-6. [Demo介绍](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/README.md#使用的详细用法在swipetableviewdemo文件夹中提供了五种示例)
+1. [实现原理](https://github.com/Roylee-ML/SwipeTableView/blob/master/README.md#实现的原理)
+2. [基本用法](https://github.com/Roylee-ML/SwipeTableView/blob/master/README.md#怎样使用使用方式类似uitableview)
+3. [下拉刷新](https://github.com/Roylee-ML/SwipeTableView/blob/master/README.md#如何支持下拉刷新)
+4. [混合模式](https://github.com/Roylee-ML/SwipeTableView/blob/master/README.md#混合模式uitableview--uicollectionview--uiscrollview)
+5. [示例代码](https://github.com/Roylee-ML/SwipeTableView/blob/master/README.md#示例代码)
+6. [Demo介绍](https://github.com/Roylee-ML/SwipeTableView/blob/master/README.md#使用的详细用法在swipetableviewdemo文件夹中提供了五种示例)
 
 <br>
 ##实现的原理

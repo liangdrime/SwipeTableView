@@ -22,12 +22,12 @@ pod 'SwipeTableView'
 <br>
 # Introduction
 
-1. [Principle](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/README_EN.md#Principle)
-2. [Base Usage](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/README_EN.md#How-to-use-it-Just-like-uitableview)
-3. [Pull To Refresh](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/README_EN.md#How-to-support-pull-to-refersh)
-4. [Hybrid Items](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/README_EN.md#Hybriduitableview--uicollectionview--uiscrollview)
-5. [Example Code](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/README_EN.md#example-code)
-6. [Demo Info](https://github.com/Roylee-ML/SwipeTableView/blob/refresh/README_EN.md#Detailed-usages-are-in-the-swipeTableViewDemo-folder-provide-five-examples)
+1. [Principle](https://github.com/Roylee-ML/SwipeTableView/blob/master/README_EN.md#Principle)
+2. [Base Usage](https://github.com/Roylee-ML/SwipeTableView/blob/master/README_EN.md#How-to-use-it-Just-like-uitableview)
+3. [Pull To Refresh](https://github.com/Roylee-ML/SwipeTableView/blob/master/README_EN.md#How-to-support-pull-to-refersh)
+4. [Hybrid Items](https://github.com/Roylee-ML/SwipeTableView/blob/master/README_EN.md#Hybriduitableview--uicollectionview--uiscrollview)
+5. [Example Code](https://github.com/Roylee-ML/SwipeTableView/blob/master/README_EN.md#example-code)
+6. [Demo Info](https://github.com/Roylee-ML/SwipeTableView/blob/master/README_EN.md#Detailed-usages-are-in-the-swipeTableViewDemo-folder-provide-five-examples)
 
 <br>
 ##Principle
