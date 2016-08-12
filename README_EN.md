@@ -8,7 +8,9 @@ This component support the UITableview scroll up and down, and both support swit
 
 # Overview
 
-![Demo OverView1](https://github.com/Roylee-ML/SwipeTableView/blob/master/ScreenShots/screenshot1.gif)      ![Demo OverView2](https://github.com/Roylee-ML/SwipeTableView/blob/master/ScreenShots/screenshot2.gif)
+<img src="https://github.com/Roylee-ML/SwipeTableView/blob/master/ScreenShots/screenshot1.gif" width = "290" height = "517" alt="OverView1" align=center />
+<img src="https://github.com/Roylee-ML/SwipeTableView/blob/master/ScreenShots/screenshot2.gif" width = "290" height = "517" alt="OverView1" align=center />
+<img src="https://github.com/Roylee-ML/SwipeTableView/blob/master/ScreenShots/screenshot3.gif" width = "290" height = "517" alt="OverView1" align=center />
 
 <br>
 # Quick start 
@@ -25,7 +27,7 @@ pod 'SwipeTableView'
 1. [Principle](https://github.com/Roylee-ML/SwipeTableView/blob/master/README_EN.md#principle)
 2. [Base Usage](https://github.com/Roylee-ML/SwipeTableView/blob/master/README_EN.md#how-to-use-it-just-like-uitableview)
 3. [Pull To Refresh](https://github.com/Roylee-ML/SwipeTableView/blob/master/README_EN.md#how-to-support-pull-to-refersh)
-4. [Hybrid Items](https://github.com/Roylee-ML/SwipeTableView/blob/master/README_EN.md#hybriduitableview--uicollectionview--uiscrollview)
+4. [Hybrid Items](https://github.com/Roylee-ML/SwipeTableView/blob/master/README_EN.md#hybrid-uitableview--uicollectionview--uiscrollview)
 5. [Example Code](https://github.com/Roylee-ML/SwipeTableView/blob/master/README_EN.md#example-code)
 6. [Demo Info](https://github.com/Roylee-ML/SwipeTableView/blob/master/README_EN.md#detailed-usages-are-in-the-swipetableviewdemo-folder-provide-five-examples)
 
@@ -87,7 +89,7 @@ pod 'SwipeTableView'
 **The `swipeHeaderView` must be `STHeaderView` or subclass of `STHeaderView`**
  
 <br>
-##How to support pull to refersh？
+##How to support pull to refersh?
 
 ###There is two ways to support pull to refresh, one is custom pull to refresh by yourself(just custom part), another is set a macro simply and crudely
 
@@ -169,7 +171,7 @@ How to judge the frame of the RefreshHeader of refresh control is constant?
 
  
 <br>
-##Hybrid（UItableView & UICollectionView & UIScrollView）
+##Hybrid (UItableView & UICollectionView & UIScrollView)
 
 1. In basic mode `Model 1`, has the best extensibility, it supports `UITableView`、`UICollectionView`、`UIScrollView`.**If you set the property `shouldAdjustContentSize` YES to adjust the contentSize of itemView, you shuld only use `STCollectionView` its subcalss when your itemView is `UICollectionView` and its contentinfo is less**
 
