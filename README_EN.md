@@ -67,7 +67,7 @@ pod 'SwipeTableView'
 <br>
 #Basic Usage
 
-##How to use it？Just like UITableView
+##How to use it? Just like UITableView
 
 **Conform protocol `SwipeTableViewDataSource` and implement the two methods below：**
 
