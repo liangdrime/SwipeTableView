@@ -8,9 +8,7 @@
 
 # Overview
 
-<img src="https://github.com/Roylee-ML/SwipeTableView/blob/master/ScreenShots/screenshot1.gif" width = "290" height = "517" alt="Demo OverView1" align=center />
-<img src="https://github.com/Roylee-ML/SwipeTableView/blob/master/ScreenShots/screenshot2.gif" width = "290" height = "517" alt="Demo OverView1" align=center />
-<img src="https://github.com/Roylee-ML/SwipeTableView/blob/master/ScreenShots/screenshot3.gif" width = "290" height = "517" alt="Demo OverView1" align=center />
+![Demo OverView1](https://github.com/Roylee-ML/SwipeTableView/blob/master/ScreenShots/screenshot1.gif)      ![Demo OverView2](https://github.com/Roylee-ML/SwipeTableView/blob/master/ScreenShots/screenshot2.gif)
 
 <br>
 # Quick start 
@@ -47,7 +45,7 @@ pod 'SwipeTableView'
 3. 由于多个item共用一个header与bar，所以，header与bar必须是根视图的子视图，即与CollectionView一样是`SwipeTableView`的子视图，并且在CollectionView的图层之上。
 >headr & bar的滚动与悬停实现是，对当前的itemView的contentOffset进行KVO。然后在当前itemView的contentOffset发生变化时，去改变header与bar的Y坐标值。
  
-4. 顶部header & bar在图层的最顶部，所以每个itemView的顶部需要做出一个留白来作为header & bar的显示空间。在`Model 1`中，采用修改`UIScrollView`的contentInsets的top值来留出顶部留白。
+4. 顶部header & bar在图层的最顶部，所以每个itemView的顶部需要做出一个留白来作为header & bar的显示空间。在`Mode 1`中，采用修改`UIScrollView`的contentInsets的top值来留出顶部留白。
 
 5. 由于header在图层的最顶部，所以要实现滑动header的同时使当前itemView跟随滚动，需要根据header的frame的变化回调给当前的itemView来改变contentOffset，同时也要具有ScrollView的弹性等效果。
 >这里采用`UIKit Dynamic`物理动画引擎自定义`STHeaderView`实现自定义`UIScrollView`效果解决上述问题 [`参考文章`](http://philcai.com/2016/03/15/%E7%94%A8UIKit-Dynamics%E6%A8%A1%E4%BB%BFUIScrollView/) [`英文博客`](http://holko.pl/2014/07/06/inertia-bouncing-rubber-banding-uikit-dynamics/)。
@@ -58,13 +56,13 @@ pod 'SwipeTableView'
 
 ![Mode 2](https://github.com/Roylee-ML/SwipeTableView/blob/master/ScreenShots/SwipeTableViewStruct2.png)
 
-1. 在`Model 2`中，基本结构与`Model 1`一样，唯一的不同在于每个itemView顶部留白的的方式。
+1. 在`Mode 2`中，基本结构与`Mode 1`一样，唯一的不同在于每个itemView顶部留白的的方式。
 >通过设置`UITabelView`的`tableHeaderView`，来提供顶部的占位留白，CollectionView采用自定义`STCollectionView`的`collectionHeaderView`来实现占位留白。（目前不支持`UIScrollView`）
 
 <br>
 
-2. 如何设置区分`Model 1`与`Model 2`模式？
->正常条件下即为`Model 1`模式；在`SwipeTableView.h`中或者在工程PCH文件中设置宏`#define ST_PULLTOREFRESH_HEADER_HEIGHT xx`设置为`Modle 2`模式。
+2. 如何设置区分`Mode 1`与`Mode 2`模式？
+>正常条件下即为`Mode 1`模式；在`SwipeTableView.h`中或者在工程PCH文件中设置宏`#define ST_PULLTOREFRESH_HEADER_HEIGHT xx`设置为`Mode 2`模式。
 
 <br>
 # Basic Usage
@@ -174,11 +172,11 @@ or
 <br>
 ##混合模式（UItableView & UICollectionView & UIScrollView）
 
-1. 在`Model 1`模式下，属于最基本的模式，可扩展性也是最强的，此时，支持`UITableView`、`UICollectionView`、`UIScrollView`。**如果，同时设置`shouldAdjustContentSize`为YES，实现自适应contentSize，在`UICollectionView`内容不足的添加下，只能使用`STCollectionView`及其子类**
+1. 在`Mode 1`模式下，属于最基本的模式，可扩展性也是最强的，此时，支持`UITableView`、`UICollectionView`、`UIScrollView`。**如果，同时设置`shouldAdjustContentSize`为YES，实现自适应contentSize，在`UICollectionView`内容不足的添加下，只能使用`STCollectionView`及其子类**
    
    >**`UICollectionView`不支持通过contentSize属性设置contentSize。**
 
-2. 在`Model 2`模式下，**`SwipeTableView`支持的collectionView必须是`STCollectionView`及其子类的实例**，目前，不支持`UIScrollView`。
+2. 在`Mode 2`模式下，**`SwipeTableView`支持的collectionView必须是`STCollectionView`及其子类的实例**，目前，不支持`UIScrollView`。
 
 <br>
 ##**示例代码**：
