@@ -60,9 +60,9 @@
     // back bt
     UIButton * back = [UIButton buttonWithType:UIButtonTypeCustom];
     back.frame = CGRectMake(10, 0, 40, 40);
-    back.top = hiddenNavigationBar?25:74;
+    back.st_top = hiddenNavigationBar?25:74;
     back.backgroundColor = RGBColorAlpha(10, 202, 0, 0.95);
-    back.layer.cornerRadius = back.height/2;
+    back.layer.cornerRadius = back.st_height/2;
     back.layer.masksToBounds = YES;
     back.titleLabel.font = [UIFont boldSystemFontOfSize:14];
     back.hidden = disableBarScroll;
@@ -120,9 +120,9 @@
         title.font = [UIFont boldSystemFontOfSize:17];
         title.text = @"Tap To Full Screen";
         title.textAlignment = NSTextAlignmentCenter;
-        title.size = CGSizeMake(200, 30);
-        title.centerX = _headerImageView.centerX;
-        title.bottom = _headerImageView.bottom - 20;
+        title.st_size = CGSizeMake(200, 30);
+        title.st_centerX = _headerImageView.st_centerX;
+        title.st_bottom = _headerImageView.st_bottom - 20;
         
         // tap gesture
         UITapGestureRecognizer * tap = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(tapHeader:)];
@@ -138,7 +138,7 @@
 - (CustomSegmentControl * )segmentBar {
     if (nil == _segmentBar) {
         self.segmentBar = [[CustomSegmentControl alloc]initWithItems:@[@"Item0",@"Item1",@"Item2",@"Item3"]];
-        _segmentBar.size = CGSizeMake(kScreenWidth, 40);
+        _segmentBar.st_size = CGSizeMake(kScreenWidth, 40);
         _segmentBar.font = [UIFont systemFontOfSize:15];
         _segmentBar.textColor = RGBColor(100, 100, 100);
         _segmentBar.selectedTextColor = RGBColor(0, 0, 0);
@@ -373,7 +373,7 @@
     }
 #if !defined(ST_PULLTOREFRESH_HEADER_HEIGHT)
     STRefreshHeader * header = itemView.header;
-    header.y = - (header.height + (_segmentBar.height + _headerImageView.height));
+    header.st_y = - (header.st_height + (_segmentBar.st_height + _headerImageView.st_height));
 #endif
 }
 

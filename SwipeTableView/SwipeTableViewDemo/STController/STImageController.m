@@ -20,7 +20,7 @@
     
     self.view.backgroundColor = [UIColor blackColor];
     self.imageView = [[UIImageView alloc]init];
-    _imageView.width = [UIScreen mainScreen].bounds.size.width;
+    _imageView.st_width = [UIScreen mainScreen].bounds.size.width;
     _imageView.userInteractionEnabled = YES;
     [self.view addSubview:_imageView];
     

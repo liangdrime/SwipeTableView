@@ -10,16 +10,16 @@
 
 @interface UIView (STFrame)
 
-@property (nonatomic, assign) CGFloat x;
-@property (nonatomic, assign) CGFloat y;
-@property (nonatomic, assign) CGFloat width;
-@property (nonatomic, assign) CGFloat height;
-@property (nonatomic, assign) CGFloat centerX;
-@property (nonatomic, assign) CGFloat centerY;
-@property (nonatomic, assign) CGSize size;
-@property (nonatomic, assign) CGFloat top;
-@property (nonatomic, assign) CGFloat bottom;
-@property (nonatomic, assign) CGFloat left;
-@property (nonatomic, assign) CGFloat right;
+@property (nonatomic, assign) CGFloat st_x;
+@property (nonatomic, assign) CGFloat st_y;
+@property (nonatomic, assign) CGFloat st_width;
+@property (nonatomic, assign) CGFloat st_height;
+@property (nonatomic, assign) CGFloat st_centerX;
+@property (nonatomic, assign) CGFloat st_centerY;
+@property (nonatomic, assign) CGSize st_size;
+@property (nonatomic, assign) CGFloat st_top;
+@property (nonatomic, assign) CGFloat st_bottom;
+@property (nonatomic, assign) CGFloat st_left;
+@property (nonatomic, assign) CGFloat st_right;
 
 @end

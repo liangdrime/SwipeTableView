@@ -75,9 +75,9 @@
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
 #if !defined(ST_PULLTOREFRESH_HEADER_HEIGHT)
     STRefreshHeader * header = self.header;
-    CGFloat orginY = - (header.height + self.swipeTableView.swipeHeaderView.height + self.swipeTableView.swipeHeaderBar.height);
-    if (header.y != orginY) {
-        header.y = orginY;
+    CGFloat orginY = - (header.st_height + self.swipeTableView.swipeHeaderView.st_height + self.swipeTableView.swipeHeaderBar.st_height);
+    if (header.st_y != orginY) {
+        header.st_y = orginY;
     }
 #endif
 }

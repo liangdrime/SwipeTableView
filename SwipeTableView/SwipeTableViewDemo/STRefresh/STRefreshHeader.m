@@ -67,8 +67,8 @@ static void * STRefreshcontentInsetContext              = &STRefreshcontentInset
 
 - (void)setupViews {
     self.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-    self.y      = - kSTRefreshHeaderHeight;
-    self.height = kSTRefreshHeaderHeight;
+    self.st_y      = - kSTRefreshHeaderHeight;
+    self.st_height = kSTRefreshHeaderHeight;
     self.state = STRefreshStateNormal;
     self.colorArray = @[RGBColor(240, 128, 128),
                         RGBColor(124, 205, 124),
@@ -76,8 +76,8 @@ static void * STRefreshcontentInsetContext              = &STRefreshcontentInset
     
     // content
     self.contentView = [UIView new];
-    _contentView.size = CGSizeMake(kSTRefreshImageWidth, kSTRefreshImageWidth);
-    _contentView.centerY = self.height;
+    _contentView.st_size = CGSizeMake(kSTRefreshImageWidth, kSTRefreshImageWidth);
+    _contentView.st_centerY = self.st_height;
     _contentView.alpha = 0;
     
     // image
@@ -95,8 +95,8 @@ static void * STRefreshcontentInsetContext              = &STRefreshcontentInset
     _circleLayer.strokeEnd = 0;
     _circleLayer.strokeColor = [(UIColor *)_colorArray.firstObject CGColor];
     
-    CGPoint center = CGPointMake(_contentView.width / 2.0, _contentView.height / 2.0);
-    CGFloat radius = _contentView.height/2.0 - _circleLayer.lineWidth / 2.0;
+    CGPoint center = CGPointMake(_contentView.st_width / 2.0, _contentView.st_height / 2.0);
+    CGFloat radius = _contentView.st_height/2.0 - _circleLayer.lineWidth / 2.0;
     CGFloat startAngle = -M_PI_2;
     CGFloat endAngle = 2*M_PI - M_PI_2;
     UIBezierPath *path = [UIBezierPath bezierPathWithArcCenter:center
@@ -206,7 +206,7 @@ static void * STRefreshcontentInsetContext              = &STRefreshcontentInset
     
     if (nil != newSuperview) {
         self.scrollView = (UIScrollView *)newSuperview;
-        self.width = newSuperview.width;
+        self.st_width = newSuperview.st_width;
         
         [self setNeedsLayout];
         [self layoutIfNeeded];
@@ -217,7 +217,7 @@ static void * STRefreshcontentInsetContext              = &STRefreshcontentInset
 
 - (void)layoutSubviews {
     [super layoutSubviews];
-    _contentView.centerX = self.width/2;
+    _contentView.st_centerX = self.st_width/2;
 }
 
 - (void)addObservers {
@@ -248,7 +248,7 @@ static void * STRefreshcontentInsetContext              = &STRefreshcontentInset
             return;
         }
         moveOffsetY = - moveOffsetY;
-        _contentView.centerY = self.height - moveOffsetY/2;
+        _contentView.st_centerY = self.st_height - moveOffsetY/2;
         
         // 拖拽
         if (self.scrollView.isDragging) {
@@ -287,7 +287,7 @@ static void * STRefreshcontentInsetContext              = &STRefreshcontentInset
     self.state = STRefreshStateRefeshing;
     [UIView animateWithDuration:0.25f delay:0 options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionCurveEaseInOut animations:^{
         
-        self.contentView.centerY = self.height/2;
+        self.contentView.st_centerY = self.st_height/2;
         
         UIEdgeInsets contentInset = self.scrollView.contentInset;
         contentInset.top = _orginContentInsetTop + kSTRefreshHeaderHeight;
@@ -316,7 +316,7 @@ static void * STRefreshcontentInsetContext              = &STRefreshcontentInset
         self.scrollView.contentInset = contentInset;
         self.scrollView.contentOffset = CGPointMake(self.scrollView.contentOffset.x, - contentInset.top);
         
-        self.contentView.centerY = self.height;
+        self.contentView.st_centerY = self.st_height;
         self.contentView.alpha = 0;
         self.circleLayer.strokeEnd = 0;
         self.headerImageV.transform = CGAffineTransformIdentity;

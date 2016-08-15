@@ -64,9 +64,9 @@
         [itemBt setTitleColor:_selectedTextColor forState:UIControlStateSelected];
         [itemBt setTitle:_items[i] forState:UIControlStateNormal];
         [itemBt.titleLabel setFont:_font];
-        CGFloat itemWidth = self.width/_items.count;
-        itemBt.size = CGSizeMake(itemWidth, self.height);
-        itemBt.x    = itemWidth * i;
+        CGFloat itemWidth = self.st_width/_items.count;
+        itemBt.st_size = CGSizeMake(itemWidth, self.st_height);
+        itemBt.st_x    = itemWidth * i;
         if (i == _selectedSegmentIndex) {
             itemBt.backgroundColor = _selectionIndicatorColor;
             itemBt.selected = YES;

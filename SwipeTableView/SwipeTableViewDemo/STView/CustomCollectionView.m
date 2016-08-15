@@ -164,13 +164,13 @@
     if (nil == title) {
         title = [UILabel new];
         title.tag = 888;
-        title.size = CGSizeMake(80, 40);
+        title.st_size = CGSizeMake(80, 40);
         title.textColor = [UIColor whiteColor];
         title.textAlignment = NSTextAlignmentCenter;
         title.font = [UIFont systemFontOfSize:16];
         [cell addSubview:title];
     }
-    title.center = CGPointMake(cell.width/2, cell.height/2);
+    title.center = CGPointMake(cell.st_width/2, cell.st_height/2);
     title.text = [NSString stringWithFormat:@"Item %ld",indexPath.item];
     return cell;
 }
