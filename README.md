@@ -73,14 +73,14 @@ pod 'SwipeTableView'
 
 **实现 `SwipeTableViewDataSource` 代理的两个方法：**
 
-```
+```objc
 - (NSInteger)numberOfItemsInSwipeTableView:(SwipeTableView *)swipeView     
 ```
 >返回列表item的个数
 
 <br>
    
-```
+```objc
 - (UIScrollView *)swipeTableView:(SwipeTableView *)swipeView viewForItemAtIndex:(NSInteger)index reusingView:(UIScrollView *)view
 ```    
 >返回对应index下的itemView，返回的视图类型需要是`UIScrollView`及其子类：`UITableView`或者`UICollectionView`。这里采用重用机制，需要根据reusingView来创建单一的itemView。
@@ -127,7 +127,7 @@ pod 'SwipeTableView'
  
 >获取下拉刷新的header，将header的frame的y值减去`swipeHeaderView`与`swipeHeaderBar`的高度和（或者重写RefreshHeader的setFrame方法），就可以消除itemView contentInsets顶部留白top值的影响（否则添加的下拉header是隐藏在底部的）。
  
-```
+```objc
 - (UIScrollView *)swipeTableView:(SwipeTableView *)swipeView viewForItemAtIndex:(NSInteger)index reusingView:(UIScrollView *)view {
    ...
    STRefreshHeader * header = scrollView.header;

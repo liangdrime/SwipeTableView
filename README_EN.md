@@ -73,14 +73,14 @@ pod 'SwipeTableView'
 
 **Conform protocol `SwipeTableViewDataSource` and implement the two methods below：**
 
-```
+```objc
 - (NSInteger)numberOfItemsInSwipeTableView:(SwipeTableView *)swipeView     
 ```
 >Return a count of the itemViews.
 
 <br>
    
-```
+```objc
 - (UIScrollView *)swipeTableView:(SwipeTableView *)swipeView viewForItemAtIndex:(NSInteger)index reusingView:(UIScrollView *)view
 ```    
 >Return a itemView at the index，the itemView must be kind of `UIScrollView`、`UITableView` or `UICollectionView`. It completed by reuse mechanism, so it is based the reusingView when create a itemView.
@@ -128,7 +128,7 @@ If the frame of refresh control is fixed (such as frame of refresh header), you 
 >Get the refresh header, and change Y of the frame, subtract both heights of `swipeHeaderView` and `swipeHeaderBar`(or override method `setFrame:` of RefreshHeader). So this way can solve the effect of top contentInsets of the itemVewi(othewise, the frefresh header will below the `swipeHeaderView`).
 
  
-```
+```objc
 - (UIScrollView *)swipeTableView:(SwipeTableView *)swipeView viewForItemAtIndex:(NSInteger)index reusingView:(UIScrollView *)view {
    ...
    STRefreshHeader * header = scrollView.header;
@@ -183,7 +183,7 @@ How to judge the frame of the RefreshHeader of refresh control is constant?
 ##**Example Code**：
 ###Init, set header and bar
 
-```
+```objc
 self.swipeTableView = [[SwipeTableView alloc]initWithFrame:[UIScreen mainScreen].bounds];
 _swipeTableView.delegate = self;
 _swipeTableView.dataSource = self;
@@ -195,7 +195,7 @@ _swipeTableView.swipeHeaderBar = self.segmentBar;
    
 ###Conform the protocol：
 
-```
+```objc
 - (NSInteger)numberOfItemsInSwipeTableView:(SwipeTableView *)swipeView {
     return 4;
 }
@@ -216,7 +216,7 @@ _swipeTableView.swipeHeaderBar = self.segmentBar;
    
 ###How to use `STCollectionView`:
 
-```
+```objc
 MyCollectionView.h
 
 @interface MyCollectionView : STCollectionView
@@ -295,7 +295,7 @@ MyCollectionView.m
 **If `STCollectionViewFlowLayout` can not satisfy the layout of `UICollectionView`, you can custom a  `flowlayout` subcalss of `STCollectionViewFlowLayout`, And need to call call the parent class method and follow some rules when override methods, such as:**
    
 
-```
+```objc
 - (void)prepareLayout {
     [super prepareLayout];
     // do something in sub class......
