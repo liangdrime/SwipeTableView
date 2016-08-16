@@ -239,11 +239,12 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 #else
     CGFloat headerOffsetY = - _swipeHeaderTopInset;
 #endif
+    [self setSwitchPageWithoutAnimation:YES]; // to set current itemview after reloaddata
     [self.contentOffsetQuene removeAllObjects];
     [self.contentSizeQuene removeAllObjects];
     [self.contentMinSizeQuene removeAllObjects];
-    [self.currentItemView setContentOffset:CGPointMake(0, headerOffsetY)];
     [self.contentView reloadData];
+    [self.currentItemView setContentOffset:CGPointMake(0, headerOffsetY)];
 }
 
 - (void)scrollToItemAtIndex:(NSInteger)index animated:(BOOL)animated {
@@ -630,25 +631,25 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 }
 
 - (void)headerView:(STHeaderView *)headerView didPan:(UIPanGestureRecognizer *)pan {
-    CGFloat refreshHeaderHeight = CGFLOAT_MAX;
-    BOOL shouldRefresh = NO;
+    if (pan.state == UIGestureRecognizerStateEnded) {
+        CGFloat refreshHeaderHeight = CGFLOAT_MAX;
+        BOOL shouldRefresh = NO;
 #if defined(ST_PULLTOREFRESH_HEADER_HEIGHT)
-    refreshHeaderHeight = ST_PULLTOREFRESH_HEADER_HEIGHT;
-    shouldRefresh = YES;
+        refreshHeaderHeight = ST_PULLTOREFRESH_HEADER_HEIGHT;
+        shouldRefresh = YES;
 #endif
-    if (_delegate && [_delegate respondsToSelector:@selector(swipeTableView:heightForRefreshHeaderAtIndex:)]) {
-        refreshHeaderHeight = [_delegate swipeTableView:self heightForRefreshHeaderAtIndex:self.currentItemIndex];
-    }
-    CGFloat offsetY = - headerView.frame.origin.y;
-    if (offsetY < - (_swipeHeaderTopInset + refreshHeaderHeight)) {
-        if (_delegate && [_delegate respondsToSelector:@selector(swipeTableView:shouldPullToRefreshAtIndex:)]) {
-            shouldRefresh = [_delegate swipeTableView:self shouldPullToRefreshAtIndex:self.currentItemIndex];
+        if (_delegate && [_delegate respondsToSelector:@selector(swipeTableView:heightForRefreshHeaderAtIndex:)]) {
+            refreshHeaderHeight = [_delegate swipeTableView:self heightForRefreshHeaderAtIndex:self.currentItemIndex];
         }
-        if (!shouldRefresh) {
-            return;
-        }
-        [headerView endDecelerating];
-        if (pan.state == UIGestureRecognizerStateEnded) {
+        CGFloat offsetY = - headerView.frame.origin.y;
+        if (offsetY < - (_swipeHeaderTopInset + refreshHeaderHeight)) {
+            if (_delegate && [_delegate respondsToSelector:@selector(swipeTableView:shouldPullToRefreshAtIndex:)]) {
+                shouldRefresh = [_delegate swipeTableView:self shouldPullToRefreshAtIndex:self.currentItemIndex];
+            }
+            if (!shouldRefresh) {
+                return;
+            }
+            [headerView endDecelerating];
             // remove the saved contentOffset, avoid to reset the offset with saved contentOffset when pull to refresh
             [_contentOffsetQuene removeObjectForKey:@(self.currentItemIndex)];
             
@@ -657,6 +658,7 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
             self.currentItemView.contentOffset = contentOffset;
         }
     }
+    
 }
 
 #pragma mark - UIScrollView M
