@@ -80,7 +80,7 @@
     _dataDic = [@{} mutableCopy];
     
     // 根据滚动后的下标请求数据
-//    [self getDataAtIndex:0];
+    //    [self getDataAtIndex:0];
     
     // 一次性请求所有item的数据
     [self getAllData];
@@ -108,11 +108,14 @@
         self.tableViewHeader = [[STHeaderView alloc]init];
         _tableViewHeader.frame = CGRectMake(0, 0, kScreenWidth, kScreenWidth * (headerImage.size.height/headerImage.size.width));
         _tableViewHeader.backgroundColor = [UIColor whiteColor];
+        _tableViewHeader.layer.masksToBounds = YES;
         
         // image view
         self.headerImageView = [[UIImageView alloc]initWithImage:headerImage];
+        _headerImageView.contentMode = UIViewContentModeScaleAspectFill;
         _headerImageView.userInteractionEnabled = YES;
         _headerImageView.frame = _tableViewHeader.bounds;
+        _headerImageView.autoresizingMask = UIViewAutoresizingFlexibleHeight;
         
         // title label
         UILabel * title = [[UILabel alloc]init];
@@ -160,6 +163,41 @@
     STImageController * imageVC = [[STImageController alloc]init];
     imageVC.transitioningDelegate = self;
     [self presentViewController:imageVC animated:YES completion:nil];
+}
+
+// tap to change header's frame
+- (void)_tapHeader:(UITapGestureRecognizer *)tap {
+    
+    CGFloat changeHeight = 50; // or -50, it will be parallax.
+    UIScrollView * currentItem = _swipeTableView.currentItemView;
+#if !defined(ST_PULLTOREFRESH_HEADER_HEIGHT)
+    CGPoint contentOffset = currentItem.contentOffset;
+    UIEdgeInsets inset = currentItem.contentInset;
+    inset.top += changeHeight;
+    contentOffset.y -= changeHeight;  // if you want the header change height from up, not do this.
+    
+    NSMutableDictionary * contentOffsetQuene = [self.swipeTableView valueForKey:@"contentOffsetQuene"];
+    [contentOffsetQuene removeAllObjects];
+    
+    [UIView animateWithDuration:.35f delay:0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
+        _tableViewHeader.st_height += changeHeight;
+        currentItem.contentInset = inset;
+        currentItem.contentOffset = contentOffset;
+    } completion:^(BOOL finished) {
+        [self.swipeTableView setValue:@(self.tableViewHeader.st_height) forKey:@"headerInset"];
+    }];
+#else
+    UIView * tableHeaderView = ((UITableView *)currentItem).tableHeaderView;
+    tableHeaderView.st_height += changeHeight;
+    
+    [UIView animateWithDuration:.35f delay:0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
+        _tableViewHeader.st_height += changeHeight;
+        [currentItem setValue:tableHeaderView forKey:@"tableHeaderView"];
+    } completion:^(BOOL finished) {
+        [self.swipeTableView setValue:@(self.tableViewHeader.st_height) forKey:@"headerInset"];
+    }];
+#endif
+    
 }
 
 - (void)shimmerHeaderTitle:(UILabel *)title {
@@ -324,7 +362,7 @@
                 // 获取当前index下item的数据，进行数据刷新
                 id data = _dataDic[@(index)];
                 [collectionView refreshWithData:data atIndex:index];
-
+                
                 view = self.collectionView;
             }
             
@@ -350,8 +388,8 @@
     [self getDataAtIndex:swipeView.currentItemIndex];
 }
 
-/** 
- *  以下两个代理，在未定义宏 #define ST_PULLTOREFRESH_HEADER_HEIGHT，并自定义下拉刷新的时候，必须实现 
+/**
+ *  以下两个代理，在未定义宏 #define ST_PULLTOREFRESH_HEADER_HEIGHT，并自定义下拉刷新的时候，必须实现
  *  如果设置了下拉刷新的宏，以下代理可根据需要实现即可
  */
 - (BOOL)swipeTableView:(SwipeTableView *)swipeTableView shouldPullToRefreshAtIndex:(NSInteger)index {
@@ -362,8 +400,8 @@
     return kSTRefreshHeaderHeight;
 }
 
-/** 
- *  采用自定义修改下拉刷新，此时不会定义宏 #define ST_PULLTOREFRESH_HEADER_HEIGHT 
+/**
+ *  采用自定义修改下拉刷新，此时不会定义宏 #define ST_PULLTOREFRESH_HEADER_HEIGHT
  *  对于一些下拉刷新控件，可能会在`layouSubViews`中设置RefreshHeader的frame。所以，需要在itemView有效的方法中改变RefreshHeader的frame，如 `scrollViewDidScroll:`
  */
 - (void)configRefreshHeaderForItem:(UIScrollView *)itemView {
@@ -376,6 +414,7 @@
     header.st_y = - (header.st_height + (_segmentBar.st_height + _headerImageView.st_height));
 #endif
 }
+
 
 
 #pragma  mark - UIViewControllerTransitioningDelegate
