@@ -30,7 +30,8 @@ void STSwizzleMethod(Class c, SEL origSEL, SEL newSEL);
 - (id)initWithBlock:(void(^)())aBlock;
 @end
 
-
+@interface SwipeTableContentView : UICollectionView
+@end
 
 
 @interface SwipeTableView ()<UICollectionViewDelegate,UICollectionViewDataSource,UIScrollViewDelegate,STHeaderViewDelegate>
@@ -105,7 +106,7 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 
 - (void)commonInit {
     // collection view
-    self.contentView = [[UICollectionView alloc]initWithFrame:CGRectZero collectionViewLayout:self.layout];
+    self.contentView = [[SwipeTableContentView alloc]initWithFrame:CGRectZero collectionViewLayout:self.layout];
     _contentView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     _contentView.backgroundColor = [UIColor clearColor];
     _contentView.showsHorizontalScrollIndicator = NO;
@@ -757,7 +758,13 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 @end
 
 
-
+@implementation SwipeTableContentView
+// Allows inner UITableView swipe-to-delete gesture
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRequireFailureOfGestureRecognizer:(nonnull UIGestureRecognizer *)otherGestureRecognizer
+{
+    return [otherGestureRecognizer.view.superview isKindOfClass:[UITableView class]];
+}
+@end
 
 @implementation STBlockExecutor
 - (id)initWithBlock:(void(^)())aBlock {
