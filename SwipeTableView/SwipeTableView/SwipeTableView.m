@@ -115,6 +115,11 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     _contentView.dataSource = self;
     [_contentView registerClass:UICollectionViewCell.class forCellWithReuseIdentifier:SwipeContentViewCellIdfy];
     
+    // disable cell prefetching after iOS10.
+    if ([_contentView respondsToSelector:@selector(setPrefetchingEnabled:)]) {
+        _contentView.prefetchingEnabled = NO;
+    }
+    
     // 添加一个空白视图，抵消iOS7后导航栏对scrollview的insets影响 - (void)automaticallyAdjustsScrollViewInsets:
     UIScrollView * autoAdjustInsetsView  = [UIScrollView new];
     autoAdjustInsetsView.scrollsToTop    = NO;

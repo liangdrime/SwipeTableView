@@ -327,7 +327,7 @@
             
             CustomTableView * tableView = (CustomTableView *)view;
             // 重用
-            if (tableView == view) {
+            if (nil == tableView) {
                 tableView = [[CustomTableView alloc]initWithFrame:swipeView.bounds style:UITableViewStylePlain];
                 tableView.backgroundColor = RGBColor(255, 255, 225);
             }
