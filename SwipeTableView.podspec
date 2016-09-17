@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "SwipeTableView"
-  s.version      = "0.2.5"
+  s.version      = "0.2.6"
   s.summary      = "A swipe view with tableview oc iOS."
   s.description  = <<-DESC
 It is a swipe view with tableview items,so it support scroll vertical and horizontal.It's used just like a tableview to set header or swithcbar. 
