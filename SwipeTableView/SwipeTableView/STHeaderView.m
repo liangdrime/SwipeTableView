@@ -222,17 +222,18 @@ static void * STHeaderViewPanGestureRecognizerStateContext = &STHeaderViewPanGes
 
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
     UIView * view = [super hitTest:point withEvent:event];
-    // tap outside of the header view
-    if (!CGRectContainsPoint(self.bounds, point)) {
-        [self endDecelerating];
-    }
+
+    // end header deceleraling when another began.
+    [self endDecelerating];
+    
     // tap inside of the header view
-    else {
-        // return self to response this event,when the header is decelerating.
+    if (CGRectContainsPoint(self.bounds, point)) {
+        // return self to response this event,to avoid other view receiving this event when the header is decelerating.
         if (self.isDecelerating) {
             return self;
         }
     }
+    
     return view;
 }
 
