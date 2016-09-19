@@ -14,14 +14,6 @@
 #define kSTRefreshCircleLineWidth   2.5
 #define kSTRefreshRoundTime         1.5
 
-typedef NS_ENUM(NSInteger,STRefreshState) {
-    STRefreshStateNormal,
-    STRefreshStatePulling,
-    STRefreshStateRefeshing,
-    STRefreshStateWillRefesh
-};
-
-
 @interface STRefreshHeader ()
 
 @property (nonatomic, weak) UIScrollView * scrollView;
@@ -229,6 +221,10 @@ static void * STRefreshcontentInsetContext              = &STRefreshcontentInset
 - (void)removeObservers {
     [self.superview removeObserver:self forKeyPath:@"contentOffset"];
     [self.superview removeObserver:self forKeyPath:@"contentInset"];;
+}
+
+- (BOOL)isRefreshing {
+    return self.state == STRefreshStateRefeshing || self.state == STRefreshStateWillRefesh;
 }
 
 #pragma mark - observe

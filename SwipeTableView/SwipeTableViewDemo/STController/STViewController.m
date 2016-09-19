@@ -393,7 +393,8 @@
  *  如果设置了下拉刷新的宏，以下代理可根据需要实现即可
  */
 - (BOOL)swipeTableView:(SwipeTableView *)swipeTableView shouldPullToRefreshAtIndex:(NSInteger)index {
-    return YES;
+    // 如果正在刷新，返回 NO 不取消header的回弹效果
+    return !(swipeTableView.currentItemView.header.state == STRefreshStateRefeshing);
 }
 
 - (CGFloat)swipeTableView:(SwipeTableView *)swipeTableView heightForRefreshHeaderAtIndex:(NSInteger)index {

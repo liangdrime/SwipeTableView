@@ -11,7 +11,17 @@
 #define kSTRefreshHeaderHeight  60
 #define kSTRefreshImageWidth    40
 
+typedef NS_ENUM(NSInteger,STRefreshState) {
+    STRefreshStateNormal,
+    STRefreshStatePulling,
+    STRefreshStateRefeshing,
+    STRefreshStateWillRefesh
+};
+
 @interface STRefreshHeader : UIView
+
+@property (nonatomic, readonly, getter=isRefreshing) BOOL refreshing;
+@property (nonatomic, assign, readonly) STRefreshState state;
 
 + (instancetype)headerWithRefreshingBlock:(void(^)(STRefreshHeader * header))refreshingBlock;
 + (instancetype)headerWithRefreshingTarget:(id)target refreshingAction:(SEL)action;
