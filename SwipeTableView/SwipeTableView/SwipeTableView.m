@@ -89,6 +89,7 @@ static NSString * const SwipeContentViewCellIdfy       = @"SwipeContentViewCellI
 static const void *SwipeTableViewItemTopInsetKey       = &SwipeTableViewItemTopInsetKey;
 static void * SwipeTableViewItemContentOffsetContext   = &SwipeTableViewItemContentOffsetContext;
 static void * SwipeTableViewItemContentSizeContext     = &SwipeTableViewItemContentSizeContext;
+static void * SwipeTableViewItemContentInsetContext    = &SwipeTableViewItemContentInsetContext;
 static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanGestureContext;
 
 @implementation SwipeTableView
@@ -439,6 +440,8 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     }
     
     // 顶部悬停
+    // floor 处理，避免不同屏幕尺寸像素影响，导致旧的item无法设置之前记录的offset
+    topMarginOffsetY = floor(topMarginOffsetY);
     if (contentOffset.y >= topMarginOffsetY) {
         // 比较过去记录的offset与当前应该设的offset，决定是否对齐相邻item的顶部
         if (itemContentOffset.y < topMarginOffsetY) {
@@ -499,6 +502,12 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
         if (_contentOffsetKVODisabled) {
             return;
         }
+        // 当前item的offset发生变化时，结束header的动画，避免header动画对offset的影响
+        // 此时，要么重新拖动了item，要么处于结束下拉刷新状态，已经不需要header的动画
+        if ([self.swipeHeaderView isKindOfClass:STHeaderView.class]) {
+            [(STHeaderView *)self.swipeHeaderView endDecelerating];
+        }
+        
         if (!_swipeHeaderBarScrollDisabled) {
             CGFloat newOffsetY      = [change[NSKeyValueChangeNewKey] CGPointValue].y;
 #if !defined(ST_PULLTOREFRESH_HEADER_HEIGHT)
@@ -604,7 +613,7 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 
 #pragma mark - STHeaderViewDelegate
 
-- (CGPoint)minHeaderViewFrameOrgin {
+- (CGPoint)minHeaderViewFrameOrigin {
 #if !defined(ST_PULLTOREFRESH_HEADER_HEIGHT)
     CGFloat minOrginY = - ((self.currentItemView.contentSize.height + _headerInset + _barInset) - self.currentItemView.bounds.size.height);
 #else
@@ -615,8 +624,15 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     return CGPointMake(0, minOrginY);
 }
 
-- (CGPoint)maxHeaderViewFrameOrgin {
-    return CGPointMake(0, _swipeHeaderTopInset);
+- (CGPoint)maxHeaderViewFrameOrigin {
+    // 针对item处于下拉刷新状态处理
+    CGFloat maxTopOriginY = _swipeHeaderTopInset;
+#if !defined(ST_PULLTOREFRESH_HEADER_HEIGHT)
+    maxTopOriginY = fmax(_currentItemView.contentInset.top - (_headerInset + _barInset), maxTopOriginY);
+#else
+    maxTopOriginY = fmax(_currentItemView.contentInset.top, maxTopOriginY);
+#endif
+    return CGPointMake(0, maxTopOriginY);
 }
 
 - (void)headerViewDidFrameChanged:(STHeaderView *)headerView {

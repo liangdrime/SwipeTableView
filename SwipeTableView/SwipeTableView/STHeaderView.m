@@ -139,6 +139,7 @@ static void * STHeaderViewPanGestureRecognizerStateContext = &STHeaderViewPanGes
             __weak typeof(self) weakSelf = self;
             _decelerationBehavior.action = ^{
                 CGPoint center = weakSelf.dynamicItem.center;
+                NSLog(@"center is changing %.2f",center.y);
                 center.x       = weakSelf.frame.origin.x;
                 CGRect frame   = weakSelf.frame;
                 frame.origin   = center;
@@ -167,6 +168,24 @@ static void * STHeaderViewPanGestureRecognizerStateContext = &STHeaderViewPanGes
     
     CGPoint minFrameOrgin = [self minFrameOrgin];
     CGPoint maxFrameOrgin = [self maxFrameOrgin];
+    
+    if (self.frame.origin.y < minFrameOrgin.y) {
+        if (minFrameOrgin.y - self.frame.origin.y < 0.05) {
+            [UIView animateWithDuration:0.02 animations:^{
+                [self setFrame:(CGRect){minFrameOrgin, self.frame.size}];
+            }];
+            [self endDecelerating];
+            return;
+        }
+    }else if (self.frame.origin.y > maxFrameOrgin.y) {
+        if (self.frame.origin.y - maxFrameOrgin.y < 0.05) {
+            [UIView animateWithDuration:0.02 animations:^{
+                [self setFrame:(CGRect){maxFrameOrgin, self.frame.size}];
+            }];
+            [self endDecelerating];
+            return;
+        }
+    }
     
     BOOL outsideFrameMinimum = frame.origin.y < minFrameOrgin.y;
     BOOL outsideFrameMaximum = frame.origin.y > maxFrameOrgin.y;
@@ -200,16 +219,16 @@ static void * STHeaderViewPanGestureRecognizerStateContext = &STHeaderViewPanGes
 
 - (CGPoint)minFrameOrgin {
     CGPoint orgin = CGPointMake(0, 0);
-    if (_delegate && [_delegate respondsToSelector:@selector(minHeaderViewFrameOrgin)]) {
-        orgin = [_delegate minHeaderViewFrameOrgin];
+    if (_delegate && [_delegate respondsToSelector:@selector(minHeaderViewFrameOrigin)]) {
+        orgin = [_delegate minHeaderViewFrameOrigin];
     }
     return orgin;
 }
 
 - (CGPoint)maxFrameOrgin {
     CGPoint orgin = CGPointMake(0, 0);
-    if (_delegate && [_delegate respondsToSelector:@selector(maxHeaderViewFrameOrgin)]) {
-        orgin = [_delegate maxHeaderViewFrameOrgin];
+    if (_delegate && [_delegate respondsToSelector:@selector(maxHeaderViewFrameOrigin)]) {
+        orgin = [_delegate maxHeaderViewFrameOrigin];
     }
     return orgin;
 }
@@ -222,17 +241,18 @@ static void * STHeaderViewPanGestureRecognizerStateContext = &STHeaderViewPanGes
 
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
     UIView * view = [super hitTest:point withEvent:event];
-    // tap outside of the header view
-    if (!CGRectContainsPoint(self.bounds, point)) {
-        [self endDecelerating];
-    }
+    
+    // end header deceleraling when another began.
+    [self endDecelerating];
+    
     // tap inside of the header view
-    else {
-        // return self to response this event,when the header is decelerating.
+    if (CGRectContainsPoint(self.bounds, point)) {
+        // return self to response this event,to avoid other view receiving this event when the header is decelerating.
         if (self.isDecelerating) {
             return self;
         }
     }
+    
     return view;
 }
 

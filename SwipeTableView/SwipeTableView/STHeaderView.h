@@ -11,8 +11,8 @@
 @class STHeaderView;
 @protocol STHeaderViewDelegate <NSObject>
 
-- (CGPoint)minHeaderViewFrameOrgin;
-- (CGPoint)maxHeaderViewFrameOrgin;
+- (CGPoint)minHeaderViewFrameOrigin;
+- (CGPoint)maxHeaderViewFrameOrigin;
 
 @optional
 - (void)headerViewDidFrameChanged:(STHeaderView *)headerView;

@@ -391,9 +391,11 @@
 /**
  *  以下两个代理，在未定义宏 #define ST_PULLTOREFRESH_HEADER_HEIGHT，并自定义下拉刷新的时候，必须实现
  *  如果设置了下拉刷新的宏，以下代理可根据需要实现即可
+ *  为了避免item处于下拉刷新状态时，继续下拉从而没有回弹的现象，需要按照以下方式实现
  */
 - (BOOL)swipeTableView:(SwipeTableView *)swipeTableView shouldPullToRefreshAtIndex:(NSInteger)index {
-    // 如果正在刷新，返回 NO 不取消header的回弹效果
+    // 如果正在刷新，返回 NO 保留header的回弹效果
+    // 返回值是 item 正在刷新的取反值
     return !(swipeTableView.currentItemView.header.state == STRefreshStateRefeshing);
 }
 
