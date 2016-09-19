@@ -439,6 +439,8 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     }
     
     // 顶部悬停
+    // floor 处理，避免不同屏幕尺寸像素影响，导致旧的item无法设置之前记录的offset
+    topMarginOffsetY = floor(topMarginOffsetY);
     if (contentOffset.y >= topMarginOffsetY) {
         // 比较过去记录的offset与当前应该设的offset，决定是否对齐相邻item的顶部
         if (itemContentOffset.y < topMarginOffsetY) {
