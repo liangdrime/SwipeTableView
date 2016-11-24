@@ -7,7 +7,6 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "STHeaderView.h"
 
 @protocol SwipeTableViewDataSource;
 @protocol SwipeTableViewDelegate;
@@ -17,16 +16,6 @@
 @property (nonatomic, weak) id<SwipeTableViewDataSource>dataSource;
 @property (nonatomic, readonly, strong) UICollectionView * contentView;
 
-/*****************************************************************************************************/
-/**
- 如果项目想要支持常用的下拉刷新控件，如MJRefresh等。需要满足以下条件：
- 
- ①.需要在项目PCH文件或者当前.h文件中设置如下的宏：#define ST_PULLTOREFRESH_HEADER_HEIGHT  xx
- ②.定义的宏中`xx`要与您使用的第三方下拉刷新控件的refreshHeader高度相同：
-   `MJRefresh` 为 `MJRefreshHeaderHeight`，`SVPullToRefresh` 为 `SVPullToRefreshViewHeight`
- */
-/*****************************************************************************************************/
-//#define ST_PULLTOREFRESH_HEADER_HEIGHT  60.0
 
 /**
  *  自定义显示在swipeView顶端的headerView，可以通过setter方法动态设置
@@ -40,9 +29,9 @@
 @property (nonatomic, strong) UIView * swipeHeaderBar;
 
 /**
- *  swipeView顶端headerView顶部的留白inset，这个属性可以设置顶部导航栏的inset，默认是 64
+ *  header & bar 悬停时距离顶部的距离。默认是 0
  */
-@property (nonatomic, assign) CGFloat swipeHeaderTopInset;
+@property (nonatomic, assign) CGFloat stickyHeaderTopInset;
 
 /**
  *  当前itemView的index，在滑动swipeView过程中，index的变化以显示窗口的1/2宽为界限
@@ -53,6 +42,11 @@
  *  当前itemView，在滑动swipeView过程中，currentItemView的变化以显示窗口的1/2宽为界限
  */
 @property (nonatomic, readonly, strong) UIScrollView * currentItemView;
+
+/**
+ *  顶部公共 header 的留白是否采用 item 的 headerview 或者 contentInsets，默认是 NO
+ */
+@property (nonatomic, getter=isUseItemHeaderView) BOOL useItemHeaderView; // tableHeaderView  or collectionHeaderView
 
 /**
  *  swipeView是否开启水平bounce效果，默认为 YES
@@ -66,9 +60,14 @@
 @property (nonatomic, assign) BOOL shouldAdjustContentSize;
 
 /**
- *  swipeHeaderBar是否跟随滚动，默认为 NO。如果设置为YES，在没有swipeHeaderView的条件下，可以实现类似网易新闻首页效果
+ *   向下拖动的时候 headerView 是否一直悬停在顶部，默认 NO
  */
-@property (nonatomic, assign) BOOL swipeHeaderBarScrollDisabled;
+@property (nonatomic, assign) BOOL swipeHeaderAlwaysOnTop;
+
+/**
+ *  是否禁止顶部悬停，默认是 NO
+ */
+@property (nonatomic, assign) BOOL stickyHeaderDiabled;
 
 @property (nonatomic, assign) BOOL scrollEnabled;
 
@@ -99,14 +98,6 @@
 - (void)swipeTableViewDidEndScrollingAnimation:(SwipeTableView *)swipeView;
 - (BOOL)swipeTableView:(SwipeTableView *)swipeView shouldSelectItemAtIndex:(NSInteger)index;
 - (void)swipeTableView:(SwipeTableView *)swipeView didSelectItemAtIndex:(NSInteger)index;
-
-
-/**
- *  ①.在没有设置宏 #define ST_PULLTOREFRESH_HEADER_HEIGHT 的时候，想要通过自定义下拉刷新控件，并改写下拉刷新控件frame的方式支持下拉刷新。下面的两个方法必须实现。
- *  ②.在定义了宏 #define ST_PULLTOREFRESH_HEADER_HEIGHT 的条件下，这两个方法可以灵活的调整每个item的下拉刷新有无，以及刷新控件的高度（RefreshHeader全部显露的高度）
- */
-- (BOOL)swipeTableView:(SwipeTableView *)swipeTableView shouldPullToRefreshAtIndex:(NSInteger)index; // default is YES if defined ST_PULLTOREFRESH_HEADER_HEIGHT,otherwise is NO.
-- (CGFloat)swipeTableView:(SwipeTableView *)swipeTableView heightForRefreshHeaderAtIndex:(NSInteger)index; // default is ST_PULLTOREFRESH_HEADER_HEIGHT if defined ST_PULLTOREFRESH_HEADER_HEIGHT,otherwise is CGFLOAT_MAX(not set pull to refesh).
 
 @end
 

@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		7D1C83FC1D2416B7001859EB /* STCollectionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7D1C83FB1D2416B7001859EB /* STCollectionView.m */; };
-		7D239A0B1D1D84DB004FF025 /* STHeaderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7D239A0A1D1D84DB004FF025 /* STHeaderView.m */; };
 		7D2C2AB01D32A7AD00C6A234 /* onepiece_kiudai.png in Resources */ = {isa = PBXBuildFile; fileRef = 7D2C2A951D32A7AD00C6A234 /* onepiece_kiudai.png */; };
 		7D2C2AB11D32A7AD00C6A234 /* STImageController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7D2C2A981D32A7AD00C6A234 /* STImageController.m */; };
 		7D2C2AB21D32A7AD00C6A234 /* STListController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7D2C2A9A1D32A7AD00C6A234 /* STListController.m */; };
@@ -43,8 +42,6 @@
 /* Begin PBXFileReference section */
 		7D1C83FA1D2416B7001859EB /* STCollectionView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = STCollectionView.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		7D1C83FB1D2416B7001859EB /* STCollectionView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = STCollectionView.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
-		7D239A091D1D84DB004FF025 /* STHeaderView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STHeaderView.h; sourceTree = "<group>"; };
-		7D239A0A1D1D84DB004FF025 /* STHeaderView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STHeaderView.m; sourceTree = "<group>"; };
 		7D2C2A951D32A7AD00C6A234 /* onepiece_kiudai.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = onepiece_kiudai.png; sourceTree = "<group>"; };
 		7D2C2A971D32A7AD00C6A234 /* STImageController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STImageController.h; sourceTree = "<group>"; };
 		7D2C2A981D32A7AD00C6A234 /* STImageController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STImageController.m; sourceTree = "<group>"; };
@@ -217,8 +214,6 @@
 			children = (
 				7DFB6AF21CAEBCEB00C2F0D3 /* SwipeTableView.h */,
 				7DFB6AF31CAEBCEB00C2F0D3 /* SwipeTableView.m */,
-				7D239A091D1D84DB004FF025 /* STHeaderView.h */,
-				7D239A0A1D1D84DB004FF025 /* STHeaderView.m */,
 				7D1C83FA1D2416B7001859EB /* STCollectionView.h */,
 				7D1C83FB1D2416B7001859EB /* STCollectionView.m */,
 				7DFB6AF51CAEBCFA00C2F0D3 /* UIView+STFrame.h */,
@@ -336,7 +331,6 @@
 				7D2C2AB61D32A7AD00C6A234 /* STRefreshHeader.m in Sources */,
 				7D2C2AB91D32A7AD00C6A234 /* CustomCollectionView.m in Sources */,
 				7D2C2AB71D32A7AD00C6A234 /* UIScrollView+STRefresh.m in Sources */,
-				7D239A0B1D1D84DB004FF025 /* STHeaderView.m in Sources */,
 				7D2C2AB21D32A7AD00C6A234 /* STListController.m in Sources */,
 				7D1C83FC1D2416B7001859EB /* STCollectionView.m in Sources */,
 				7D2C2ABB1D32A7AD00C6A234 /* CustomTableView.m in Sources */,

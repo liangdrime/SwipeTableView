@@ -19,9 +19,9 @@
 - (UIScrollView *)scrollView;
 @end
 
-@interface UIScrollView (PanGestureRecognizer)
+@interface UIScrollView (HeaderView)
 - (void)setHeaderView:(UIView *)headerView;
-void STSwizzleMethod(Class c, SEL origSEL, SEL newSEL);
+- (UIView *)headerView;
 @end
 
 #pragma mark - Weak Refrence
@@ -33,15 +33,16 @@ void STSwizzleMethod(Class c, SEL origSEL, SEL newSEL);
 
 
 
-@interface SwipeTableView ()<UICollectionViewDelegate,UICollectionViewDataSource,UIScrollViewDelegate,STHeaderViewDelegate>
+@interface SwipeTableView ()<UICollectionViewDelegate,UICollectionViewDataSource,UIScrollViewDelegate>
 
-@property (nonatomic, strong, readwrite) UICollectionView * contentView;
+@property (nonatomic, readwrite) UICollectionView * contentView;
 @property (nonatomic, strong) UICollectionViewFlowLayout *layout;
+@property (nonatomic, strong) UIView * headerView;
 @property (nonatomic, assign) CGFloat headerInset;
 @property (nonatomic, assign) CGFloat barInset;
 @property (nonatomic, assign) NSIndexPath * cunrrentItemIndexpath;
 @property (nonatomic, readwrite) NSInteger currentItemIndex;
-@property (nonatomic, strong, readwrite) UIScrollView * currentItemView;
+@property (nonatomic, readwrite) UIScrollView * currentItemView;
 /**
  *  将要显示的item的index
  */
@@ -76,11 +77,6 @@ void STSwizzleMethod(Class c, SEL origSEL, SEL newSEL);
  *  标记itemView自适应contentSize的状态，用于在observe中修改当前itemView的contentOffset（重设contentSize影响contentOffset）
  */
 @property (nonatomic, assign) BOOL isAdjustingcontentSize;
-
-/**
- *  设置当前scrollViewItem的contentOffset时，在KVO中不对contentOffset进行观察处理
- */
-@property (nonatomic, assign) BOOL contentOffsetKVODisabled;
 
 
 @end
@@ -125,17 +121,21 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     UIScrollView * autoAdjustInsetsView  = [UIScrollView new];
     autoAdjustInsetsView.scrollsToTop    = NO;
     
+    // header 与 bar 的 contentView
+    self.headerView = [UIView new];
+    
     [self addSubview:autoAdjustInsetsView];
     [self addSubview:_contentView];
+    [self addSubview:_headerView];
     
     self.contentOffsetQuene  = [NSMutableDictionary dictionaryWithCapacity:0];
     self.contentSizeQuene    = [NSMutableDictionary dictionaryWithCapacity:0];
     self.contentMinSizeQuene = [NSMutableDictionary dictionaryWithCapacity:0];
-    _swipeHeaderTopInset = 64;
+    _stickyHeaderTopInset = 0;
     _headerInset = 0;
     _barInset = 0;
     _currentItemIndex = 0;
-    _switchPageWithoutAnimation = YES;
+    _switchPageWithoutAnimation = NO;
     _cunrrentItemIndexpath  = [NSIndexPath indexPathForItem:0 inSection:0];
 }
 
@@ -158,31 +158,24 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     
     self.contentView.frame = self.bounds;
     self.layout.itemSize = self.bounds.size;
-    self.swipeHeaderBarScrollDisabled &= nil == _swipeHeaderView;
-    self.swipeHeaderBar.st_top = _swipeHeaderView.st_bottom;
-    if (_swipeHeaderBarScrollDisabled) {
-        _swipeHeaderBar.st_top = _swipeHeaderTopInset;
-    }
+    self.headerView.st_width = self.st_width;
 }
 
 - (void)didMoveToSuperview {
     [super didMoveToSuperview];
+    [self moveHeaderViewToItemView:_currentItemView];
     [self reloadData];
 }
 
 - (void)setSwipeHeaderView:(UIView *)swipeHeaderView {
     if (_swipeHeaderView != swipeHeaderView) {
         [_swipeHeaderView removeFromSuperview];
-        [self addSubview:swipeHeaderView];
+        [_headerView addSubview:swipeHeaderView];
         
-        _swipeHeaderView       = swipeHeaderView;
-        _swipeHeaderView.st_y += _swipeHeaderTopInset;
-        _headerInset           = _swipeHeaderView.bounds.size.height;
-        
-        BOOL isSTHeaderView = [swipeHeaderView isKindOfClass:STHeaderView.class];
-        if (isSTHeaderView) {
-            [(STHeaderView *)swipeHeaderView setDelegate:self];
-        }
+        _swipeHeaderView        = swipeHeaderView;
+        _swipeHeaderView.st_top = 0;
+        _headerView.st_height   = _swipeHeaderBar.st_height + _swipeHeaderView.st_height;
+        _headerInset            = _swipeHeaderView.st_height;
 
         [self reloadData];
         [self layoutIfNeeded];
@@ -192,26 +185,20 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 - (void)setSwipeHeaderBar:(UIView *)swipeHeaderBar {
     if (_swipeHeaderBar != swipeHeaderBar) {
         [_swipeHeaderBar removeFromSuperview];
-        [self addSubview:swipeHeaderBar];
+        [_headerView addSubview:swipeHeaderBar];
         
-        _swipeHeaderBar       = swipeHeaderBar;
-        _swipeHeaderBar.st_y += _swipeHeaderTopInset;
-        _barInset             = _swipeHeaderBar.bounds.size.height;
+        _swipeHeaderBar           = swipeHeaderBar;
+        _headerView.st_height     = _swipeHeaderBar.st_height + _swipeHeaderView.st_height;
+        _swipeHeaderBar.st_bottom = _headerView.st_height;
+        _barInset                 = _swipeHeaderBar.st_height;
         
         [self reloadData];
         [self layoutIfNeeded];
     }
 }
 
-- (void)setSwipeHeaderTopInset:(CGFloat)swipeHeaderTopInset {
-    if (_swipeHeaderView) {
-        _swipeHeaderView.st_y += (swipeHeaderTopInset - _swipeHeaderTopInset);
-    }
-    if (_swipeHeaderBar) {
-        _swipeHeaderBar.st_y += (swipeHeaderTopInset - _swipeHeaderTopInset);
-    }
-    _swipeHeaderTopInset = swipeHeaderTopInset;
-    
+- (void)setStickyHeaderTopInset:(CGFloat)stickyHeaderTopInset {
+    _stickyHeaderTopInset = stickyHeaderTopInset;
     [self reloadData];
     [self layoutIfNeeded];
 }
@@ -219,10 +206,6 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 - (void)setAlwaysBounceHorizontal:(BOOL)alwaysBounceHorizontal {
     _alwaysBounceHorizontal = alwaysBounceHorizontal;
     self.contentView.alwaysBounceHorizontal = alwaysBounceHorizontal;
-}
-
-- (void)setSwipeHeaderBarScrollDisabled:(BOOL)swipeHeaderBarScrollDisabled {
-    _swipeHeaderBarScrollDisabled = swipeHeaderBarScrollDisabled && nil == _swipeHeaderView;
 }
 
 - (void)setScrollEnabled:(BOOL)scrollEnabled {
@@ -240,12 +223,9 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 #pragma mark -
 
 - (void)reloadData {
-#if !defined(ST_PULLTOREFRESH_HEADER_HEIGHT)
-    CGFloat headerOffsetY = - (_headerInset + _swipeHeaderTopInset + _barInset);
-#else
-    CGFloat headerOffsetY = - _swipeHeaderTopInset;
-#endif
-    [self setSwitchPageWithoutAnimation:YES]; // to set current itemview after reloaddata
+    CGFloat headerOffsetY = _useItemHeaderView ? 0 : -(_headerInset + _barInset);
+    
+//    [self setSwitchPageWithoutAnimation:YES]; // to set current itemview after reloaddata
     [self.contentOffsetQuene removeAllObjects];
     [self.contentSizeQuene removeAllObjects];
     [self.contentMinSizeQuene removeAllObjects];
@@ -279,74 +259,66 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     UICollectionViewCell * cell = [collectionView dequeueReusableCellWithReuseIdentifier:SwipeContentViewCellIdfy forIndexPath:indexPath];
-#if !defined(ST_PULLTOREFRESH_HEADER_HEIGHT)
+    
     UIScrollView * subView = cell.scrollView;
     if (_dataSource && [_dataSource respondsToSelector:@selector(swipeTableView:viewForItemAtIndex:reusingView:)]) {
         UIScrollView * newSubView = [_dataSource swipeTableView:self viewForItemAtIndex:indexPath.row reusingView:subView];
         newSubView.scrollsToTop = NO;
-        // top inset
-        CGFloat topInset = _headerInset + _barInset + _swipeHeaderTopInset;
-        UIEdgeInsets contentInset = newSubView.contentInset;
-        BOOL setTopInset = [objc_getAssociatedObject(newSubView, SwipeTableViewItemTopInsetKey) boolValue];
-        if (!setTopInset) {
-            contentInset.top += topInset;
-            newSubView.contentInset = contentInset;
-            newSubView.scrollIndicatorInsets = contentInset;
-            newSubView.contentOffset = CGPointMake(0, - topInset);  // set default contentOffset after init
-            objc_setAssociatedObject(newSubView, SwipeTableViewItemTopInsetKey, @(YES), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-        }else {
-            // update
-            CGFloat deltaTopInset = topInset - contentInset.top;
-            contentInset.top += deltaTopInset;
-            newSubView.contentInset = contentInset;
-            newSubView.scrollIndicatorInsets = contentInset;
+        
+        // 公共 header 的留白采用 tableHeaderView 等
+        if (_useItemHeaderView) {
+            NSAssert([newSubView isKindOfClass:UITableView.class] || [newSubView isKindOfClass:STCollectionView.class], @"The item view from dataSouce must be kind of UITalbeView class or STCollectionView class!");
+            
+            // header view
+            UIView * headerView = [newSubView viewWithTag:666];
+            if (nil == headerView) {
+                headerView = [[UIView alloc]init];
+                headerView.st_width = newSubView.st_width;
+                headerView.tag = 666;
+            }
+            CGFloat headerHeight = _headerInset + _barInset;
+            BOOL setHeaderHeight = [objc_getAssociatedObject(newSubView, SwipeTableViewItemTopInsetKey) boolValue];
+            if (!setHeaderHeight) {
+                headerView.st_height += headerHeight;
+                objc_setAssociatedObject(newSubView, SwipeTableViewItemTopInsetKey, @(YES), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+            }else {
+                // update
+                CGFloat deltHeaderHeight = headerHeight - headerView.st_height;
+                headerView.st_height += deltHeaderHeight;
+            }
+            newSubView.headerView = headerView;
+        }
+        // 公共 header 采用 contentInsets
+        else {
+            // top inset
+            CGFloat topInset = _headerInset + _barInset;
+            UIEdgeInsets contentInset = newSubView.contentInset;
+            BOOL setTopInset = [objc_getAssociatedObject(newSubView, SwipeTableViewItemTopInsetKey) boolValue];
+            if (!setTopInset) {
+                contentInset.top += topInset;
+                newSubView.contentInset = contentInset;
+                newSubView.scrollIndicatorInsets = contentInset;
+                newSubView.contentOffset = CGPointMake(0, - topInset);  // set default contentOffset after init
+                objc_setAssociatedObject(newSubView, SwipeTableViewItemTopInsetKey, @(YES), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+            }else {
+                // update
+                CGFloat deltaTopInset = topInset - contentInset.top;
+                contentInset.top += deltaTopInset;
+                newSubView.contentInset = contentInset;
+                newSubView.scrollIndicatorInsets = contentInset;
+            }
         }
         
+        // add new subview
         if (newSubView != subView) {
             [subView removeFromSuperview];
             [cell.contentView addSubview:newSubView];
             subView = newSubView;
         }
-    }
-#else
-    UIScrollView * subView = cell.scrollView;
-    if (_dataSource && [_dataSource respondsToSelector:@selector(swipeTableView:viewForItemAtIndex:reusingView:)]) {
-        UIScrollView * newSubView = [_dataSource swipeTableView:self viewForItemAtIndex:indexPath.row reusingView:subView];
-        NSAssert([newSubView isKindOfClass:UITableView.class] || [newSubView isKindOfClass:STCollectionView.class], @"The item view from dataSouce must be kind of UITalbeView class or STCollectionView class!");
-        newSubView.scrollsToTop = NO;
-        // top inset
-        CGFloat headerHeight = _headerInset + _barInset;
-        UIEdgeInsets contentInset = newSubView.contentInset;
-        contentInset.top = _swipeHeaderTopInset;
-        newSubView.contentInset = contentInset;
-        // header view
-        UIView * headerView = [newSubView viewWithTag:666];
-        if (nil == headerView) {
-            headerView = [[UIView alloc]init];
-            headerView.st_width = newSubView.st_width;
-            headerView.tag = 666;
-        }
-        BOOL setHeaderHeight = [objc_getAssociatedObject(newSubView, SwipeTableViewItemTopInsetKey) boolValue];
-        if (!setHeaderHeight) {
-            headerView.st_height += headerHeight;
-            objc_setAssociatedObject(newSubView, SwipeTableViewItemTopInsetKey, @(YES), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-        }else {
-            // update
-            CGFloat deltHeaderHeight = headerHeight - headerView.st_height;
-            headerView.st_height += deltHeaderHeight;
-        }
-        contentInset.top = headerView.st_height + _swipeHeaderTopInset;
-        newSubView.scrollIndicatorInsets = contentInset;
-        newSubView.headerView = headerView;
         
-        if (newSubView != subView) {
-            [subView removeFromSuperview];
-            [cell.contentView addSubview:newSubView];
-            subView = newSubView;
-        }
     }
-#endif
-    // reuse item view observe
+    
+    // reuse itemView observe
     [_shouldVisibleItemView removeObserver:self forKeyPath:@"contentOffset"];
     [_shouldVisibleItemView removeObserver:self forKeyPath:@"contentSize"];
     [_shouldVisibleItemView removeObserver:self forKeyPath:@"panGestureRecognizer.state"];
@@ -355,6 +327,14 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     [_shouldVisibleItemView addObserver:self forKeyPath:@"contentOffset" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:SwipeTableViewItemContentOffsetContext];
     [_shouldVisibleItemView addObserver:self forKeyPath:@"contentSize" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:SwipeTableViewItemContentSizeContext];
     [_shouldVisibleItemView addObserver:self forKeyPath:@"panGestureRecognizer.state" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:SwipeTableViewItemPanGestureContext];
+    
+    // init currentItemView
+    if (!_currentItemView) {
+        self.currentItemView = subView;
+        [_currentItemView addObserver:self forKeyPath:@"contentOffset" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:SwipeTableViewItemContentOffsetContext];
+        [_currentItemView addObserver:self forKeyPath:@"contentSize" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:SwipeTableViewItemContentSizeContext];
+        [_currentItemView addObserver:self forKeyPath:@"panGestureRecognizer.state" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:SwipeTableViewItemPanGestureContext];
+    }
     
     UIScrollView * lastItemView = _currentItemView;
     NSInteger lastIndex         = _currentItemIndex;
@@ -393,7 +373,7 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     }
 }
 
-#pragma mark -
+#pragma mark - Private
 
 - (void)adjustItemViewContentOffset:(UIScrollView *)itemView atIndex:(NSInteger)index fromLastItemView:(UIScrollView *)lastItemView lastIndex:(NSInteger)lastIndex {
     
@@ -401,11 +381,11 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
      *  First init or reloaddata,this condition will be executed when the item init or call the method `reloadData`.
      */
     if (lastIndex == index) {
-#if !defined(ST_PULLTOREFRESH_HEADER_HEIGHT)
-        CGPoint initContentOffset = CGPointMake(0, -(_swipeHeaderTopInset + _headerInset + _barInset));
-#else
-        CGPoint initContentOffset = CGPointMake(0, - _swipeHeaderTopInset);
-#endif
+        // move headerView to currentItemView first
+        [self moveHeaderViewToItemView:itemView];
+        
+        CGPoint initContentOffset = CGPointMake(0, -itemView.contentInset.top);
+        
         // save current contentOffset before reset contentSize,to reset contentOffset when KVO contentSize.
         _contentOffsetQuene[@(index)] = [NSValue valueWithCGPoint:initContentOffset];
         
@@ -428,11 +408,9 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     }
     
     // 取出记录的offset
-#if !defined(ST_PULLTOREFRESH_HEADER_HEIGHT)
-    CGFloat topMarginOffsetY  = - (_swipeHeaderTopInset + _barInset);
-#else
-    CGFloat topMarginOffsetY  = _headerInset - _swipeHeaderTopInset;
-#endif
+    CGFloat topMarginOffsetY  = _useItemHeaderView ? _headerInset :- _barInset;
+    topMarginOffsetY         -= _stickyHeaderTopInset;
+    
     NSValue *offsetObj = [self.contentOffsetQuene objectForKey:@(index)];
     CGPoint itemContentOffset = [offsetObj CGPointValue];
     if (nil == offsetObj) {  // init
@@ -467,11 +445,11 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 
 - (void)adjustItemViewContentSize:(UIScrollView *)itemView atIndex:(NSInteger)index {
     // get the min required height of contentSize
-#if !defined(ST_PULLTOREFRESH_HEADER_HEIGHT)
-    CGFloat minRequireHeight = itemView.st_height - (_swipeHeaderTopInset + _barInset);
-#else
-    CGFloat minRequireHeight = itemView.st_height - _swipeHeaderTopInset + _headerInset;
-#endif
+    CGFloat minRequireHeight = itemView.st_height - _barInset - _stickyHeaderTopInset;
+    if (_useItemHeaderView) {
+        minRequireHeight = itemView.st_height + _headerInset - _stickyHeaderTopInset;
+    }
+
     // 修正contentInset的bottom的影响
     minRequireHeight  -= itemView.contentInset.bottom;
     // 重设contentsize的高度
@@ -492,6 +470,21 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     }
 }
 
+- (void)moveHeaderViewToItemView:(UIScrollView *)itemView {
+    UIView * superView = _useItemHeaderView ? itemView.headerView : itemView;
+    [_headerView removeFromSuperview];
+    [superView addSubview:_headerView];
+    [itemView setContentOffset:itemView.contentOffset];
+}
+
+- (void)moveHeaderViewToContentView:(UIView *)contentView {
+    CGPoint origin = [_headerView.superview convertPoint:_headerView.frame.origin toView:contentView];
+    _headerView.st_top = origin.y;
+    
+    [_headerView removeFromSuperview];
+    [contentView addSubview:_headerView];
+}
+
 #pragma mark - observe
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context {
@@ -499,48 +492,32 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     /** contentOffset */
     if (context == SwipeTableViewItemContentOffsetContext) {
         
-        if (_contentOffsetKVODisabled) {
-            return;
-        }
-        // 当前item的offset发生变化时，结束header的动画，避免header动画对offset的影响
-        // 此时，要么重新拖动了item，要么处于结束下拉刷新状态，已经不需要header的动画
-        if ([self.swipeHeaderView isKindOfClass:STHeaderView.class]) {
-            [(STHeaderView *)self.swipeHeaderView endDecelerating];
-        }
+        CGFloat newOffsetY      = [change[NSKeyValueChangeNewKey] CGPointValue].y;
+        UIScrollView * itemView = object;
         
-        if (!_swipeHeaderBarScrollDisabled) {
-            CGFloat newOffsetY      = [change[NSKeyValueChangeNewKey] CGPointValue].y;
-#if !defined(ST_PULLTOREFRESH_HEADER_HEIGHT)
-            CGFloat topMarginOffset = _swipeHeaderTopInset + _barInset;
-            // stick the bar
-            if (newOffsetY < - topMarginOffset) {
-                if (_swipeHeaderBar) {
-                    _swipeHeaderBar.st_bottom  = - newOffsetY;
-                    _swipeHeaderView.st_bottom = _swipeHeaderBar.st_top;
-                }else {
-                    _swipeHeaderView.st_bottom = - newOffsetY;
-                }
-            }else {
-                _swipeHeaderBar.st_bottom  = topMarginOffset;
-                // 'fmax' is used to fix the bug below iOS8.3 : the position of the bar will not correct when the swipeHeaderView is outside of the screen. 
-                _swipeHeaderView.st_bottom = fmax(- (newOffsetY + _barInset), 0);
+        
+        if (!_stickyHeaderDiabled && itemView == _currentItemView) {
+            CGFloat topStickyOffset = _useItemHeaderView ? _headerInset : -_barInset;
+            topStickyOffset        -= _stickyHeaderTopInset;
+            CGFloat maxTopOffset    = _useItemHeaderView ? 0 : -_headerView.st_height;
+            
+            // sticky the header view
+            if (newOffsetY > topStickyOffset) {
+                CGPoint headerBottom = CGPointMake(0, _barInset + _stickyHeaderTopInset);
+                CGPoint targetBottom = [self convertPoint:headerBottom toView:_headerView.superview];
+                _headerView.st_bottom = targetBottom.y;
             }
-#else
-            CGFloat topMarginOffset = _headerInset - _swipeHeaderTopInset;
-            // stick the bar
-            if (newOffsetY < topMarginOffset) {
-                if (_swipeHeaderView) {
-                    _swipeHeaderView.st_top = - newOffsetY;
-                    _swipeHeaderBar.st_top  = _swipeHeaderView.st_bottom;
+            else {
+                CGFloat top = 0;
+                if (newOffsetY < maxTopOffset && _swipeHeaderAlwaysOnTop) {
+                    CGPoint headerTop = CGPointZero;
+                    CGPoint targetTop = [self convertPoint:headerTop toView:_headerView.superview];
+                    top = targetTop.y;
                 }else {
-                    _swipeHeaderBar.st_top  = - newOffsetY;
+                    top = _useItemHeaderView ? 0 : -_headerView.st_height;
                 }
-            }else {
-                _swipeHeaderBar.st_top  = _swipeHeaderTopInset;
-                // 'fmax' is used to fix the bug below iOS8.3 : the position of the bar will not correct when the swipeHeaderView is outside of the screen.
-                _swipeHeaderView.st_top = fmax(- newOffsetY, - _headerInset);
+                _headerView.st_top = top;
             }
-#endif
         }
         
         /*
@@ -558,8 +535,9 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
                 CGFloat contentOffsetY    = scrollView.contentOffset.y;
                 CGPoint requireOffset     = [offsetObj CGPointValue];
                 // round 之后，解决像素影响问题
-                if (round(contentOffsetY) != round(requireOffset.y)) {
-                    scrollView.contentOffset = CGPointMake(scrollView.contentOffset.x, round(requireOffset.y));
+                CGFloat requireOffsetY = round(requireOffset.y);
+                if (round(contentOffsetY) != requireOffsetY) {
+                    scrollView.contentOffset = CGPointMake(scrollView.contentOffset.x, requireOffsetY);
                 }
             }
         }
@@ -611,77 +589,6 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     }
 }
 
-#pragma mark - STHeaderViewDelegate
-
-- (CGPoint)minHeaderViewFrameOrigin {
-#if !defined(ST_PULLTOREFRESH_HEADER_HEIGHT)
-    CGFloat minOrginY = - ((self.currentItemView.contentSize.height + _headerInset + _barInset) - self.currentItemView.bounds.size.height);
-#else
-    CGFloat minOrginY = - (self.currentItemView.contentSize.height - self.currentItemView.bounds.size.height);
-#endif
-    // 'fmin' is used to fix the case when contentSize is smaller than bounds
-    minOrginY = fmin(minOrginY, _swipeHeaderTopInset);
-    return CGPointMake(0, minOrginY);
-}
-
-- (CGPoint)maxHeaderViewFrameOrigin {
-    // 针对item处于下拉刷新状态处理
-    CGFloat maxTopOriginY = _swipeHeaderTopInset;
-#if !defined(ST_PULLTOREFRESH_HEADER_HEIGHT)
-    maxTopOriginY = fmax(_currentItemView.contentInset.top - (_headerInset + _barInset), maxTopOriginY);
-#else
-    maxTopOriginY = fmax(_currentItemView.contentInset.top, maxTopOriginY);
-#endif
-    return CGPointMake(0, maxTopOriginY);
-}
-
-- (void)headerViewDidFrameChanged:(STHeaderView *)headerView {
-    
-#if !defined(ST_PULLTOREFRESH_HEADER_HEIGHT)
-    CGFloat offsetY = - (headerView.frame.origin.y + _headerInset + _barInset);
-#else
-    CGFloat offsetY = - headerView.frame.origin.y;
-#endif
-    _swipeHeaderBar.st_top = fmax(_swipeHeaderTopInset, headerView.st_bottom);
-    
-    _contentOffsetKVODisabled = YES;
-    CGPoint contentOffset = self.currentItemView.contentOffset;
-    contentOffset.y       = offsetY;
-    self.currentItemView.contentOffset = contentOffset;
-    _contentOffsetKVODisabled = NO;
-}
-
-- (void)headerView:(STHeaderView *)headerView didPan:(UIPanGestureRecognizer *)pan {
-    if (pan.state == UIGestureRecognizerStateEnded) {
-        CGFloat refreshHeaderHeight = CGFLOAT_MAX;
-        BOOL shouldRefresh = NO;
-#if defined(ST_PULLTOREFRESH_HEADER_HEIGHT)
-        refreshHeaderHeight = ST_PULLTOREFRESH_HEADER_HEIGHT;
-        shouldRefresh = YES;
-#endif
-        if (_delegate && [_delegate respondsToSelector:@selector(swipeTableView:heightForRefreshHeaderAtIndex:)]) {
-            refreshHeaderHeight = [_delegate swipeTableView:self heightForRefreshHeaderAtIndex:self.currentItemIndex];
-        }
-        CGFloat offsetY = - headerView.frame.origin.y;
-        if (offsetY < - (_swipeHeaderTopInset + refreshHeaderHeight)) {
-            if (_delegate && [_delegate respondsToSelector:@selector(swipeTableView:shouldPullToRefreshAtIndex:)]) {
-                shouldRefresh = [_delegate swipeTableView:self shouldPullToRefreshAtIndex:self.currentItemIndex];
-            }
-            if (!shouldRefresh) {
-                return;
-            }
-            [headerView endDecelerating];
-            // remove the saved contentOffset, avoid to reset the offset with saved contentOffset when pull to refresh
-            [_contentOffsetQuene removeObjectForKey:@(self.currentItemIndex)];
-            
-            // call KVO to enable the pull-to-refresh
-            CGPoint contentOffset = self.currentItemView.contentOffset;
-            self.currentItemView.contentOffset = contentOffset;
-        }
-    }
-    
-}
-
 #pragma mark - UIScrollView M
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
@@ -717,12 +624,20 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 }
 
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
+    // 切换 headerview 的 superview，使其显示在 collectionview 的父视图上
+    [self moveHeaderViewToContentView:self];
+    
     if (_delegate && [_delegate respondsToSelector:@selector(swipeTableViewWillBeginDragging:)]) {
         [_delegate swipeTableViewWillBeginDragging:self];
     }
 }
 
 - (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate {
+    // 切换 headerview 到当前的 itemview 上
+    if (!decelerate) {
+        [self moveHeaderViewToItemView:_currentItemView];
+    }
+    
     if (_delegate && [_delegate respondsToSelector:@selector(swipeTableViewDidEndDragging:willDecelerate:)]) {
         [_delegate swipeTableViewDidEndDragging:self willDecelerate:decelerate];
     }
@@ -735,6 +650,9 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 }
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
+    // 切换 headerview 到当前的 itemview 上
+    [self moveHeaderViewToItemView:_currentItemView];
+    
     if (_delegate && [_delegate respondsToSelector:@selector(swipeTableViewDidEndDecelerating:)]) {
         [_delegate swipeTableViewDidEndDecelerating:self];
     }
@@ -831,61 +749,7 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 @end
 
 
-@implementation UIScrollView (PanGestureRecognizer)
-
-+ (void)load {
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        STSwizzleMethod([self class],
-                        @selector(isDragging),
-                        @selector(st_isDragging));
-        STSwizzleMethod([self class],
-                        @selector(isTracking),
-                        @selector(st_isTracking));
-        STSwizzleMethod([self class],
-                        @selector(isDecelerating),
-                        @selector(st_isDecelerating));
-    });
-}
-
-- (BOOL)st_isTracking {
-    SwipeTableView * swipeTableView = self.swipeTableView;
-    UIView * headerView = swipeTableView.swipeHeaderView;
-    if ([headerView isKindOfClass:STHeaderView.class]) {
-        STHeaderView * header = (STHeaderView *)headerView;
-        if (header.isTracking && self == swipeTableView.currentItemView) {
-            return YES;
-        }
-        return [self st_isTracking];
-    }
-    return [self st_isTracking];
-}
-
-- (BOOL)st_isDragging {
-    SwipeTableView * swipeTableView = self.swipeTableView;
-    UIView * headerView = swipeTableView.swipeHeaderView;
-    if ([headerView isKindOfClass:STHeaderView.class]) {
-        STHeaderView * header = (STHeaderView *)headerView;
-        if (header.isDragging && self == swipeTableView.currentItemView) {
-            return YES;
-        }
-        return [self st_isDragging];
-    }
-    return [self st_isDragging];
-}
-
-- (BOOL)st_isDecelerating {
-    SwipeTableView * swipeTableView = self.swipeTableView;
-    UIView * headerView = swipeTableView.swipeHeaderView;
-    if ([headerView isKindOfClass:STHeaderView.class]) {
-        STHeaderView * header = (STHeaderView *)headerView;
-        if (header.isDecelerating && self == swipeTableView.currentItemView) {
-            return YES;
-        }
-        return [self st_isDecelerating];
-    }
-    return [self st_isDecelerating];
-}
+@implementation UIScrollView (HeaderView)
 
 - (void)setHeaderView:(UIView *)headerView {
     if ([self isKindOfClass:UITableView.class]) {
@@ -895,30 +759,13 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     }
 }
 
-void STSwizzleMethod(Class c, SEL origSEL, SEL newSEL) {
-    Method origMethod = class_getInstanceMethod(c, origSEL);
-    Method newMethod = nil;
-    if (!origMethod) {
-        origMethod = class_getClassMethod(c, origSEL);
-        if (!origMethod) {
-            return;
-        }
-        newMethod = class_getClassMethod(c, newSEL);
-        if (!newMethod) {
-            return;
-        }
-    }else{
-        newMethod = class_getInstanceMethod(c, newSEL);
-        if (!newMethod) {
-            return;
-        }
+- (UIView *)headerView {
+    if ([self isKindOfClass:UITableView.class]) {
+        return [self valueForKey:@"tableHeaderView"];
+    }else if ([self isKindOfClass:UICollectionView.class]) {
+        return [self valueForKey:@"collectionHeadView"];
     }
-    
-    if(class_addMethod(c, origSEL, method_getImplementation(newMethod), method_getTypeEncoding(newMethod))){
-        class_replaceMethod(c, newSEL, method_getImplementation(origMethod), method_getTypeEncoding(origMethod));
-    }else{
-        method_exchangeImplementations(origMethod, newMethod);
-    }
+    return nil;
 }
 
 @end

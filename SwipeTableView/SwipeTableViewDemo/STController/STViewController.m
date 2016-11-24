@@ -21,7 +21,7 @@
 @interface STViewController ()<SwipeTableViewDataSource,SwipeTableViewDelegate,UIGestureRecognizerDelegate,UIViewControllerTransitioningDelegate>
 
 @property (nonatomic, strong) SwipeTableView * swipeTableView;
-@property (nonatomic, strong) STHeaderView * tableViewHeader;
+@property (nonatomic, strong) UIView * tableViewHeader;
 @property (nonatomic, strong) CustomSegmentControl * segmentBar;
 @property (nonatomic, strong) CustomTableView * tableView;
 @property (nonatomic, strong) CustomCollectionView * collectionView;
@@ -45,10 +45,8 @@
     _swipeTableView.shouldAdjustContentSize = YES;
     _swipeTableView.swipeHeaderView = disableBarScroll?nil:self.tableViewHeader;
     _swipeTableView.swipeHeaderBar = self.segmentBar;
-    _swipeTableView.swipeHeaderBarScrollDisabled = disableBarScroll;
-    if (hiddenNavigationBar) {
-        _swipeTableView.swipeHeaderTopInset = 0;
-    }
+    _swipeTableView.swipeHeaderAlwaysOnTop = NO;
+    _swipeTableView.stickyHeaderTopInset = hiddenNavigationBar?0:64;
     [self.view addSubview:_swipeTableView];
     
     // nav bar
@@ -105,7 +103,7 @@
     if (nil == _tableViewHeader) {
         UIImage * headerImage = [UIImage imageNamed:@"onepiece_kiudai"];
         // swipe header
-        self.tableViewHeader = [[STHeaderView alloc]init];
+        self.tableViewHeader = [[UIView alloc]init];
         _tableViewHeader.frame = CGRectMake(0, 0, kScreenWidth, kScreenWidth * (headerImage.size.height/headerImage.size.width));
         _tableViewHeader.backgroundColor = [UIColor whiteColor];
         _tableViewHeader.layer.masksToBounds = YES;
