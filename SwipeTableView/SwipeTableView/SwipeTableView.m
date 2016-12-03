@@ -147,12 +147,6 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     self.headerView.st_width = self.st_width;
 }
 
-- (void)didMoveToSuperview {
-    [super didMoveToSuperview];
-    [self moveHeaderViewToItemView:_currentItemView];
-    [self reloadData];
-}
-
 - (void)setSwipeHeaderView:(UIView *)swipeHeaderView {
     if (_swipeHeaderView != swipeHeaderView) {
         [_swipeHeaderView removeFromSuperview];
@@ -208,7 +202,6 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 - (void)reloadData {
     CGFloat headerOffsetY = _itemContentTopFromHeaderViewBottom ? -(_headerInset + _barInset) : 0;
     
-    //    [self setSwitchPageWithoutAnimation:YES]; // to set current itemview after reloaddata
     [self.contentOffsetQuene removeAllObjects];
     [self.contentSizeQuene removeAllObjects];
     [self.contentMinSizeQuene removeAllObjects];
@@ -222,8 +215,16 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     CGSize contentSize    = self.currentItemView.contentSize;
     self.contentOffsetQuene[@(_currentItemIndex)] = [NSValue valueWithCGPoint:contentOffset];
     self.contentSizeQuene[@(_currentItemIndex)]   = [NSValue valueWithCGSize:contentSize];
-    // scroll to target item index
+    
+    // Move the header view to self, and move it to the current itemview until scroll the
+    // item to next, it happens on the next event loop when change value of the property
+    // `switchPageWithoutAnimation` if the animated is NO.
     //
+    // If not, it may make the subviews of heder view disorder when change the superview
+    // of the header view frequently.
+    [self moveHeaderViewToContentView:self];
+    
+    // Scroll to target item index
     // 此处要先设置状态，因为scrollviewToItem的方法会导致先调用scrollViewDidScroll:然后再cellForRow重用item
     self.switchPageWithoutAnimation = !animated;
     NSIndexPath * indexPath = [NSIndexPath indexPathForItem:index inSection:0];
@@ -317,13 +318,15 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
         [_currentItemView addObserver:self forKeyPath:@"contentOffset" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:SwipeTableViewItemContentOffsetContext];
         [_currentItemView addObserver:self forKeyPath:@"contentSize" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:SwipeTableViewItemContentSizeContext];
         [_currentItemView addObserver:self forKeyPath:@"panGestureRecognizer.state" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:SwipeTableViewItemPanGestureContext];
+        // move headerView to currentItemView first
+        [self moveHeaderViewToItemView:subView];
     }
     
     UIScrollView * lastItemView = _currentItemView;
     NSInteger lastIndex         = _currentItemIndex;
     
     if (_switchPageWithoutAnimation) {
-        // observe
+        // Change observe
         [_currentItemView removeObserver:self forKeyPath:@"contentOffset"];
         [_currentItemView removeObserver:self forKeyPath:@"contentSize"];
         [_currentItemView removeObserver:self forKeyPath:@"panGestureRecognizer.state"];
@@ -333,11 +336,13 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
         self.currentItemIndex = indexPath.row;
         self.currentItemView  = subView;
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            // Change the property on the next event loop, to enable the effect on the call back of KVO.
             _switchPageWithoutAnimation = !_switchPageWithoutAnimation;
+            // Move headerView to currentItemView after scrolling the view. And before this action
+            // the header view may be subview of self, if method scrollToItemAtIndex:animated: was called
+            // and the animated is NO.
+            [self moveHeaderViewToItemView:subView];
         });
-        
-        // _switchPageWithoutAnimation 是 YES 的情况下，主动切换 headerview 到当前的 itemview 上
-        [self moveHeaderViewToItemView:_currentItemView];
     }
     
     // make the itemview's contentoffset same
@@ -367,9 +372,6 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
      *  First init or reloaddata,this condition will be executed when the item init or call the method `reloadData`.
      */
     if (lastIndex == index) {
-        // move headerView to currentItemView first
-        [self moveHeaderViewToItemView:itemView];
-        
         CGPoint initContentOffset = CGPointMake(0, -itemView.contentInset.top);
         
         // save current contentOffset before reset contentSize,to reset contentOffset when KVO contentSize.
@@ -490,7 +492,7 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
         CGFloat newOffsetY      = [change[NSKeyValueChangeNewKey] CGPointValue].y;
         UIScrollView * itemView = object;
         
-        if (!_stickyHeaderDiabled && itemView == _currentItemView) {
+        if (!_switchPageWithoutAnimation && !_stickyHeaderDiabled && itemView == _currentItemView) {
             CGFloat topStickyOffset = _itemContentTopFromHeaderViewBottom ? -_barInset : _headerInset;
             topStickyOffset        -= _stickyHeaderTopInset;
             CGFloat maxTopOffset    = _itemContentTopFromHeaderViewBottom ? -_headerView.st_height : 0;
@@ -591,7 +593,7 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
         if (_switchPageWithoutAnimation) {
             return;
         }
-        // observe
+        // Change observe
         [_currentItemView removeObserver:self forKeyPath:@"contentOffset"];
         [_currentItemView removeObserver:self forKeyPath:@"contentSize"];
         [_currentItemView removeObserver:self forKeyPath:@"panGestureRecognizer.state"];
@@ -604,7 +606,7 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
         [_currentItemView addObserver:self forKeyPath:@"contentSize" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:SwipeTableViewItemContentSizeContext];
         [_currentItemView addObserver:self forKeyPath:@"panGestureRecognizer.state" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:SwipeTableViewItemPanGestureContext];
         
-        // did index change
+        // Did index change
         if (_delegate && [_delegate respondsToSelector:@selector(swipeTableViewCurrentItemIndexDidChange:)]) {
             [_delegate swipeTableViewCurrentItemIndexDidChange:self];
         }
@@ -615,7 +617,7 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 }
 
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
-    // 切换 headerview 的 superview，使其显示在 collectionview 的父视图上
+    // Move the header view to self, to keep the position relative to screen of the header view.
     [self moveHeaderViewToContentView:self];
     
     if (_delegate && [_delegate respondsToSelector:@selector(swipeTableViewWillBeginDragging:)]) {
@@ -624,7 +626,7 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 }
 
 - (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate {
-    // 切换 headerview 到当前的 itemview 上
+    // Move the header view to current itemview after scrolling, to enable scroll the header view.
     if (!decelerate) {
         [self moveHeaderViewToItemView:_currentItemView];
     }
@@ -641,7 +643,7 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 }
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
-    // 切换 headerview 到当前的 itemview 上
+    // Move the header view to current itemview after scrolling, to enable scroll the header view.
     [self moveHeaderViewToItemView:_currentItemView];
     
     if (_delegate && [_delegate respondsToSelector:@selector(swipeTableViewDidEndDecelerating:)]) {
