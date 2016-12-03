@@ -271,6 +271,8 @@
 				TargetAttributes = {
 					7DFB6AC81CAEBCC600C2F0D3 = {
 						CreatedOnToolsVersion = 7.2;
+						DevelopmentTeam = H4JK55MDDZ;
+						ProvisioningStyle = Automatic;
 					};
 					7DFB6AE11CAEBCC600C2F0D3 = {
 						CreatedOnToolsVersion = 7.2;
@@ -463,9 +465,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = H4JK55MDDZ;
 				INFOPLIST_FILE = SwipeTableView/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = mengliang.SwipeTableView;
+				PRODUCT_BUNDLE_IDENTIFIER = com.roylee.SwipeTableView;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -474,9 +478,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = H4JK55MDDZ;
 				INFOPLIST_FILE = SwipeTableView/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = mengliang.SwipeTableView;
+				PRODUCT_BUNDLE_IDENTIFIER = com.roylee.SwipeTableView;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

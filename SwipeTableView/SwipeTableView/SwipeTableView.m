@@ -142,16 +142,13 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 - (void)layoutSubviews {
     [super layoutSubviews];
     
-    //    self.contentView.frame = self.bounds;
-    //    self.layout.itemSize = self.bounds.size;
-    //    self.headerView.st_width = self.st_width;
+    self.contentView.frame = self.bounds;
+    self.layout.itemSize = self.bounds.size;
+    self.headerView.st_width = self.st_width;
 }
 
 - (void)didMoveToSuperview {
     [super didMoveToSuperview];
-    self.contentView.frame = self.bounds;
-    self.layout.itemSize = self.bounds.size;
-    self.headerView.st_width = self.st_width;
     [self moveHeaderViewToItemView:_currentItemView];
     [self reloadData];
 }
