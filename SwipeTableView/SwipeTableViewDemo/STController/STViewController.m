@@ -248,6 +248,9 @@
     if (nil == _tableView) {
         _tableView = [[CustomTableView alloc]initWithFrame:_swipeTableView.bounds style:UITableViewStylePlain];
         _tableView.backgroundColor = RGBColor(255, 255, 225);
+        UIEdgeInsets contentInsets = _tableView.contentInset;
+        contentInsets.top = _type == STControllerTypeHiddenNavBar?0:64;
+        _tableView.contentInset = contentInsets;
     }
     return _tableView;
 }
@@ -256,6 +259,9 @@
     if (nil == _collectionView) {
         _collectionView = [[CustomCollectionView alloc]initWithFrame:_swipeTableView.bounds];
         _collectionView.backgroundColor = RGBColor(255, 255, 225);
+        UIEdgeInsets contentInsets = _collectionView.contentInset;
+        contentInsets.top = _type == STControllerTypeHiddenNavBar?0:64;
+        _collectionView.contentInset = contentInsets;
     }
     return _collectionView;
 }
@@ -328,6 +334,9 @@
             if (nil == tableView) {
                 tableView = [[CustomTableView alloc]initWithFrame:swipeView.bounds style:UITableViewStylePlain];
                 tableView.backgroundColor = RGBColor(255, 255, 225);
+                UIEdgeInsets contentInsets = tableView.contentInset;
+                contentInsets.top = _type == STControllerTypeHiddenNavBar?0:64;
+                tableView.contentInset = contentInsets;
             }
             
             // 获取当前index下item的数据，进行数据刷新
