@@ -43,41 +43,26 @@
 @property (nonatomic, assign) NSIndexPath * cunrrentItemIndexpath;
 @property (nonatomic, readwrite) NSInteger currentItemIndex;
 @property (nonatomic, readwrite) UIScrollView * currentItemView;
-/**
- *  将要显示的item的index
- */
+/// 将要显示的item的index
 @property (nonatomic, assign) NSInteger shouldVisibleItemIndex;
 
-/**
- *  将要显示的itemView
- */
+/// 将要显示的itemView
 @property (nonatomic, strong) UIScrollView * shouldVisibleItemView;
 
-/**
- *  记录重用中各个item的contentOffset，最后还原用
- */
+/// 记录重用中各个item的contentOffset，最后还原用
 @property (nonatomic, strong) NSMutableDictionary * contentOffsetQuene;
 
-/**
- *  记录item的contentSize
- */
+/// 记录item的contentSize
 @property (nonatomic, strong) NSMutableDictionary * contentSizeQuene;
 
-/**
- *  记录item所要求的最小contentSize
- */
+/// 记录item所要求的最小contentSize
 @property (nonatomic, strong) NSMutableDictionary * contentMinSizeQuene;
 
-/**
- *  调用 scrollToItemAtIndex:animated: animated为NO的状态
- */
+/// 调用 scrollToItemAtIndex:animated: animated为NO的状态
 @property (nonatomic, assign) BOOL switchPageWithoutAnimation;
 
-/**
- *  标记itemView自适应contentSize的状态，用于在observe中修改当前itemView的contentOffset（重设contentSize影响contentOffset）
- */
+/// 标记itemView自适应contentSize的状态，用于在observe中修改当前itemView的contentOffset（重设contentSize影响contentOffset）
 @property (nonatomic, assign) BOOL isAdjustingcontentSize;
-
 
 @end
 
@@ -102,7 +87,7 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 
 - (void)commonInit {
     // collection view
-    self.contentView = [[UICollectionView alloc]initWithFrame:CGRectZero collectionViewLayout:self.layout];
+    self.contentView = [[UICollectionView alloc]initWithFrame:self.bounds collectionViewLayout:self.layout];
     _contentView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     _contentView.backgroundColor = [UIColor clearColor];
     _contentView.showsHorizontalScrollIndicator = NO;
@@ -136,6 +121,7 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     _barInset = 0;
     _currentItemIndex = 0;
     _switchPageWithoutAnimation = NO;
+    _itemContentTopFromHeaderViewBottom = NO;
     _cunrrentItemIndexpath  = [NSIndexPath indexPathForItem:0 inSection:0];
 }
 
@@ -156,13 +142,16 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 - (void)layoutSubviews {
     [super layoutSubviews];
     
-    self.contentView.frame = self.bounds;
-    self.layout.itemSize = self.bounds.size;
-    self.headerView.st_width = self.st_width;
+    //    self.contentView.frame = self.bounds;
+    //    self.layout.itemSize = self.bounds.size;
+    //    self.headerView.st_width = self.st_width;
 }
 
 - (void)didMoveToSuperview {
     [super didMoveToSuperview];
+    self.contentView.frame = self.bounds;
+    self.layout.itemSize = self.bounds.size;
+    self.headerView.st_width = self.st_width;
     [self moveHeaderViewToItemView:_currentItemView];
     [self reloadData];
 }
@@ -176,9 +165,8 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
         _swipeHeaderView.st_top = 0;
         _headerView.st_height   = _swipeHeaderBar.st_height + _swipeHeaderView.st_height;
         _headerInset            = _swipeHeaderView.st_height;
-
+        
         [self reloadData];
-        [self layoutIfNeeded];
     }
 }
 
@@ -193,14 +181,12 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
         _barInset                 = _swipeHeaderBar.st_height;
         
         [self reloadData];
-        [self layoutIfNeeded];
     }
 }
 
 - (void)setStickyHeaderTopInset:(CGFloat)stickyHeaderTopInset {
     _stickyHeaderTopInset = stickyHeaderTopInset;
     [self reloadData];
-    [self layoutIfNeeded];
 }
 
 - (void)setAlwaysBounceHorizontal:(BOOL)alwaysBounceHorizontal {
@@ -223,9 +209,9 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 #pragma mark -
 
 - (void)reloadData {
-    CGFloat headerOffsetY = _useItemHeaderView ? 0 : -(_headerInset + _barInset);
+    CGFloat headerOffsetY = _itemContentTopFromHeaderViewBottom ? -(_headerInset + _barInset) : 0;
     
-//    [self setSwitchPageWithoutAnimation:YES]; // to set current itemview after reloaddata
+    //    [self setSwitchPageWithoutAnimation:YES]; // to set current itemview after reloaddata
     [self.contentOffsetQuene removeAllObjects];
     [self.contentSizeQuene removeAllObjects];
     [self.contentMinSizeQuene removeAllObjects];
@@ -240,9 +226,8 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     self.contentOffsetQuene[@(_currentItemIndex)] = [NSValue valueWithCGPoint:contentOffset];
     self.contentSizeQuene[@(_currentItemIndex)]   = [NSValue valueWithCGSize:contentSize];
     // scroll to target item index
-    /*！
-     * 此处要先设置状态，因为scrollviewToItem的方法会导致先调用scrollViewDidScroll:然后再cellForRow重用item
-     */
+    //
+    // 此处要先设置状态，因为scrollviewToItem的方法会导致先调用scrollViewDidScroll:然后再cellForRow重用item
     self.switchPageWithoutAnimation = !animated;
     NSIndexPath * indexPath = [NSIndexPath indexPathForItem:index inSection:0];
     [self.contentView scrollToItemAtIndexPath:indexPath atScrollPosition:UICollectionViewScrollPositionCenteredHorizontally animated:animated];
@@ -265,8 +250,29 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
         UIScrollView * newSubView = [_dataSource swipeTableView:self viewForItemAtIndex:indexPath.row reusingView:subView];
         newSubView.scrollsToTop = NO;
         
-        // 公共 header 的留白采用 tableHeaderView 等
-        if (_useItemHeaderView) {
+        // 公共 header 采用 contentInsets
+        if (_itemContentTopFromHeaderViewBottom) {
+            // top inset
+            CGFloat topInset = _headerInset + _barInset;
+            UIEdgeInsets contentInset = newSubView.contentInset;
+            BOOL setTopInset = [objc_getAssociatedObject(newSubView, SwipeTableViewItemTopInsetKey) boolValue];
+            if (!setTopInset) {
+                contentInset.top += topInset;
+                newSubView.contentInset = contentInset;
+                newSubView.scrollIndicatorInsets = contentInset;
+                newSubView.contentOffset = CGPointMake(0, - topInset);  // set default contentOffset after init
+                objc_setAssociatedObject(newSubView, SwipeTableViewItemTopInsetKey, @(YES), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+            }else {
+                // update
+                CGFloat deltaTopInset = topInset - contentInset.top;
+                contentInset.top += deltaTopInset;
+                newSubView.contentInset = contentInset;
+                newSubView.scrollIndicatorInsets = contentInset;
+            }
+            
+        }
+        // 公共 header 的留白采用 tableHeaderView...
+        else {
             NSAssert([newSubView isKindOfClass:UITableView.class] || [newSubView isKindOfClass:STCollectionView.class], @"The item view from dataSouce must be kind of UITalbeView class or STCollectionView class!");
             
             // header view
@@ -287,26 +293,6 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
                 headerView.st_height += deltHeaderHeight;
             }
             newSubView.headerView = headerView;
-        }
-        // 公共 header 采用 contentInsets
-        else {
-            // top inset
-            CGFloat topInset = _headerInset + _barInset;
-            UIEdgeInsets contentInset = newSubView.contentInset;
-            BOOL setTopInset = [objc_getAssociatedObject(newSubView, SwipeTableViewItemTopInsetKey) boolValue];
-            if (!setTopInset) {
-                contentInset.top += topInset;
-                newSubView.contentInset = contentInset;
-                newSubView.scrollIndicatorInsets = contentInset;
-                newSubView.contentOffset = CGPointMake(0, - topInset);  // set default contentOffset after init
-                objc_setAssociatedObject(newSubView, SwipeTableViewItemTopInsetKey, @(YES), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-            }else {
-                // update
-                CGFloat deltaTopInset = topInset - contentInset.top;
-                contentInset.top += deltaTopInset;
-                newSubView.contentInset = contentInset;
-                newSubView.scrollIndicatorInsets = contentInset;
-            }
         }
         
         // add new subview
@@ -352,6 +338,9 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             _switchPageWithoutAnimation = !_switchPageWithoutAnimation;
         });
+        
+        // _switchPageWithoutAnimation 是 YES 的情况下，主动切换 headerview 到当前的 itemview 上
+        [self moveHeaderViewToItemView:_currentItemView];
     }
     
     // make the itemview's contentoffset same
@@ -377,7 +366,7 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 
 - (void)adjustItemViewContentOffset:(UIScrollView *)itemView atIndex:(NSInteger)index fromLastItemView:(UIScrollView *)lastItemView lastIndex:(NSInteger)lastIndex {
     
-    /** 
+    /**
      *  First init or reloaddata,this condition will be executed when the item init or call the method `reloadData`.
      */
     if (lastIndex == index) {
@@ -395,7 +384,7 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
         return;
     }
     
-    /** 
+    /**
      *  Adjust contentOffset
      */
     // save current item contentoffset
@@ -408,7 +397,7 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     }
     
     // 取出记录的offset
-    CGFloat topMarginOffsetY  = _useItemHeaderView ? _headerInset :- _barInset;
+    CGFloat topMarginOffsetY  = _itemContentTopFromHeaderViewBottom ? -_barInset : _headerInset;
     topMarginOffsetY         -= _stickyHeaderTopInset;
     
     NSValue *offsetObj = [self.contentOffsetQuene objectForKey:@(index)];
@@ -433,7 +422,7 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     _contentOffsetQuene[@(index)] = [NSValue valueWithCGPoint:itemContentOffset];
     
     
-    /** 
+    /**
      *  Adjust contentsize
      */
     [self adjustItemViewContentSize:itemView atIndex:index];
@@ -445,11 +434,11 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 
 - (void)adjustItemViewContentSize:(UIScrollView *)itemView atIndex:(NSInteger)index {
     // get the min required height of contentSize
-    CGFloat minRequireHeight = itemView.st_height - _barInset - _stickyHeaderTopInset;
-    if (_useItemHeaderView) {
-        minRequireHeight = itemView.st_height + _headerInset - _stickyHeaderTopInset;
+    CGFloat minRequireHeight = itemView.st_height + _headerInset - _stickyHeaderTopInset;
+    if (_itemContentTopFromHeaderViewBottom) {
+        minRequireHeight = itemView.st_height - _barInset - _stickyHeaderTopInset;
     }
-
+    
     // 修正contentInset的bottom的影响
     minRequireHeight  -= itemView.contentInset.bottom;
     // 重设contentsize的高度
@@ -471,17 +460,26 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 }
 
 - (void)moveHeaderViewToItemView:(UIScrollView *)itemView {
-    UIView * superView = _useItemHeaderView ? itemView.headerView : itemView;
-    [_headerView removeFromSuperview];
+    UIView * superView = _itemContentTopFromHeaderViewBottom ? itemView : itemView.headerView;
+    if (_headerView.superview == superView) {
+        return;
+    }
+    _headerView.st_top = _itemContentTopFromHeaderViewBottom ? -_headerView.st_height : 0;
+    
+    /// Add the header view to current item view,
+    /// Note that, can not call -removeFromSuperView here, it will hold the main quene some times.
     [superView addSubview:_headerView];
-    [itemView setContentOffset:itemView.contentOffset];
 }
 
 - (void)moveHeaderViewToContentView:(UIView *)contentView {
+    if (_headerView.superview == contentView) {
+        return;
+    }
     CGPoint origin = [_headerView.superview convertPoint:_headerView.frame.origin toView:contentView];
     _headerView.st_top = origin.y;
     
-    [_headerView removeFromSuperview];
+    /// Add the header view to current item view,
+    /// Note that, can not call -removeFromSuperView here, it will hold the main quene some times.
     [contentView addSubview:_headerView];
 }
 
@@ -495,28 +493,24 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
         CGFloat newOffsetY      = [change[NSKeyValueChangeNewKey] CGPointValue].y;
         UIScrollView * itemView = object;
         
-        
         if (!_stickyHeaderDiabled && itemView == _currentItemView) {
-            CGFloat topStickyOffset = _useItemHeaderView ? _headerInset : -_barInset;
+            CGFloat topStickyOffset = _itemContentTopFromHeaderViewBottom ? -_barInset : _headerInset;
             topStickyOffset        -= _stickyHeaderTopInset;
-            CGFloat maxTopOffset    = _useItemHeaderView ? 0 : -_headerView.st_height;
+            CGFloat maxTopOffset    = _itemContentTopFromHeaderViewBottom ? -_headerView.st_height : 0;
+            maxTopOffset           -= _currentItemView.contentInset.top;
             
             // sticky the header view
             if (newOffsetY > topStickyOffset) {
-                CGPoint headerBottom = CGPointMake(0, _barInset + _stickyHeaderTopInset);
-                CGPoint targetBottom = [self convertPoint:headerBottom toView:_headerView.superview];
-                _headerView.st_bottom = targetBottom.y;
+                [self moveHeaderViewToContentView:self];
+                _headerView.st_bottom = _barInset + _stickyHeaderTopInset;
             }
             else {
-                CGFloat top = 0;
                 if (newOffsetY < maxTopOffset && _swipeHeaderAlwaysOnTop) {
-                    CGPoint headerTop = CGPointZero;
-                    CGPoint targetTop = [self convertPoint:headerTop toView:_headerView.superview];
-                    top = targetTop.y;
+                    [self moveHeaderViewToContentView:self];
+                    _headerView.st_top = _currentItemView.contentInset.top; // 0 or not.
                 }else {
-                    top = _useItemHeaderView ? 0 : -_headerView.st_height;
+                    [self moveHeaderViewToItemView:_currentItemView];
                 }
-                _headerView.st_top = top;
             }
         }
         
