@@ -167,7 +167,7 @@
 - (void)_tapHeader:(UITapGestureRecognizer *)tap {
     
     CGFloat changeHeight = 50; // or -50, it will be parallax.
-    UIScrollView * currentItem = _swipeTableView.currentItemView;
+    UIScrollView * currentItem = [_swipeTableView.currentItemView viewWithTag:SwipeTableViewScrollViewTag];
 #if !defined(ST_PULLTOREFRESH_HEADER_HEIGHT)
     CGPoint contentOffset = currentItem.contentOffset;
     UIEdgeInsets inset = currentItem.contentInset;
@@ -403,7 +403,8 @@
 - (BOOL)swipeTableView:(SwipeTableView *)swipeTableView shouldPullToRefreshAtIndex:(NSInteger)index {
     // 如果正在刷新，返回 NO 保留header的回弹效果
     // 返回值是 item 正在刷新的取反值
-    return !(swipeTableView.currentItemView.header.state == STRefreshStateRefeshing);
+    UIScrollView *scrollView = [swipeTableView.currentItemView viewWithTag:SwipeTableViewScrollViewTag];
+    return !(scrollView.header.state == STRefreshStateRefeshing);
 }
 
 - (CGFloat)swipeTableView:(SwipeTableView *)swipeTableView heightForRefreshHeaderAtIndex:(NSInteger)index {

@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
+UIKIT_EXTERN const CGFloat SwipeTableViewScrollViewTag;
+
 @protocol SwipeTableViewDataSource;
 @protocol SwipeTableViewDelegate;
 @interface SwipeTableView : UIView
@@ -43,7 +45,12 @@
 /**
  * 当前itemView，在滑动swipeView过程中，currentItemView的变化以显示窗口的1/2宽为界限
  */
-@property (nonatomic, readonly, strong) UIScrollView * currentItemView;
+@property (nonatomic, readonly, strong) UIView * currentItemView;
+
+/**
+ * 当前itemView的 scrollview
+ */
+@property (nonatomic, readonly, strong) UIScrollView * currentScrollView;
 
 /**
  * 每个 itemview 的内容是否从公共 headerview 的底部开始，默认是 NO。
@@ -89,7 +96,7 @@
 @protocol SwipeTableViewDataSource <NSObject>
 
 - (NSInteger)numberOfItemsInSwipeTableView:(SwipeTableView *)swipeView;
-- (UIScrollView *)swipeTableView:(SwipeTableView *)swipeView viewForItemAtIndex:(NSInteger)index reusingView:(UIScrollView *)view;
+- (UIView *)swipeTableView:(SwipeTableView *)swipeView viewForItemAtIndex:(NSInteger)index reusingView:(UIView *)view;
 
 @end
 
