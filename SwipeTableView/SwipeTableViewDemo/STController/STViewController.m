@@ -46,6 +46,7 @@
     _swipeTableView.swipeHeaderView = disableBarScroll?nil:self.tableViewHeader;
     _swipeTableView.swipeHeaderBar = self.segmentBar;
     _swipeTableView.swipeHeaderAlwaysOnTop = NO;
+    //    _swipeTableView.itemContentTopFromHeaderViewBottom = YES;
     _swipeTableView.stickyHeaderTopInset = hiddenNavigationBar?0:64;
     [self.view addSubview:_swipeTableView];
     
@@ -107,14 +108,14 @@
         _tableViewHeader.frame = CGRectMake(0, 0, kScreenWidth, kScreenWidth * (headerImage.size.height/headerImage.size.width));
         _tableViewHeader.backgroundColor = [UIColor whiteColor];
         _tableViewHeader.layer.masksToBounds = YES;
-        
+
         // image view
         self.headerImageView = [[UIImageView alloc]initWithImage:headerImage];
         _headerImageView.contentMode = UIViewContentModeScaleAspectFill;
         _headerImageView.userInteractionEnabled = YES;
         _headerImageView.frame = _tableViewHeader.bounds;
         _headerImageView.autoresizingMask = UIViewAutoresizingFlexibleHeight;
-        
+
         // title label
         UILabel * title = [[UILabel alloc]init];
         title.textColor = RGBColor(255, 255, 255);
@@ -124,10 +125,10 @@
         title.st_size = CGSizeMake(200, 30);
         title.st_centerX = _headerImageView.st_centerX;
         title.st_bottom = _headerImageView.st_bottom - 20;
-        
+
         // tap gesture
         UITapGestureRecognizer * tap = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(tapHeader:)];
-        
+
         [_tableViewHeader addSubview:_headerImageView];
         [_tableViewHeader addSubview:title];
         [_headerImageView addGestureRecognizer:tap];
@@ -167,7 +168,7 @@
 - (void)_tapHeader:(UITapGestureRecognizer *)tap {
     
     CGFloat changeHeight = 50; // or -50, it will be parallax.
-    UIScrollView * currentItem = [_swipeTableView.currentItemView viewWithTag:SwipeTableViewScrollViewTag];
+    UIScrollView * currentItem = _swipeTableView.currentScrollView;
 #if !defined(ST_PULLTOREFRESH_HEADER_HEIGHT)
     CGPoint contentOffset = currentItem.contentOffset;
     UIEdgeInsets inset = currentItem.contentInset;
@@ -248,9 +249,6 @@
     if (nil == _tableView) {
         _tableView = [[CustomTableView alloc]initWithFrame:_swipeTableView.bounds style:UITableViewStylePlain];
         _tableView.backgroundColor = RGBColor(255, 255, 225);
-        UIEdgeInsets contentInsets = _tableView.contentInset;
-        contentInsets.top = _type == STControllerTypeHiddenNavBar?0:64;
-        _tableView.contentInset = contentInsets;
     }
     return _tableView;
 }
@@ -259,9 +257,6 @@
     if (nil == _collectionView) {
         _collectionView = [[CustomCollectionView alloc]initWithFrame:_swipeTableView.bounds];
         _collectionView.backgroundColor = RGBColor(255, 255, 225);
-        UIEdgeInsets contentInsets = _collectionView.contentInset;
-        contentInsets.top = _type == STControllerTypeHiddenNavBar?0:64;
-        _collectionView.contentInset = contentInsets;
     }
     return _collectionView;
 }
@@ -334,14 +329,12 @@
             if (nil == tableView) {
                 tableView = [[CustomTableView alloc]initWithFrame:swipeView.bounds style:UITableViewStylePlain];
                 tableView.backgroundColor = RGBColor(255, 255, 225);
-                UIEdgeInsets contentInsets = tableView.contentInset;
-                contentInsets.top = _type == STControllerTypeHiddenNavBar?0:64;
-                tableView.contentInset = contentInsets;
             }
             
             // 获取当前index下item的数据，进行数据刷新
             id data = _dataDic[@(index)];
             [tableView refreshWithData:data atIndex:index];
+            
             
             view = tableView;
         }
@@ -379,9 +372,6 @@
             break;
     }
     
-    // 在没有设定下拉刷新宏的条件下，自定义的下拉刷新需要做 refreshheader 的 frame 处理
-    [self configRefreshHeaderForItem:view];
-    
     return view;
 }
 
@@ -394,38 +384,6 @@
 - (void)swipeTableViewDidEndDecelerating:(SwipeTableView *)swipeView {
     [self getDataAtIndex:swipeView.currentItemIndex];
 }
-
-/**
- *  以下两个代理，在未定义宏 #define ST_PULLTOREFRESH_HEADER_HEIGHT，并自定义下拉刷新的时候，必须实现
- *  如果设置了下拉刷新的宏，以下代理可根据需要实现即可
- *  为了避免item处于下拉刷新状态时，继续下拉从而没有回弹的现象，需要按照以下方式实现
- */
-- (BOOL)swipeTableView:(SwipeTableView *)swipeTableView shouldPullToRefreshAtIndex:(NSInteger)index {
-    // 如果正在刷新，返回 NO 保留header的回弹效果
-    // 返回值是 item 正在刷新的取反值
-    UIScrollView *scrollView = [swipeTableView.currentItemView viewWithTag:SwipeTableViewScrollViewTag];
-    return !(scrollView.header.state == STRefreshStateRefeshing);
-}
-
-- (CGFloat)swipeTableView:(SwipeTableView *)swipeTableView heightForRefreshHeaderAtIndex:(NSInteger)index {
-    return kSTRefreshHeaderHeight;
-}
-
-/**
- *  采用自定义修改下拉刷新，此时不会定义宏 #define ST_PULLTOREFRESH_HEADER_HEIGHT
- *  对于一些下拉刷新控件，可能会在`layouSubViews`中设置RefreshHeader的frame。所以，需要在itemView有效的方法中改变RefreshHeader的frame，如 `scrollViewDidScroll:`
- */
-- (void)configRefreshHeaderForItem:(UIScrollView *)itemView {
-    if (_type == STControllerTypeDisableBarScroll) {
-        itemView.header = nil;
-        return;
-    }
-#if !defined(ST_PULLTOREFRESH_HEADER_HEIGHT)
-    STRefreshHeader * header = itemView.header;
-    header.st_y = - (header.st_height + (_segmentBar.st_height + _headerImageView.st_height));
-#endif
-}
-
 
 
 #pragma  mark - UIViewControllerTransitioningDelegate
