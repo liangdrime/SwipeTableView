@@ -52,10 +52,10 @@ static BOOL STForwardInvocation(id self, NSInvocation *invocation) {
     SEL aliasSelector = STAliasForSelector(invocation.selector);
     STInvocationAgency *agency = objc_getAssociatedObject(self, aliasSelector);
     
+    // Invoke the new method before the origin method.
+    //
     // Replace the target & selector of the invocation, and
     // invoke the replaced method of the replaced target.
-    //
-    // Invoke the new method before the origin method.
     [agency invoke:^(id _target, SEL _selector) {
         invocation.target = _target;
         invocation.selector = _selector;
