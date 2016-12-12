@@ -329,14 +329,20 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
         if (!setHeaderHeight) {
             headerView.st_height += headerHeight;
             objc_setAssociatedObject(newSubView, SwipeTableViewItemTopInsetKey, @(YES), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+            newSubView.headerView = headerView;
         }else {
-            // update
+            /// Update the height of header view, only when the delta height is not 0,
+            ///
+            /// If just call `st_headerView` to set header view, it may make the position wrong
+            /// when change the current item view frequently.
             CGFloat deltHeaderHeight = headerHeight - headerView.st_height;
             headerView.st_height += deltHeaderHeight;
+            if (deltHeaderHeight != 0) {
+                newSubView.headerView = headerView;
+            }
         }
         contentInset.top = headerView.st_height + _swipeHeaderTopInset;
         newSubView.scrollIndicatorInsets = contentInset;
-        newSubView.headerView = headerView;
         
         if (newSubView != subView) {
             [subView removeFromSuperview];
