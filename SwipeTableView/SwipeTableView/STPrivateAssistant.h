@@ -1,5 +1,5 @@
 //
-//  STPrivate.h
+//  STPrivateAssistant.h
 //  SwipeTableView
 //
 //  Created by Roylee on 2016/12/11.
@@ -9,10 +9,13 @@
 #import <Foundation/Foundation.h>
 #import "SwipeTableView.h"
 
+typedef void(^InjectActionBlock)();
+
 @interface  SwipeTableView (Private)
 
 - (void)injectScrollAction:(SEL)selector toView:(UIScrollView *)scrollView fromSelector:(SEL)fromSelector;
-- (void)injectReloadAction:(SEL)selector toView:(UIScrollView *)scrollView;
+- (void)injectReloadAction:(InjectActionBlock)reloadActionBlock toView:(UIScrollView *)scrollView;
+void RunOnNextEventLoop(void(^block)());
 
 @end
 
@@ -21,6 +24,8 @@
 @interface UIScrollView (STExtension)
 
 @property (nonatomic, strong) UIView *st_headerView;
+@property (nonatomic, assign) NSInteger st_index;
+@property (nonatomic, assign) BOOL isReloadingData;
 - (SwipeTableView *)st_swipeTableView;
 
 @end
@@ -35,4 +40,15 @@ CGFloat CGFloatPixelFloor(CGFloat value);
 CGFloat CGFloatPixelRound(CGFloat value);
 
 @end
+
+
+
+typedef void(^STObserverCallBackBlock)(id object, id newValue, id oldValue);
+
+@interface STObserver : NSObject
+
++ (void)observerForObject:(id)object keyPath:(NSString *)keyPath callBackBlock:(STObserverCallBackBlock)callBackBlock;
+
+@end
+
 

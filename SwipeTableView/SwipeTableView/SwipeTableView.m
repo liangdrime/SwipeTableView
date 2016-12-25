@@ -8,7 +8,7 @@
 
 #import "SwipeTableView.h"
 #import <objc/runtime.h>
-#import "STPrivate.h"
+#import "STPrivateAssistant.h"
 #import "UIView+STFrame.h"
 #import "STCollectionView.h"
 
@@ -31,9 +31,6 @@ const CGFloat SwipeTableViewScrollViewTag = 997998;
 /// 将要显示的item的index
 @property (nonatomic, assign) NSInteger shouldVisibleItemIndex;
 
-/// 将要显示的itemView
-@property (nonatomic, strong) UIView * shouldVisibleItemView;
-
 /// 记录重用中各个item的contentOffset，最后还原用
 @property (nonatomic, strong) NSMutableDictionary * contentOffsetQuene;
 
@@ -54,14 +51,10 @@ const CGFloat SwipeTableViewScrollViewTag = 997998;
 
 @property (nonatomic, assign) BOOL contentOffsetKVODisabled;
 
-@property (nonatomic, assign) BOOL isItemViewReloadingData;
-
 @end
 
 static NSString * const SwipeContentViewCellIdfy       = @"SwipeContentViewCellIdfy";
 static const void *SwipeTableViewItemTopInsetKey       = &SwipeTableViewItemTopInsetKey;
-static void * SwipeTableViewItemContentOffsetContext   = &SwipeTableViewItemContentOffsetContext;
-static void * SwipeTableViewItemContentSizeContext     = &SwipeTableViewItemContentSizeContext;
 static void * SwipeTableViewItemContentInsetContext    = &SwipeTableViewItemContentInsetContext;
 static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanGestureContext;
 
@@ -188,7 +181,7 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     // it will scoll to top when tap status bar.
     _currentItemView.st_scrollView.scrollsToTop = NO;
     _currentItemView = currentItemView;
-    currentItemView.st_scrollView.scrollsToTop  = YES;
+    _currentItemView.st_scrollView.scrollsToTop = YES;
 }
 
 - (UIView *)currentScrollView {
@@ -215,25 +208,28 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 }
 
 - (void)scrollToItemAtIndex:(NSInteger)index animated:(BOOL)animated {
-    /// Record content offset of last item.
+    if (index == _currentItemIndex) {
+        return;
+    }
+    // Record content offset of last item.
     CGPoint contentOffset = self.currentItemView.st_scrollView.contentOffset;
     CGSize contentSize    = self.currentItemView.st_scrollView.contentSize;
     self.contentOffsetQuene[@(_currentItemIndex)] = [NSValue valueWithCGPoint:contentOffset];
     self.contentSizeQuene[@(_currentItemIndex)]   = [NSValue valueWithCGSize:contentSize];
     
-    /// Move the header view to self, and move it to the current itemview until scroll the
-    /// item to next, it happens on the next event loop when change value of the property
-    /// `switchPageWithoutAnimation` if the animated is NO.
-    ///
-    /// If not, it may make the subviews of heder view disorder when change the superview
-    /// of the header view frequently.
+    // Move the header view to self, and move it to the current itemview until scroll the
+    // item to next, it happens on the next event loop when change value of the property
+    // `switchPageWithoutAnimation` if the animated is NO.
+    //
+    // If not, it may make the subviews of heder view disorder when change the superview
+    // of the header view frequently.
     [self moveHeaderViewToContentView:self];
     
-    /// Scroll to the target item index.
-    ///
-    /// Note that, the perproty `switchPageWithoutAnimation` should set before, because the
-    /// method -scrollToItemAtIndexPath will call -scrollViewDidScroll firstly, and call
-    /// -cellForItemAtIndexPath late.
+    // Scroll to the target item index.
+    //
+    // Note that, the perproty `switchPageWithoutAnimation` should set before, because the
+    // method -scrollToItemAtIndexPath will call -scrollViewDidScroll firstly, and call
+    // -cellForItemAtIndexPath late.
     self.switchPageWithoutAnimation = !animated;
     NSIndexPath * indexPath = [NSIndexPath indexPathForItem:index inSection:0];
     [self.contentView scrollToItemAtIndexPath:indexPath atScrollPosition:UICollectionViewScrollPositionCenteredHorizontally animated:animated];
@@ -252,12 +248,14 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     UICollectionViewCell * cell = [collectionView dequeueReusableCellWithReuseIdentifier:SwipeContentViewCellIdfy forIndexPath:indexPath];
     
     UIView * subView = cell.contentView.subviews.firstObject;
+    UIScrollView * scrollView = subView.st_scrollView;
+    
     if (_dataSource && [_dataSource respondsToSelector:@selector(swipeTableView:viewForItemAtIndex:reusingView:)]) {
         UIView *newSubView = [_dataSource swipeTableView:self viewForItemAtIndex:indexPath.row reusingView:subView];
-        UIScrollView * scrollView = newSubView.st_scrollView;
+        scrollView = newSubView.st_scrollView;
         scrollView.scrollsToTop = NO;
         
-        /// Use contentInsets for the space of common headerview.
+        // Use contentInsets for the space of common headerview.
         if (_itemContentTopFromHeaderViewBottom) {
             // Set the top inset for common headerview.
             CGFloat topInset = _headerInset + _barInset;
@@ -276,8 +274,8 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
             }
             
         }
-        /// Use tableHeaderView or collectionHeaderView for common headerview, if the itemview
-        /// from datasource is subclass of UITableView or UICollectionView.
+        // Use tableHeaderView or collectionHeaderView for common headerview, if the itemview
+        // from datasource is subclass of UITableView or UICollectionView.
         else {
             NSAssert([scrollView isKindOfClass:UITableView.class] || [scrollView isKindOfClass:STCollectionView.class], @"The item view from dataSouce must be kind of UITalbeView class or STCollectionView class!");
             
@@ -295,10 +293,10 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
                 scrollView.st_headerView = headerView;
                 objc_setAssociatedObject(scrollView, SwipeTableViewItemTopInsetKey, @(YES), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
             }else {
-                /// Update the height of header view, only when the delta height is not 0,
-                ///
-                /// If just call `st_headerView` to set header view, it may make the position wrong
-                /// when change the current item view frequently.
+                // Update the height of header view, only when the delta height is not 0,
+                //
+                // If just call `st_headerView` to set header view, it may make the position wrong
+                // when change the current item view frequently.
                 CGFloat deltHeaderHeight = headerHeight - headerView.st_height;
                 headerView.st_height += deltHeaderHeight;
                 if (deltHeaderHeight != 0) {
@@ -316,16 +314,16 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
         
     }
     
-    // Reuse itemView observe
-    [self removeObserverFromItemView:_shouldVisibleItemView];
-    self.shouldVisibleItemIndex = indexPath.item;
-    self.shouldVisibleItemView  = subView;
-    [self addObserverToItemView:_shouldVisibleItemView];
+    // Set tag index to the item view.
+    scrollView.st_index = indexPath.item;
+    _shouldVisibleItemIndex = indexPath.item;
+    
+    // Add observer to the itemView.
+    [self addObserverToItemView:scrollView];
     
     // Init currentItemView
-    if (!_currentItemView) {
+    if (_currentItemIndex == indexPath.item) {
         self.currentItemView = subView;
-        [self addObserverToItemView:_currentItemView];
         // Move headerView to currentItemView first
         [self moveHeaderViewToItemView:subView];
     }
@@ -334,25 +332,25 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     NSInteger lastIndex   = _currentItemIndex;
     
     if (_switchPageWithoutAnimation) {
-        // Change observe
-        [self removeObserverFromItemView:_currentItemView];
-        [self addObserverToItemView:subView];
-        self.currentItemIndex = indexPath.row;
-        self.currentItemView  = subView;
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            /// Change the property on the next event loop, to enable the effect on the call back of KVO.
+        // Reset the current itemview and current index.
+        self.currentItemView = subView;
+        self.currentItemIndex = indexPath.item;
+        RunOnNextEventLoop(^{
+            // Change the property on the next event loop, to enable the effect on the call back of KVO.
             _switchPageWithoutAnimation = NO;
-            /// Move headerView to currentItemView after scrolling the view. And before this action
-            /// the header view may be subview of self, if method scrollToItemAtIndex:animated: was called
-            /// and the animated is NO.
-            [self moveHeaderViewToItemView:subView];
+            
+            // Move headerView to currentItemView after scrolling the view. And before this action
+            // the header view may be subview of self, if method -scrollToItemAtIndex:animated: was called
+            // and the animated is NO.
+            [self moveHeaderViewToItemView:_currentItemView];
         });
     }
+    
     // Inject actions to the scrollview
-    [self injectActionsToItemView:subView.st_scrollView];
+    [self injectActionsToItemView:scrollView];
     
     // Make the itemview's contentoffset same
-    [self adjustItemViewContentOffset:subView.st_scrollView atIndex:indexPath.item fromLastItemView:lastItemView.st_scrollView lastIndex:lastIndex];
+    [self adjustItemViewContentOffset:scrollView atIndex:indexPath.item fromLastItemView:lastItemView.st_scrollView lastIndex:lastIndex];
     
     return cell;
 }
@@ -373,9 +371,8 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 #pragma mark - Private
 
 - (void)adjustItemViewContentOffset:(UIScrollView *)itemView atIndex:(NSInteger)index fromLastItemView:(UIScrollView *)lastItemView lastIndex:(NSInteger)lastIndex {
-    
-    /// First init or reloaddata,this condition will be executed when the item init
-    /// or call the method `reloadData`.
+    // First init or reloaddata,this condition will be executed when the item init
+    // or call the method `reloadData`.
     if (lastIndex == index) {
         CGPoint initContentOffset = CGPointMake(0, -itemView.contentInset.top);
         
@@ -388,8 +385,8 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
         return;
     }
     
-    /// Adjust contentOffset below.
-    /// Save current item contentoffset
+    // Adjust contentOffset below.
+    // Save current item contentoffset
     CGPoint contentOffset  = lastItemView.contentOffset;
     if (lastItemView != itemView) {
         self.contentOffsetQuene[@(lastIndex)] = [NSValue valueWithCGPoint:contentOffset];
@@ -419,10 +416,9 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     }else {
         itemContentOffset.y = contentOffset.y;
     }
-    
+        
     // Save current contentOffset before reset contentSize,to reset contentOffset when KVO contentSize.
     _contentOffsetQuene[@(index)] = [NSValue valueWithCGPoint:itemContentOffset];
-    
     
     // Adjust contentsize
     [self adjustItemViewContentSize:itemView atIndex:index];
@@ -454,7 +450,7 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
         itemView.contentSize           = contentSize;
         _isAdjustingcontentSize        = YES;
         // 自适应contentSize的状态在当前事件循环之后解除
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        RunOnNextEventLoop(^{
             _isAdjustingcontentSize = NO;
         });
     }
@@ -468,10 +464,11 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     }else if ([self isHeaderBarSticky]) {
         return;
     }
+    
     _headerView.st_top = _itemContentTopFromHeaderViewBottom ? -_headerView.st_height : 0;
     
-    /// Add the header view to current item view,
-    /// Note that, can not call -removeFromSuperView here, it will hold the main quene some times.
+    // Add the header view to current item view,
+    // Note that, can not call -removeFromSuperView here, it will hold the main quene some times.
     [superView addSubview:_headerView];
 }
 
@@ -482,8 +479,8 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     CGPoint origin = [_headerView.superview convertPoint:_headerView.frame.origin toView:contentView];
     _headerView.st_top = origin.y;
     
-    /// Add the header view to current item view,
-    /// Note that, can not call -removeFromSuperView here, it will hold the main quene some times.
+    // Add the header view to current item view,
+    // Note that, can not call -removeFromSuperView here, it will hold the main quene some times.
     [contentView addSubview:_headerView];
 }
 
@@ -497,74 +494,70 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 #pragma mark - Observe & Inject Action
 
 - (void)injectActionsToItemView:(UIScrollView *)scrollView {
-    /// Inject scroll view did scroll action from the scrollview delegate.
-    /// In the mew method, update the position of common header view.
+    // Inject scroll view did scroll action from the scrollview delegate.
+    // In the mew method, update the position of common header view.
     [self injectScrollAction:@selector(st_scrollViewDidScroll:) toView:scrollView fromSelector:@selector(scrollViewDidScroll:)];
-    /// Inject reloadData action to monitor if should adjust contentsize.
-    ///
-    /// If the table or collection shriks when call -realodData, the offset will be adjusted.
-    /// So must record the offset before reloaddata, it will be used to reset offset when
-    /// reloaddata completed.
+    // Inject reloadData action to monitor if should adjust contentsize.
+    //
+    // If the table or collection shriks when call -realodData, the offset will be adjusted.
+    // So must record the offset before reloaddata, it will be used to reset offset when
+    // reloaddata completed.
     if (_shouldAdjustContentSize) {
-        [self injectReloadAction:@selector(st_reloadData) toView:scrollView];
+        __weak typeof(self) weakSelf = self;
+        __weak typeof(scrollView) weakScrollView = scrollView;
+        [self injectReloadAction:^{
+            [weakSelf st_reloadData:weakScrollView];
+        } toView:scrollView];
     }
 }
 
-- (void)addObserverToItemView:(UIView *)view {
-    [view.st_scrollView addObserver:self forKeyPath:@"contentOffset" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:SwipeTableViewItemContentOffsetContext];
-    [view.st_scrollView addObserver:self forKeyPath:@"contentSize" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:SwipeTableViewItemContentSizeContext];
+- (void)addObserverToItemView:(UIScrollView *)view {
+    [STObserver observerForObject:view keyPath:@"contentOffset" callBackBlock:^(UIScrollView *object, id newValue, id oldValue) {
+        [self scrollViewContentOffsetDidChanged:object newValue:newValue oldValue:oldValue];
+    }];
+    [STObserver observerForObject:view keyPath:@"contentSize" callBackBlock:^(UIScrollView *object, id newValue, id oldValue) {
+        [self scrollViewContentSizeDidChanged:object newValue:newValue oldValue:oldValue];
+    }];
 }
 
-- (void)removeObserverFromItemView:(UIView *)view {
-    [view.st_scrollView removeObserver:self forKeyPath:@"contentOffset"];
-    [view.st_scrollView removeObserver:self forKeyPath:@"contentSize"];
-}
-
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context {
+- (void)scrollViewContentOffsetDidChanged:(UIScrollView *)scrollView newValue:(id)newValue oldValue:(id)oldValue {
+    if (_contentOffsetKVODisabled) {
+        return;
+    }
     
-    /** contentOffset */
-    if (context == SwipeTableViewItemContentOffsetContext) {
-        if (_contentOffsetKVODisabled) {
-            return;
-        }
-        
-        /// If allowed adjust contentsize, use this perproty to indicate the status when the
-        /// item scrollview is adjusting contentsize.
-        ///
-        /// And use the stored offset in the `contentOffsetQuene` to reset the original offset
-        /// after the item scrollview adjusted contentsize.
-        if (_isAdjustingcontentSize) {
-            // 当前scrollview所对应的index
-            NSInteger index = _currentItemIndex;
-            if (object != _currentItemView) {
-                index = _shouldVisibleItemIndex;
-            }
-            UIScrollView * scrollView = object;
+    // If allowed adjust contentsize, use this perproty to indicate the status when the
+    // item scrollview is adjusting contentsize.
+    //
+    // And use the stored offset in the `contentOffsetQuene` to reset the original offset
+    // after the item scrollview adjusted contentsize.
+    if (_isAdjustingcontentSize) {
+        // Get index of the scrollview.
+        NSInteger index = scrollView.st_index;
+        if (index == _currentItemIndex || index == _shouldVisibleItemIndex) {
             NSValue * offsetObj       = _contentOffsetQuene[@(index)];
             if (nil != offsetObj) {
                 CGFloat requireOffsetY    = [offsetObj CGPointValue].y;
-                /// Follow is change offset of the scroll view, it will not call KVO,
-                /// but it will call -scrollViewDidScroll:.
+                // Follow is change offset of the scroll view, it will not call KVO,
+                // but it will call -scrollViewDidScroll:.
                 _contentOffsetKVODisabled = YES;
                 scrollView.contentOffset  = CGPointMake(scrollView.contentOffset.x, requireOffsetY);
                 _contentOffsetKVODisabled = NO;
-            }
+            };
         }
-        
     }
-    /** contentSize */
-    else if (context == SwipeTableViewItemContentSizeContext) {
-        // adjust contentSize
-        if (_shouldAdjustContentSize) {
-            // Get the real itemview index which will adjust contentsize.
-            NSInteger index = _currentItemIndex;
-            if (object != _currentItemView) {
-                index   = _shouldVisibleItemIndex;
-            }
-            UIScrollView * scrollView = object;
+}
+
+- (void)scrollViewContentSizeDidChanged:(UIScrollView *)scrollView newValue:(id)newValue oldValue:(id)oldValue {
+    // adjust contentSize
+    if (_shouldAdjustContentSize) {
+        
+        // Get the real itemview index which will adjust contentsize.
+        NSInteger index = scrollView.st_index;
+        if (index == _currentItemIndex || index == _shouldVisibleItemIndex) {
             CGFloat contentSizeH      = scrollView.contentSize.height;
             CGSize minRequireSize     = [_contentMinSizeQuene[@(index)] CGSizeValue];
             CGFloat minRequireSizeH   = CGFloatPixelRound(minRequireSize.height);
+            
             if (contentSizeH < minRequireSizeH) {
                 _isAdjustingcontentSize = YES;
                 minRequireSize = CGSizeMake(minRequireSize.width, minRequireSizeH);
@@ -574,10 +567,9 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
                 }else {
                     scrollView.contentSize = minRequireSize;
                 }
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                
+                RunOnNextEventLoop(^{
                     _isAdjustingcontentSize = NO;
-                    // Reset the status of item scrollview whether is it reloading data.
-                    _isItemViewReloadingData = NO;
                 });
             }
         }
@@ -585,46 +577,56 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 }
 
 - (void)st_scrollViewDidScroll:(UIScrollView *)scrollView {
-    CGFloat offsetY = scrollView.contentOffset.y;
+    BOOL isContentViewScrolling   = _contentView.isDragging || _contentView.isDecelerating;
+    BOOL currentItemViewNotScroll = isContentViewScrolling || scrollView != _currentItemView.st_scrollView;
+    if (currentItemViewNotScroll || _stickyHeaderDiabled) {
+        return;
+    }
     
-    if (!_stickyHeaderDiabled && scrollView == _currentItemView.st_scrollView) {
-        CGFloat topStickyOffset = _itemContentTopFromHeaderViewBottom ? -_barInset : _headerInset;
-        topStickyOffset        -= _stickyHeaderTopInset;
-        CGFloat minTopOffset    = _itemContentTopFromHeaderViewBottom ? -_headerView.st_height : 0;
-        minTopOffset           -= _currentItemView.st_scrollView.contentInset.top;
-        
-        // Sticky the header view
-        if (offsetY > topStickyOffset) {
+    CGFloat offsetY         = scrollView.contentOffset.y;
+    CGFloat topStickyOffset = _itemContentTopFromHeaderViewBottom ? -_barInset : _headerInset;
+    topStickyOffset        -= _stickyHeaderTopInset;
+    CGFloat minTopOffset    = _itemContentTopFromHeaderViewBottom ? -_headerView.st_height : 0;
+    minTopOffset           -= _currentItemView.st_scrollView.contentInset.top;
+    
+    // Sticky the header view
+    if (offsetY > topStickyOffset) {
+        [self moveHeaderViewToContentView:self];
+        _headerView.st_bottom = _barInset + _stickyHeaderTopInset;
+    }
+    else {
+        BOOL alwaysSticky = _swipeHeaderAlwaysOnTop || _swipeHeaderBarAlwaysStickyOnTop;
+        if (offsetY < minTopOffset && alwaysSticky) {
             [self moveHeaderViewToContentView:self];
-            _headerView.st_bottom = _barInset + _stickyHeaderTopInset;
-        }
-        else {
-            BOOL alwaysSticky = _swipeHeaderAlwaysOnTop || _swipeHeaderBarAlwaysStickyOnTop;
-            if (offsetY < minTopOffset && alwaysSticky) {
-                [self moveHeaderViewToContentView:self];
-                _headerView.st_top = _stickyHeaderTopInset; // 0 or not.
-            }else {
-                [self moveHeaderViewToItemView:_currentItemView];
-            }
+            _headerView.st_top = _stickyHeaderTopInset; // 0 or not.
+        }else {
+            [self moveHeaderViewToItemView:_currentItemView];
         }
     }
     
-    /// If enable asjust contentsize of itemview, should store the offset when the scrollview
-    /// is scrolling, it will be used to reset the original offset when the contentsize changed.
-    ///
-    /// But if the tableview or collection view is invoking -reloadData, this -scrollViewDidScroll
-    /// will be called, and it will adjust offset if the table shrinks. Then the offset will be
-    /// great changed.
-    /// So in this case, not store the offset.
-    if (_shouldAdjustContentSize && !_isItemViewReloadingData) {
+    // If enable adjust contentsize of itemview, should store the offset when the scrollview
+    // is scrolling, it will be used to reset the original offset when the contentsize changed.
+    //
+    // But if the tableview or collection view is invoking -reloadData, this -scrollViewDidScroll
+    // will be called, and it will adjust offset if the table shrinks. Then the offset will be
+    // great changed.
+    // So in this case, not store the offset.
+    if (_shouldAdjustContentSize && !scrollView.isReloadingData) {
         _contentOffsetQuene[@(_currentItemIndex)] = [NSValue valueWithCGPoint:scrollView.contentOffset];
     }
 }
 
-- (void)st_reloadData {
-    /// Mark the status when the item scrollview began -realodData, and it will
-    /// be reset when the contentsize be adjusted.
-    _isItemViewReloadingData = YES;
+- (void)st_reloadData:(id)object {
+    if (![object isKindOfClass:[UITableView class]] && ![object isKindOfClass:[UICollectionView class]]) {
+        return;
+    }
+    // Mark the status when the item scrollview began -realodData, and it will
+    // be reset when the contentsize be adjusted.
+    ((UIScrollView *)object).isReloadingData = YES;
+    // Reset the status of item scrollview after reload data.
+    RunOnNextEventLoop(^{
+        ((UIScrollView *)object).isReloadingData = NO;
+    });
 }
 
 #pragma mark - UIScrollView M
@@ -635,19 +637,36 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     NSInteger currentItemIndex = offsetX/scrollView.st_width + 0.5;
     
     if (currentItemIndex != _currentItemIndex) {
+        NSIndexPath *currentIndexPath = [NSIndexPath indexPathForItem:currentItemIndex inSection:0];
+        UIView *currentItemView = [self.contentView cellForItemAtIndexPath:currentIndexPath].contentView.subviews.firstObject;
+        
         if (_switchPageWithoutAnimation) {
+            if (currentItemView) {
+                self.currentItemIndex = currentItemIndex;
+                self.currentItemView = currentItemView;
+                
+                RunOnNextEventLoop(^{
+                    // Change the property on the next event loop, to enable the effect on the call back of KVO.
+                    _switchPageWithoutAnimation = NO;
+                    
+                    // Move headerView to currentItemView after scrolling the view. And before this action
+                    // the header view may be subview of self, if method -scrollToItemAtIndex:animated: was called
+                    // and the animated is NO.
+                    [self moveHeaderViewToItemView:_currentItemView];
+                });
+                
+                // Did index change call back.
+                if (_delegate && [_delegate respondsToSelector:@selector(swipeTableViewCurrentItemIndexDidChange:)]) {
+                    [_delegate swipeTableViewCurrentItemIndexDidChange:self];
+                }
+            }
             return;
         }
-        // Change observe
-        [self removeObserverFromItemView:_currentItemView];
         
-        _currentItemIndex = currentItemIndex;
-        NSIndexPath *currentIndexPath = [NSIndexPath indexPathForItem:_currentItemIndex inSection:0];
-        self.currentItemView = [self.contentView cellForItemAtIndexPath:currentIndexPath].contentView.subviews.firstObject;
+        self.currentItemIndex = currentItemIndex;
+        self.currentItemView = currentItemView;
         
-        [self addObserverToItemView:_currentItemView];
-        
-        // Did index change
+        // Did index change call back.
         if (_delegate && [_delegate respondsToSelector:@selector(swipeTableViewCurrentItemIndexDidChange:)]) {
             [_delegate swipeTableViewCurrentItemIndexDidChange:self];
         }
@@ -700,13 +719,6 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 
 
 - (void)dealloc {
-    @try {
-        [self removeObserverFromItemView:_currentItemView];
-        [self removeObserverFromItemView:_shouldVisibleItemView];
-    }
-    @catch (NSException *exception) {
-        
-    }
     [self setContentMinSizeQuene:nil];
     [self setContentOffsetQuene:nil];
 }

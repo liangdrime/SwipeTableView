@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		7D052FA71DFF049700CA60B0 /* STPrivate.m in Sources */ = {isa = PBXBuildFile; fileRef = 7D052FA61DFF049700CA60B0 /* STPrivate.m */; };
+		7D052FA71DFF049700CA60B0 /* STPrivateAssistant.m in Sources */ = {isa = PBXBuildFile; fileRef = 7D052FA61DFF049700CA60B0 /* STPrivateAssistant.m */; };
 		7D1C83FC1D2416B7001859EB /* STCollectionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7D1C83FB1D2416B7001859EB /* STCollectionView.m */; };
 		7D2C2AB01D32A7AD00C6A234 /* onepiece_kiudai.png in Resources */ = {isa = PBXBuildFile; fileRef = 7D2C2A951D32A7AD00C6A234 /* onepiece_kiudai.png */; };
 		7D2C2AB11D32A7AD00C6A234 /* STImageController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7D2C2A981D32A7AD00C6A234 /* STImageController.m */; };
@@ -41,8 +41,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		7D052FA51DFF049700CA60B0 /* STPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STPrivate.h; sourceTree = "<group>"; };
-		7D052FA61DFF049700CA60B0 /* STPrivate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STPrivate.m; sourceTree = "<group>"; };
+		7D052FA51DFF049700CA60B0 /* STPrivateAssistant.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STPrivateAssistant.h; sourceTree = "<group>"; };
+		7D052FA61DFF049700CA60B0 /* STPrivateAssistant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STPrivateAssistant.m; sourceTree = "<group>"; };
 		7D1C83FA1D2416B7001859EB /* STCollectionView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = STCollectionView.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		7D1C83FB1D2416B7001859EB /* STCollectionView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = STCollectionView.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		7D2C2A951D32A7AD00C6A234 /* onepiece_kiudai.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = onepiece_kiudai.png; sourceTree = "<group>"; };
@@ -219,8 +219,8 @@
 				7DFB6AF31CAEBCEB00C2F0D3 /* SwipeTableView.m */,
 				7D1C83FA1D2416B7001859EB /* STCollectionView.h */,
 				7D1C83FB1D2416B7001859EB /* STCollectionView.m */,
-				7D052FA51DFF049700CA60B0 /* STPrivate.h */,
-				7D052FA61DFF049700CA60B0 /* STPrivate.m */,
+				7D052FA51DFF049700CA60B0 /* STPrivateAssistant.h */,
+				7D052FA61DFF049700CA60B0 /* STPrivateAssistant.m */,
 				7DFB6AF51CAEBCFA00C2F0D3 /* UIView+STFrame.h */,
 				7DFB6AF61CAEBCFA00C2F0D3 /* UIView+STFrame.m */,
 			);
@@ -333,7 +333,7 @@
 			files = (
 				7DFB6AD11CAEBCC600C2F0D3 /* AppDelegate.m in Sources */,
 				7DFB6AF41CAEBCEB00C2F0D3 /* SwipeTableView.m in Sources */,
-				7D052FA71DFF049700CA60B0 /* STPrivate.m in Sources */,
+				7D052FA71DFF049700CA60B0 /* STPrivateAssistant.m in Sources */,
 				7D2C2AB81D32A7AD00C6A234 /* STTransitions.m in Sources */,
 				7DFB6AF71CAEBCFA00C2F0D3 /* UIView+STFrame.m in Sources */,
 				7D2C2AB61D32A7AD00C6A234 /* STRefreshHeader.m in Sources */,

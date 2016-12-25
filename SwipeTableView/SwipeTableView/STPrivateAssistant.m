@@ -1,12 +1,12 @@
 //
-//  STPrivate.m
+//  STPrivateAssistant.m
 //  SwipeTableView
 //
 //  Created by Roylee on 2016/12/11.
 //  Copyright © 2016年 Roy lee. All rights reserved.
 //
 
-#import "STPrivate.h"
+#import "STPrivateAssistant.h"
 #import <objc/runtime.h>
 #import <objc/message.h>
 
@@ -14,6 +14,7 @@
 
 @property (nonatomic, strong) id target;
 @property (nonatomic, assign) SEL selector;
+@property (nonatomic, copy) InjectActionBlock block;
 
 @end
 
@@ -28,8 +29,20 @@
     return self;
 }
 
+- (instancetype)initWithTarget:(id)target block:(InjectActionBlock)block {
+    self = [super init];
+    if (self) {
+        self.target = target;
+        self.block = block;
+    }
+    return self;
+}
+
 - (void)invoke:(void(^)(id _target, SEL _selector))invocation {
-    if (invocation) {
+    if (_block) {
+        _block();
+    }
+    else if (invocation) {
         invocation(_target,_selector);
     }
 }
@@ -141,6 +154,38 @@ static void STNSObjectInjectAction(NSObject *self, SEL selector, NSObject *targe
     }
 }
 
+static void STNSObjectInjectBlockAction(NSObject *self, SEL selector, NSObject *target,InjectActionBlock block) {
+    SEL aliasSelector = STAliasForSelector(selector);
+    
+    @synchronized (self) {
+        STInvocationAgency *agency = objc_getAssociatedObject(self, aliasSelector);
+        if (agency != nil) return;
+        
+        agency = [[STInvocationAgency alloc] initWithTarget:target block:block];
+        objc_setAssociatedObject(self, aliasSelector, agency, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        
+        Class class = self.class;
+        STSwizzleForwardInvocation(class);
+        NSCAssert(class != nil, @"Could not swizzle class of %@", self);
+        
+        Method targetMethod = class_getInstanceMethod(class, selector);
+        if (targetMethod == NULL) {
+            // Define the selector to call -forwardInvocation:.
+            class_addMethod(class, selector, _objc_msgForward, method_getTypeEncoding(targetMethod));
+        } else if (method_getImplementation(targetMethod) != _objc_msgForward) {
+            // Make a method alias for the existing method implementation.
+            // The alias method will be invoke instead of the existing origin method.
+            const char *typeEncoding = method_getTypeEncoding(targetMethod);
+            
+            BOOL addedAlias __attribute__((unused)) = class_addMethod(class, aliasSelector, method_getImplementation(targetMethod), typeEncoding);
+            NSCAssert(addedAlias, @"Original implementation for %@ is already copied to %@ on %@", NSStringFromSelector(selector), NSStringFromSelector(aliasSelector), class);
+            
+            // Redefine the selector to call -forwardInvocation:.
+            class_replaceMethod(class, selector, _objc_msgForward, method_getTypeEncoding(targetMethod));
+        }
+    }
+}
+
 
 
 
@@ -189,12 +234,26 @@ static void STNSObjectInjectAction(NSObject *self, SEL selector, NSObject *targe
     scrollView.delegate = delegate;
 }
 
-- (void)injectReloadAction:(SEL)selector toView:(UIScrollView *)scrollView {
+- (void)injectReloadAction:(InjectActionBlock)reloadActionBlock toView:(UIScrollView *)scrollView {
     if (![scrollView respondsToSelector:@selector(reloadData)]) {
         return;
     }
-    STNSObjectInjectAction(scrollView, @selector(reloadData), self, selector);
+    STNSObjectInjectBlockAction(scrollView, @selector(reloadData), self, reloadActionBlock);
 }
+
+void RunOnNextEventLoop(void(^block)()) {
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        if (block) {
+            block();
+        }
+    });
+}
+
+@end
+
+
+
+@implementation NSObject (STDealloc)
 
 - (void)st_runAtDealloc:(void(^)())deallocBlock {
     if (deallocBlock) {
@@ -212,10 +271,12 @@ static void STNSObjectInjectAction(NSObject *self, SEL selector, NSObject *targe
 
 
 
+static void *STScrollViewAssociatedKey = &STScrollViewAssociatedKey;
+
 @implementation UIScrollView (STExtension)
 
 - (SwipeTableView *)st_swipeTableView {
-    SwipeTableView * swipeTableView = objc_getAssociatedObject(self, "swipeTableView");
+    SwipeTableView * swipeTableView = objc_getAssociatedObject(self, STScrollViewAssociatedKey);
     if (nil != swipeTableView) {
         return swipeTableView;
     }
@@ -223,9 +284,9 @@ static void STNSObjectInjectAction(NSObject *self, SEL selector, NSObject *targe
         if ([nextRes isKindOfClass:SwipeTableView.class]) {
             SwipeTableView * swipeTableView = (SwipeTableView *)nextRes;
             // Weak refrence by runtime.
-            objc_setAssociatedObject(self, "swipeTableView", swipeTableView, OBJC_ASSOCIATION_ASSIGN);
+            objc_setAssociatedObject(self, STScrollViewAssociatedKey, swipeTableView, OBJC_ASSOCIATION_ASSIGN);
             [swipeTableView st_runAtDealloc:^{
-                objc_setAssociatedObject(self, "swipeTableView", nil, OBJC_ASSOCIATION_ASSIGN);
+                objc_setAssociatedObject(self, STScrollViewAssociatedKey, nil, OBJC_ASSOCIATION_ASSIGN);
             }];
             return (SwipeTableView *)nextRes;
         }
@@ -248,6 +309,22 @@ static void STNSObjectInjectAction(NSObject *self, SEL selector, NSObject *targe
         return [self valueForKey:@"collectionHeadView"];
     }
     return nil;
+}
+
+- (void)setSt_index:(NSInteger)st_index {
+    objc_setAssociatedObject(self, @selector(st_index), @(st_index), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (NSInteger)st_index {
+    return [objc_getAssociatedObject(self, _cmd) integerValue];
+}
+
+- (void)setIsReloadingData:(BOOL)isReloadingData {
+    objc_setAssociatedObject(self, @selector(isReloadingData), @(isReloadingData), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (BOOL)isReloadingData {
+    return [objc_getAssociatedObject(self, _cmd) boolValue];
 }
 
 @end
@@ -300,5 +377,77 @@ CGFloat STScreenScale() {
 }
 
 @end
+
+
+
+
+@interface STObserver ()
+
+@property (nonatomic, weak) id weakTarget;
+@property (nonatomic, unsafe_unretained) id unsafeTarget;
+@property (nonatomic, copy) NSString *keyPath;
+@property (nonatomic, copy) STObserverCallBackBlock block;
+
+@end
+
+@implementation STObserver
+
+static BOOL IsAddedObserverToObjectForKeyPath(id object, NSString *keyPath) {
+    STObserver *observer = objc_getAssociatedObject(object, (__bridge void *)(keyPath));
+    return observer != nil;
+}
+
+static void AddObserverToObjectForKeyPath(id object, STObserver *observer, NSString *keyPath) {
+    void *key = (__bridge void *)(keyPath);
+    objc_setAssociatedObject(object, key, observer, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (void)dealloc {
+    NSObject *target;
+    
+    @synchronized (self) {
+        _block = nil;
+        
+        // The target should still exist at this point, because we still need to
+        // tear down its KVO observation. Therefore, we can use the unsafe
+        // reference (and need to, because the weak one will have been zeroed by
+        // now).
+        target = self.unsafeTarget;
+        
+        _unsafeTarget = nil;
+    }
+    
+    [target removeObserver:self forKeyPath:_keyPath];
+}
+
+- (instancetype)initWithObject:(id)object keyPath:(NSString *)keyPath block:(STObserverCallBackBlock)block {
+    self = [super init];
+    if (self) {
+        NSObject *strongTarget = object;
+        self.weakTarget = object;
+        self.unsafeTarget = strongTarget;
+        self.keyPath = keyPath;
+        self.block = block;
+        [_unsafeTarget addObserver:self forKeyPath:keyPath options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:nil];
+    }
+    return self;
+}
+
++ (void)observerForObject:(id)object keyPath:(NSString *)keyPath callBackBlock:(STObserverCallBackBlock)callBackBlock {
+    if (IsAddedObserverToObjectForKeyPath(object,keyPath)) {
+        return;
+    }
+    STObserver *observer = [[STObserver alloc] initWithObject:object keyPath:keyPath block:callBackBlock];
+    AddObserverToObjectForKeyPath(object, observer, keyPath);
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {
+    if (_block) {
+        _block(object, change[NSKeyValueChangeNewKey], change[NSKeyValueChangeOldKey]);
+    }
+}
+
+@end
+
 
 
