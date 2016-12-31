@@ -355,27 +355,6 @@ static void *STScrollViewAssociatedKey = &STScrollViewAssociatedKey;
     return scrollView;
 }
 
-/// floor value for pixel-aligned
-CGFloat CGFloatPixelFloor(CGFloat value) {
-    CGFloat scale = STScreenScale();
-    return floor(value * scale) / scale;
-}
-
-/// round value for pixel-aligned
-CGFloat CGFloatPixelRound(CGFloat value) {
-    CGFloat scale = STScreenScale();
-    return round(value * scale) / scale;
-}
-
-CGFloat STScreenScale() {
-    static CGFloat scale;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        scale = [UIScreen mainScreen].scale;
-    });
-    return scale;
-}
-
 @end
 
 

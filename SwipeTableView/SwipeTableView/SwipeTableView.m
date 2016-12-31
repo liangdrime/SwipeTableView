@@ -198,6 +198,7 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 
 - (void)reloadData {
     CGFloat headerOffsetY = _itemContentTopFromHeaderViewBottom ? -(_headerInset + _barInset) : 0;
+    headerOffsetY        -= self.currentScrollView.contentInset.top;
     
     [self swipeHeaderBarAlwaysStickyOnTop];
     [self.contentOffsetQuene removeAllObjects];
@@ -407,7 +408,7 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     
     // 顶部悬停
     // floor 处理，避免不同屏幕尺寸像素影响，导致旧的item无法设置之前记录的offset
-    topMarginOffsetY = CGFloatPixelFloor(topMarginOffsetY);
+    topMarginOffsetY = STFloatPixelFloor(topMarginOffsetY);
     if (contentOffset.y >= topMarginOffsetY) {
         // 比较过去记录的offset与当前应该设的offset，决定是否对齐相邻item的顶部
         if (itemContentOffset.y < topMarginOffsetY) {
@@ -416,7 +417,7 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     }else {
         itemContentOffset.y = contentOffset.y;
     }
-        
+    
     // Save current contentOffset before reset contentSize,to reset contentOffset when KVO contentSize.
     _contentOffsetQuene[@(index)] = [NSValue valueWithCGPoint:itemContentOffset];
     
@@ -461,8 +462,6 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     UIView * superView = _itemContentTopFromHeaderViewBottom ? scrollView : scrollView.st_headerView;
     if (_headerView.superview == superView || _swipeHeaderBarAlwaysStickyOnTop) {
         return;
-    }else if ([self isHeaderBarSticky]) {
-        return;
     }
     
     _headerView.st_top = _itemContentTopFromHeaderViewBottom ? -_headerView.st_height : 0;
@@ -484,11 +483,17 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     [contentView addSubview:_headerView];
 }
 
-- (BOOL)isHeaderBarSticky {
-    CGFloat offsetY = self.currentScrollView.contentOffset.y;
+- (BOOL)isHeaderOrBarSticky {
+    CGFloat offsetY       = self.currentScrollView.contentOffset.y;
     CGFloat stickyOffsetY = _itemContentTopFromHeaderViewBottom ? -_barInset : _headerInset;
     stickyOffsetY        -= _stickyHeaderTopInset;
-    return offsetY > stickyOffsetY;
+    CGFloat minTopOffset  = _itemContentTopFromHeaderViewBottom ? -_headerView.st_height : 0;
+    
+    BOOL alwaysSticky = _swipeHeaderAlwaysOnTop || _swipeHeaderBarAlwaysStickyOnTop;
+    BOOL headerSticky = offsetY < minTopOffset && alwaysSticky;
+    BOOL barSticky = offsetY > stickyOffsetY;
+    
+    return headerSticky || barSticky;
 }
 
 #pragma mark - Observe & Inject Action
@@ -556,7 +561,7 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
         if (index == _currentItemIndex || index == _shouldVisibleItemIndex) {
             CGFloat contentSizeH      = scrollView.contentSize.height;
             CGSize minRequireSize     = [_contentMinSizeQuene[@(index)] CGSizeValue];
-            CGFloat minRequireSizeH   = CGFloatPixelRound(minRequireSize.height);
+            CGFloat minRequireSizeH   = STFloatPixelRound(minRequireSize.height);
             
             if (contentSizeH < minRequireSizeH) {
                 _isAdjustingcontentSize = YES;
@@ -586,8 +591,12 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     CGFloat offsetY         = scrollView.contentOffset.y;
     CGFloat topStickyOffset = _itemContentTopFromHeaderViewBottom ? -_barInset : _headerInset;
     topStickyOffset        -= _stickyHeaderTopInset;
+    CGFloat validTopInset   = _currentItemView.st_scrollView.contentInset.top;
+    if (_itemContentTopFromHeaderViewBottom) {
+        validTopInset      -= _headerView.st_height;
+    }
     CGFloat minTopOffset    = _itemContentTopFromHeaderViewBottom ? -_headerView.st_height : 0;
-    minTopOffset           -= _currentItemView.st_scrollView.contentInset.top;
+    minTopOffset           -= validTopInset;
     
     // Sticky the header view
     if (offsetY > topStickyOffset) {
@@ -595,12 +604,12 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
         _headerView.st_bottom = _barInset + _stickyHeaderTopInset;
     }
     else {
+        [self moveHeaderViewToItemView:_currentItemView];
+        
         BOOL alwaysSticky = _swipeHeaderAlwaysOnTop || _swipeHeaderBarAlwaysStickyOnTop;
-        if (offsetY < minTopOffset && alwaysSticky) {
-            [self moveHeaderViewToContentView:self];
-            _headerView.st_top = _stickyHeaderTopInset; // 0 or not.
-        }else {
-            [self moveHeaderViewToItemView:_currentItemView];
+        if (offsetY <= minTopOffset && alwaysSticky) {
+            CGPoint topPoint = [_currentItemView.st_scrollView convertPoint:CGPointZero fromView:self];
+            _headerView.st_top = topPoint.y;
         }
     }
     

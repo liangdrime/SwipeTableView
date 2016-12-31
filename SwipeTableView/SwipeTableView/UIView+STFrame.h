@@ -22,4 +22,7 @@
 @property (nonatomic, assign) CGFloat st_left;
 @property (nonatomic, assign) CGFloat st_right;
 
+CGFloat STFloatPixelFloor(CGFloat value);
+CGFloat STFloatPixelRound(CGFloat value);
+
 @end

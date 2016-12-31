@@ -36,9 +36,6 @@ void RunOnNextEventLoop(void(^block)());
 
 - (UIScrollView *)st_scrollView;
 
-CGFloat CGFloatPixelFloor(CGFloat value);
-CGFloat CGFloatPixelRound(CGFloat value);
-
 @end
 
 

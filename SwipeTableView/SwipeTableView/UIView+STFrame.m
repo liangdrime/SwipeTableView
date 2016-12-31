@@ -112,6 +112,26 @@
     self.frame = CGRectMake(r - self.st_width, self.st_top, self.st_width, self.st_height);
 }
 
+/// floor value for pixel-aligned
+CGFloat STFloatPixelFloor(CGFloat value) {
+    CGFloat scale = STScreenScale();
+    return floor(value * scale) / scale;
+}
+
+/// round value for pixel-aligned
+CGFloat STFloatPixelRound(CGFloat value) {
+    CGFloat scale = STScreenScale();
+    return round(value * scale) / scale;
+}
+
+CGFloat STScreenScale() {
+    static CGFloat scale;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        scale = [UIScreen mainScreen].scale;
+    });
+    return scale;
+}
 
 
 @end
