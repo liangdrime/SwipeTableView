@@ -194,6 +194,13 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     return _swipeHeaderBarAlwaysStickyOnTop =  _swipeHeaderBar && !_swipeHeaderView;
 }
 
+- (NSInteger)currentItemIndex {
+    if (_switchPageWithoutAnimation) {
+        return _shouldVisibleItemIndex;
+    }
+    return _currentItemIndex;
+}
+
 #pragma mark -
 
 - (void)reloadData {
@@ -212,6 +219,7 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     if (index == _currentItemIndex) {
         return;
     }
+    _shouldVisibleItemIndex = index;
     // Record content offset of last item.
     CGPoint contentOffset = self.currentItemView.st_scrollView.contentOffset;
     CGSize contentSize    = self.currentItemView.st_scrollView.contentSize;
@@ -344,6 +352,9 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
             // the header view may be subview of self, if method -scrollToItemAtIndex:animated: was called
             // and the animated is NO.
             [self moveHeaderViewToItemView:_currentItemView];
+            
+            // Call end decelerating delegate
+            [self scrollViewDidEndDecelerating:collectionView];
         });
     }
     
@@ -461,6 +472,8 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     UIScrollView *scrollView = itemView.st_scrollView;
     UIView * superView = _itemContentTopFromHeaderViewBottom ? scrollView : scrollView.st_headerView;
     if (_headerView.superview == superView || _swipeHeaderBarAlwaysStickyOnTop) {
+        return;
+    }else if ([self isHeaderOrBarSticky]) {
         return;
     }
     
@@ -662,6 +675,9 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
                     // the header view may be subview of self, if method -scrollToItemAtIndex:animated: was called
                     // and the animated is NO.
                     [self moveHeaderViewToItemView:_currentItemView];
+                    
+                    // Call end decelerating delegate
+                    [self scrollViewDidEndDecelerating:scrollView];
                 });
                 
                 // Did index change call back.
