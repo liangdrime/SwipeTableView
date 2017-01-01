@@ -26,6 +26,7 @@ void RunOnNextEventLoop(void(^block)());
 @property (nonatomic, strong) UIView *st_headerView;
 @property (nonatomic, assign) NSInteger st_index;
 @property (nonatomic, assign) BOOL isReloadingData;
+@property (nonatomic, assign) UIEdgeInsets st_originalInsets;
 - (SwipeTableView *)st_swipeTableView;
 
 @end

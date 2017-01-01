@@ -271,6 +271,8 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
             UIEdgeInsets contentInset = scrollView.contentInset;
             BOOL setTopInset = [objc_getAssociatedObject(newSubView, SwipeTableViewItemTopInsetKey) boolValue];
             if (!setTopInset) {
+                // Save the original insets when init the view first.
+                scrollView.st_originalInsets = contentInset;
                 contentInset.top += topInset;
                 scrollView.contentInset = contentInset;
                 scrollView.contentOffset = CGPointMake(0, - topInset);  // set default contentOffset after init
@@ -301,6 +303,8 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
                 headerView.st_height += headerHeight;
                 scrollView.st_headerView = headerView;
                 objc_setAssociatedObject(scrollView, SwipeTableViewItemTopInsetKey, @(YES), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+                // Save the original insets when init the view first.
+                scrollView.st_originalInsets = scrollView.contentInset;
             }else {
                 // Update the height of header view, only when the delta height is not 0,
                 //
@@ -400,6 +404,9 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     // Adjust contentOffset below.
     // Save current item contentoffset
     CGPoint contentOffset  = lastItemView.contentOffset;
+    // Ignore the changed top insets. such as the item is in pull to refreshing.
+    contentOffset.y       += lastItemView.contentInset.top - lastItemView.st_originalInsets.top;
+    
     if (lastItemView != itemView) {
         self.contentOffsetQuene[@(lastIndex)] = [NSValue valueWithCGPoint:contentOffset];
     }else {
@@ -498,9 +505,11 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 
 - (BOOL)isHeaderOrBarSticky {
     CGFloat offsetY       = self.currentScrollView.contentOffset.y;
+    CGFloat changedInset  = self.currentScrollView.contentInset.top - self.currentScrollView.st_originalInsets.top;
     CGFloat stickyOffsetY = _itemContentTopFromHeaderViewBottom ? -_barInset : _headerInset;
     stickyOffsetY        -= _stickyHeaderTopInset;
     CGFloat minTopOffset  = _itemContentTopFromHeaderViewBottom ? -_headerView.st_height : 0;
+    minTopOffset         -= changedInset;
     
     BOOL alwaysSticky = _swipeHeaderAlwaysOnTop || _swipeHeaderBarAlwaysStickyOnTop;
     BOOL headerSticky = offsetY < minTopOffset && alwaysSticky;
@@ -536,6 +545,59 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     [STObserver observerForObject:view keyPath:@"contentSize" callBackBlock:^(UIScrollView *object, id newValue, id oldValue) {
         [self scrollViewContentSizeDidChanged:object newValue:newValue oldValue:oldValue];
     }];
+}
+
+- (void)st_scrollViewDidScroll:(UIScrollView *)scrollView {
+    BOOL isContentViewScrolling   = _contentView.isDragging || _contentView.isDecelerating;
+    BOOL currentItemViewNotScroll = isContentViewScrolling || scrollView != _currentItemView.st_scrollView;
+    if (currentItemViewNotScroll || _stickyHeaderDiabled) {
+        return;
+    }
+    
+    CGFloat offsetY         = scrollView.contentOffset.y;
+    CGFloat topStickyOffset = _itemContentTopFromHeaderViewBottom ? -_barInset : _headerInset;
+    topStickyOffset        -= _stickyHeaderTopInset;
+    CGFloat minTopOffset    = _itemContentTopFromHeaderViewBottom ? -_headerView.st_height : 0;
+    minTopOffset           -= scrollView.st_originalInsets.top;
+    
+    // Sticky the header view
+    if (offsetY > topStickyOffset) {
+        [self moveHeaderViewToContentView:self];
+        _headerView.st_bottom = _barInset + _stickyHeaderTopInset;
+    }
+    else {
+        [self moveHeaderViewToItemView:_currentItemView];
+        
+        BOOL alwaysSticky = _swipeHeaderAlwaysOnTop || _swipeHeaderBarAlwaysStickyOnTop;
+        if (offsetY <= minTopOffset && alwaysSticky) {
+            CGPoint topPoint = [_currentItemView.st_scrollView convertPoint:CGPointZero fromView:self];
+            _headerView.st_top = topPoint.y;
+        }
+    }
+    
+    // If enable adjust contentsize of itemview, should store the offset when the scrollview
+    // is scrolling, it will be used to reset the original offset when the contentsize changed.
+    //
+    // But if the tableview or collection view is invoking -reloadData, this -scrollViewDidScroll
+    // will be called, and it will adjust offset if the table shrinks. Then the offset will be
+    // great changed.
+    // So in this case, not store the offset.
+    if (_shouldAdjustContentSize && !scrollView.isReloadingData) {
+        _contentOffsetQuene[@(_currentItemIndex)] = [NSValue valueWithCGPoint:scrollView.contentOffset];
+    }
+}
+
+- (void)st_reloadData:(id)object {
+    if (![object isKindOfClass:[UITableView class]] && ![object isKindOfClass:[UICollectionView class]]) {
+        return;
+    }
+    // Mark the status when the item scrollview began -realodData, and it will
+    // be reset when the contentsize be adjusted.
+    ((UIScrollView *)object).isReloadingData = YES;
+    // Reset the status of item scrollview after reload data.
+    RunOnNextEventLoop(^{
+        ((UIScrollView *)object).isReloadingData = NO;
+    });
 }
 
 - (void)scrollViewContentOffsetDidChanged:(UIScrollView *)scrollView newValue:(id)newValue oldValue:(id)oldValue {
@@ -592,63 +654,6 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
             }
         }
     }
-}
-
-- (void)st_scrollViewDidScroll:(UIScrollView *)scrollView {
-    BOOL isContentViewScrolling   = _contentView.isDragging || _contentView.isDecelerating;
-    BOOL currentItemViewNotScroll = isContentViewScrolling || scrollView != _currentItemView.st_scrollView;
-    if (currentItemViewNotScroll || _stickyHeaderDiabled) {
-        return;
-    }
-    
-    CGFloat offsetY         = scrollView.contentOffset.y;
-    CGFloat topStickyOffset = _itemContentTopFromHeaderViewBottom ? -_barInset : _headerInset;
-    topStickyOffset        -= _stickyHeaderTopInset;
-    CGFloat validTopInset   = _currentItemView.st_scrollView.contentInset.top;
-    if (_itemContentTopFromHeaderViewBottom) {
-        validTopInset      -= _headerView.st_height;
-    }
-    CGFloat minTopOffset    = _itemContentTopFromHeaderViewBottom ? -_headerView.st_height : 0;
-    minTopOffset           -= validTopInset;
-    
-    // Sticky the header view
-    if (offsetY > topStickyOffset) {
-        [self moveHeaderViewToContentView:self];
-        _headerView.st_bottom = _barInset + _stickyHeaderTopInset;
-    }
-    else {
-        [self moveHeaderViewToItemView:_currentItemView];
-        
-        BOOL alwaysSticky = _swipeHeaderAlwaysOnTop || _swipeHeaderBarAlwaysStickyOnTop;
-        if (offsetY <= minTopOffset && alwaysSticky) {
-            CGPoint topPoint = [_currentItemView.st_scrollView convertPoint:CGPointZero fromView:self];
-            _headerView.st_top = topPoint.y;
-        }
-    }
-    
-    // If enable adjust contentsize of itemview, should store the offset when the scrollview
-    // is scrolling, it will be used to reset the original offset when the contentsize changed.
-    //
-    // But if the tableview or collection view is invoking -reloadData, this -scrollViewDidScroll
-    // will be called, and it will adjust offset if the table shrinks. Then the offset will be
-    // great changed.
-    // So in this case, not store the offset.
-    if (_shouldAdjustContentSize && !scrollView.isReloadingData) {
-        _contentOffsetQuene[@(_currentItemIndex)] = [NSValue valueWithCGPoint:scrollView.contentOffset];
-    }
-}
-
-- (void)st_reloadData:(id)object {
-    if (![object isKindOfClass:[UITableView class]] && ![object isKindOfClass:[UICollectionView class]]) {
-        return;
-    }
-    // Mark the status when the item scrollview began -realodData, and it will
-    // be reset when the contentsize be adjusted.
-    ((UIScrollView *)object).isReloadingData = YES;
-    // Reset the status of item scrollview after reload data.
-    RunOnNextEventLoop(^{
-        ((UIScrollView *)object).isReloadingData = NO;
-    });
 }
 
 #pragma mark - UIScrollView M

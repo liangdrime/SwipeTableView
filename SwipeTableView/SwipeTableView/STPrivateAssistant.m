@@ -300,6 +300,7 @@ static void *STScrollViewAssociatedKey = &STScrollViewAssociatedKey;
     }else if ([self isKindOfClass:UICollectionView.class]) {
         [self setValue:headerView forKey:@"collectionHeadView"];
     }
+    [self bringSubviewToFront:headerView];
 }
 
 - (UIView *)st_headerView {
@@ -325,6 +326,14 @@ static void *STScrollViewAssociatedKey = &STScrollViewAssociatedKey;
 
 - (BOOL)isReloadingData {
     return [objc_getAssociatedObject(self, _cmd) boolValue];
+}
+
+- (void)setSt_originalInsets:(UIEdgeInsets)st_originalInsets {
+    objc_setAssociatedObject(self, @selector(st_originalInsets), [NSValue valueWithUIEdgeInsets:st_originalInsets], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (UIEdgeInsets)st_originalInsets {
+    return [objc_getAssociatedObject(self, _cmd) UIEdgeInsetsValue];
 }
 
 @end
