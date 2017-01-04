@@ -338,7 +338,7 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     if (_currentItemIndex == indexPath.item) {
         self.currentItemView = subView;
         // Move headerView to currentItemView first
-        [self moveHeaderViewToItemView:subView];
+        [self moveHeaderViewToItemView:scrollView];
     }
     
     UIView * lastItemView = _currentItemView;
@@ -355,7 +355,7 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
             // Move headerView to currentItemView after scrolling the view. And before this action
             // the header view may be subview of self, if method -scrollToItemAtIndex:animated: was called
             // and the animated is NO.
-            [self moveHeaderViewToItemView:_currentItemView];
+            [self moveHeaderViewToItemView:scrollView];
             
             // Call end decelerating delegate
             [self scrollViewDidEndDecelerating:collectionView];
@@ -404,8 +404,6 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     // Adjust contentOffset below.
     // Save current item contentoffset
     CGPoint contentOffset  = lastItemView.contentOffset;
-    // Ignore the changed top insets. such as the item is in pull to refreshing.
-    contentOffset.y       += lastItemView.contentInset.top - lastItemView.st_originalInsets.top;
     
     if (lastItemView != itemView) {
         self.contentOffsetQuene[@(lastIndex)] = [NSValue valueWithCGPoint:contentOffset];
@@ -413,6 +411,8 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
         // 非滚动切换item，由于重用关系前后itemView是同一个
         contentOffset = [self.contentOffsetQuene[@(lastIndex)] CGPointValue];
     }
+    // Set the min offset to ignore the changed top insets, such as the item is in pulling to refresh.
+    contentOffset.y   = fmax(contentOffset.y, -lastItemView.st_originalInsets.top);
     
     // 取出记录的offset
     CGFloat topMarginOffsetY  = _itemContentTopFromHeaderViewBottom ? -_barInset : _headerInset;
@@ -475,16 +475,32 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     }
 }
 
-- (void)moveHeaderViewToItemView:(UIView *)itemView {
-    UIScrollView *scrollView = itemView.st_scrollView;
+- (void)pureMoveHeaderViewToItemView:(UIScrollView *)scrollView {
     UIView * superView = _itemContentTopFromHeaderViewBottom ? scrollView : scrollView.st_headerView;
-    if (_headerView.superview == superView || _swipeHeaderBarAlwaysStickyOnTop) {
-        return;
-    }else if ([self isHeaderOrBarSticky]) {
+    if (_headerView.superview == superView || self.swipeHeaderBarAlwaysStickyOnTop) {
         return;
     }
     
-    _headerView.st_top = _itemContentTopFromHeaderViewBottom ? -_headerView.st_height : 0;
+    // Add the header view to current item view,
+    // Note that, can not call -removeFromSuperView here, it will hold the main quene some times.
+    [superView addSubview:_headerView];
+}
+
+- (void)moveHeaderViewToItemView:(UIScrollView *)scrollView {
+    UIView * superView = _itemContentTopFromHeaderViewBottom ? scrollView : scrollView.st_headerView;
+    if (_headerView.superview == superView || self.swipeHeaderBarAlwaysStickyOnTop) {
+        return;
+    }else if ([self isTopBarSticky]) {
+        return;
+    }
+    
+    CGFloat top = _itemContentTopFromHeaderViewBottom? -_headerView.st_height : 0;
+    if ([self isHeaderSticky]) {
+        // Change the position of header view in its superview of a scrollview.
+        CGFloat moveOffsetY = scrollView.contentOffset.y + scrollView.st_originalInsets.top;
+        top += moveOffsetY;
+    }
+    _headerView.st_top = top;
     
     // Add the header view to current item view,
     // Note that, can not call -removeFromSuperView here, it will hold the main quene some times.
@@ -503,19 +519,24 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     [contentView addSubview:_headerView];
 }
 
-- (BOOL)isHeaderOrBarSticky {
+- (BOOL)isHeaderSticky {
     CGFloat offsetY       = self.currentScrollView.contentOffset.y;
-    CGFloat changedInset  = self.currentScrollView.contentInset.top - self.currentScrollView.st_originalInsets.top;
-    CGFloat stickyOffsetY = _itemContentTopFromHeaderViewBottom ? -_barInset : _headerInset;
-    stickyOffsetY        -= _stickyHeaderTopInset;
     CGFloat minTopOffset  = _itemContentTopFromHeaderViewBottom ? -_headerView.st_height : 0;
-    minTopOffset         -= changedInset;
+    minTopOffset         -= self.currentScrollView.st_originalInsets.top;
     
     BOOL alwaysSticky = _swipeHeaderAlwaysOnTop || _swipeHeaderBarAlwaysStickyOnTop;
     BOOL headerSticky = offsetY < minTopOffset && alwaysSticky;
-    BOOL barSticky = offsetY > stickyOffsetY;
     
-    return headerSticky || barSticky;
+    return headerSticky;
+}
+
+- (BOOL)isTopBarSticky {
+    CGFloat offsetY       = self.currentScrollView.contentOffset.y;
+    CGFloat stickyOffsetY = _itemContentTopFromHeaderViewBottom ? -_barInset : _headerInset;
+    stickyOffsetY        -= _stickyHeaderTopInset;
+    
+    BOOL barSticky = offsetY > stickyOffsetY;
+    return barSticky;
 }
 
 #pragma mark - Observe & Inject Action
@@ -555,9 +576,13 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     }
     
     CGFloat offsetY         = scrollView.contentOffset.y;
-    CGFloat topStickyOffset = _itemContentTopFromHeaderViewBottom ? -_barInset : _headerInset;
+    CGFloat topStickyOffset = _headerInset;
+    CGFloat minTopOffset    = 0;
+    if (_itemContentTopFromHeaderViewBottom) {
+        topStickyOffset     = -_barInset;
+        minTopOffset        = -_headerView.st_height;
+    }
     topStickyOffset        -= _stickyHeaderTopInset;
-    CGFloat minTopOffset    = _itemContentTopFromHeaderViewBottom ? -_headerView.st_height : 0;
     minTopOffset           -= scrollView.st_originalInsets.top;
     
     // Sticky the header view
@@ -566,12 +591,14 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
         _headerView.st_bottom = _barInset + _stickyHeaderTopInset;
     }
     else {
-        [self moveHeaderViewToItemView:_currentItemView];
+        [self pureMoveHeaderViewToItemView:scrollView];
         
         BOOL alwaysSticky = _swipeHeaderAlwaysOnTop || _swipeHeaderBarAlwaysStickyOnTop;
-        if (offsetY <= minTopOffset && alwaysSticky) {
-            CGPoint topPoint = [_currentItemView.st_scrollView convertPoint:CGPointZero fromView:self];
+        if (offsetY < minTopOffset && alwaysSticky) {
+            CGPoint topPoint = [scrollView convertPoint:CGPointMake(0, scrollView.st_originalInsets.top) fromView:self];
             _headerView.st_top = topPoint.y;
+        }else {
+            _headerView.st_top = 0;
         }
     }
     
@@ -679,7 +706,7 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
                     // Move headerView to currentItemView after scrolling the view. And before this action
                     // the header view may be subview of self, if method -scrollToItemAtIndex:animated: was called
                     // and the animated is NO.
-                    [self moveHeaderViewToItemView:_currentItemView];
+                    [self moveHeaderViewToItemView:_currentItemView.st_scrollView];
                     
                     // Call end decelerating delegate
                     [self scrollViewDidEndDecelerating:scrollView];
@@ -718,7 +745,7 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 - (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate {
     // Move the header view to current itemview after scrolling, to enable scroll the header view.
     if (!decelerate) {
-        [self moveHeaderViewToItemView:_currentItemView];
+        [self moveHeaderViewToItemView:_currentItemView.st_scrollView];
     }
     
     if (_delegate && [_delegate respondsToSelector:@selector(swipeTableViewDidEndDragging:willDecelerate:)]) {
@@ -734,7 +761,7 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
     // Move the header view to current itemview after scrolling, to enable scroll the header view.
-    [self moveHeaderViewToItemView:_currentItemView];
+    [self moveHeaderViewToItemView:_currentItemView.st_scrollView];
     
     if (_delegate && [_delegate respondsToSelector:@selector(swipeTableViewDidEndDecelerating:)]) {
         [_delegate swipeTableViewDidEndDecelerating:self];
