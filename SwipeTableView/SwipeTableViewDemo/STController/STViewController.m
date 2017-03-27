@@ -46,7 +46,7 @@
     _swipeTableView.swipeHeaderView = disableBarScroll?nil:self.tableViewHeader;
     _swipeTableView.swipeHeaderBar = self.segmentBar;
     _swipeTableView.swipeHeaderAlwaysOnTop = NO;
-    //    _swipeTableView.itemContentTopFromHeaderViewBottom = YES;
+//    _swipeTableView.itemContentTopFromHeaderViewBottom = YES;
     _swipeTableView.stickyHeaderTopInset = hiddenNavigationBar?0:64;
     [self.view addSubview:_swipeTableView];
     
@@ -79,7 +79,7 @@
     _dataDic = [@{} mutableCopy];
     
     // 根据滚动后的下标请求数据
-    //    [self getDataAtIndex:0];
+//    [self getDataAtIndex:0];
     
     // 一次性请求所有item的数据
     [self getAllData];
