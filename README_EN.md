@@ -32,10 +32,10 @@ pod 'SwipeTableView'
 6. [Demo Info](https://github.com/Roylee-ML/SwipeTableView/blob/master/README_EN.md#detailed-usages-are-in-the-swipetableviewdemo-folder-provide-five-examples)
 
 <br>
-##Principle
+## Principle
 >In order to be compatible with the pull to refresh, adopted two kinds of ways, but the basic structure is the same.
       
-###Mode 1
+### Mode 1
 
 ![Mode 1](https://github.com/Roylee-ML/SwipeTableView/blob/master/ScreenShots/SwipeTableViewStruct1.png)
    
@@ -54,7 +54,7 @@ pod 'SwipeTableView'
  
  
  
-###Mode 2
+### Mode 2
 
 ![Mode 2](https://github.com/Roylee-ML/SwipeTableView/blob/master/ScreenShots/SwipeTableViewStruct2.png)
 
@@ -67,9 +67,9 @@ pod 'SwipeTableView'
 >Under normal conditions, it is `Mode 1`; For `Mode 2`, set the macro `#define ST_PULLTOREFRESH_HEADER_HEIGHT xx` in the `SwipeTableView.h` or the PCH file.
 
 <br>
-#Basic Usage
+# Basic Usage
 
-##How to use it? Just like UITableView
+## How to use it? Just like UITableView
 
 **Conform protocol `SwipeTableViewDataSource` and implement the two methods below：**
 
@@ -89,9 +89,9 @@ pod 'SwipeTableView'
 **The `swipeHeaderView` must be `STHeaderView` or subclass of `STHeaderView`**
  
 <br>
-##How to support pull to refersh?
+## How to support pull to refersh?
 
-###There is two ways to support pull to refresh, one is custom pull to refresh by yourself(just custom part), another is set a macro simply and crudely
+### There is two ways to support pull to refresh, one is custom pull to refresh by yourself(just custom part), another is set a macro simply and crudely
 
 <br>
 
@@ -171,7 +171,7 @@ How to judge the frame of the RefreshHeader of refresh control is constant?
 
  
 <br>
-##Hybrid (UItableView & UICollectionView & UIScrollView)
+## Hybrid (UItableView & UICollectionView & UIScrollView)
 
 1. In basic mode `Model 1`, has the best extensibility, it supports `UITableView`、`UICollectionView`、`UIScrollView`.**If you set the property `shouldAdjustContentSize` YES to adjust the contentSize of itemView, you shuld only use `STCollectionView` its subcalss when your itemView is `UICollectionView` and its contentinfo is less**
 
@@ -180,8 +180,8 @@ How to judge the frame of the RefreshHeader of refresh control is constant?
 2. In `Model 2`, **collectionView you used must be kind of `SwipeTableView`**, now, not support `UIScrollView`.
 
 <br>
-##**Example Code**：
-###Init, set header and bar
+## **Example Code**：
+### Init, set header and bar
 
 ```objc
 self.swipeTableView = [[SwipeTableView alloc]initWithFrame:[UIScreen mainScreen].bounds];
@@ -193,7 +193,7 @@ _swipeTableView.swipeHeaderBar = self.segmentBar;
 
 ```
    
-###Conform the protocol：
+### Conform the protocol：
 
 ```objc
 - (NSInteger)numberOfItemsInSwipeTableView:(SwipeTableView *)swipeView {
@@ -214,7 +214,7 @@ _swipeTableView.swipeHeaderBar = self.segmentBar;
 }
 ```
    
-###How to use `STCollectionView`:
+### How to use `STCollectionView`:
 
 ```objc
 MyCollectionView.h
@@ -331,7 +331,7 @@ MyCollectionView.m
 <br>
 # Demo Info
 
-###Detailed usages are in the SwipeTableViewDemo folder, provide five examples:
+### Detailed usages are in the SwipeTableViewDemo folder, provide five examples:
 
   - `SingleOneKindView`   
      The itemView is just one kind, it is `CustomTableView` (subclass of `UITableView`) in the demo
