@@ -67,7 +67,7 @@ pod 'SwipeTableView'
 
 
 ## 使用用法
-### *怎样使用？使用方式类似UITableView
+### 怎样使用？使用方式类似UITableView
 
 **实现 `SwipeTableViewDataSource` 代理的两个方法：**
 
@@ -85,7 +85,7 @@ pod 'SwipeTableView'
 **使用的`swipeHeaderView`必须是`STHeaderView`及其子类的实例。**
  
 
-### *如何支持下拉刷新？
+### 如何支持下拉刷新？
 
 >**下拉刷新有两种实现方式，一种用户自定义下拉刷新组件（局部修改自定义），一种是简单粗暴设置宏：**
 
@@ -174,9 +174,9 @@ or
 2. 在`Mode 2`模式下，**`SwipeTableView`支持的collectionView必须是`STCollectionView`及其子类的实例**，目前，不支持`UIScrollView`。
 
 
-### **示例代码**：
+## **示例代码**：
 
-**初始化并设置header与bar**
+### 初始化并设置header与bar
 ```objc
 self.swipeTableView = [[SwipeTableView alloc]initWithFrame:[UIScreen mainScreen].bounds];
 _swipeTableView.delegate = self;
@@ -186,7 +186,7 @@ _swipeTableView.swipeHeaderView = self.tableViewHeader;
 _swipeTableView.swipeHeaderBar = self.segmentBar;
 ```
    
-**实现数据源代理：**
+### 实现数据源代理：
 ```objc
 - (NSInteger)numberOfItemsInSwipeTableView:(SwipeTableView *)swipeView {
     return 4;
@@ -206,7 +206,7 @@ _swipeTableView.swipeHeaderBar = self.segmentBar;
 }
 ```
    
-**`STCollectionView`使用方法：**
+### `STCollectionView`使用方法：
 ```objc
 MyCollectionView.h
 
@@ -320,7 +320,7 @@ MyCollectionView.m
 ```
 
 
-# Demo 介绍
+## Demo 介绍
 ### 使用的详细用法在SwipeTableViewDemo文件夹中，提供了五种示例：
 
   - `SingleOneKindView`   
