@@ -67,7 +67,7 @@ pod 'SwipeTableView'
 
 
 ## 使用用法
-### 怎样使用？使用方式类似UITableView
+### *怎样使用？使用方式类似UITableView
 
 **实现 `SwipeTableViewDataSource` 代理的两个方法：**
 
@@ -85,7 +85,7 @@ pod 'SwipeTableView'
 **使用的`swipeHeaderView`必须是`STHeaderView`及其子类的实例。**
  
 
-### 如何支持下拉刷新？
+### *如何支持下拉刷新？
 
 >**下拉刷新有两种实现方式，一种用户自定义下拉刷新组件（局部修改自定义），一种是简单粗暴设置宏：**
 
