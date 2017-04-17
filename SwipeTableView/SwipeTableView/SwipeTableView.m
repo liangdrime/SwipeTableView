@@ -560,11 +560,12 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 }
 
 - (void)addObserverToItemView:(UIScrollView *)view {
+    __weak typeof(self) weakSelf = self;
     [STObserver observerForObject:view keyPath:@"contentOffset" callBackBlock:^(UIScrollView *object, id newValue, id oldValue) {
-        [self scrollViewContentOffsetDidChanged:object newValue:newValue oldValue:oldValue];
+        [weakSelf scrollViewContentOffsetDidChanged:object newValue:newValue oldValue:oldValue];
     }];
     [STObserver observerForObject:view keyPath:@"contentSize" callBackBlock:^(UIScrollView *object, id newValue, id oldValue) {
-        [self scrollViewContentSizeDidChanged:object newValue:newValue oldValue:oldValue];
+        [weakSelf scrollViewContentSizeDidChanged:object newValue:newValue oldValue:oldValue];
     }];
 }
 
