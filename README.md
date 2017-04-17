@@ -5,17 +5,15 @@
 [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/Roylee-ML/SwipeTableView/blob/master/License)
 
 功能类似半糖首页菜单与QQ音乐歌曲列表页面。即支持UITableview的上下滚动，同时也支持不同列表之间的滑动切换。同时可以设置顶部header view与列表切换功能bar，使用方式类似于原生UITableview的tableHeaderView的方式。 [`Engilish→`](https://github.com/Roylee-ML/SwipeTableView/blob/master/README_EN.md)
------------
+****
 
 # 预览
-------
 <img src="https://github.com/Roylee-ML/SwipeTableView/blob/master/ScreenShots/screenshot1.gif" width = "290" height = "517" alt="OverView1" align=center />
 <img src="https://github.com/Roylee-ML/SwipeTableView/blob/master/ScreenShots/screenshot2.gif" width = "290" height = "517" alt="OverView1" align=center />
 <img src="https://github.com/Roylee-ML/SwipeTableView/blob/master/ScreenShots/screenshot3.gif" width = "290" height = "517" alt="OverView1" align=center />
 
 
 # 使用 Cocoapods 导入
-------
 SwipeTableView is available on [CocoaPods](http://cocoapods.org).  Add the following to your Podfile:
 
 ```ruby
@@ -24,7 +22,6 @@ pod 'SwipeTableView'
 
 
 # 目录
-------
 1. [实现原理](https://github.com/Roylee-ML/SwipeTableView/blob/master/README.md#实现的原理)
 2. [基本用法](https://github.com/Roylee-ML/SwipeTableView/blob/master/README.md#怎样使用使用方式类似uitableview)
 3. [下拉刷新](https://github.com/Roylee-ML/SwipeTableView/blob/master/README.md#如何支持下拉刷新)
@@ -35,7 +32,6 @@ pod 'SwipeTableView'
 
 
 ## 实现的原理
-
 >为了兼容下拉刷新，采用了两种实现方式，但基本构造都是一样的
       
 ### Mode 1
@@ -71,7 +67,6 @@ pod 'SwipeTableView'
 
 
 ## 使用用法
-------
 ### 怎样使用？使用方式类似UITableView
 
 **实现 `SwipeTableViewDataSource` 代理的两个方法：**
@@ -326,7 +321,6 @@ MyCollectionView.m
 
 
 # Demo 介绍
-------
 ### 使用的详细用法在SwipeTableViewDemo文件夹中，提供了五种示例：
 
   - `SingleOneKindView`   
@@ -351,6 +345,5 @@ MyCollectionView.m
   -  Demo中提供简单的自定义下拉刷新控件`STRefreshHeader`，供参考
 
 # License
-------
 SwipeTableView is available under the MIT license. See the LICENSE file for more info.
 
