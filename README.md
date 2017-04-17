@@ -5,25 +5,23 @@
 [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/Roylee-ML/SwipeTableView/blob/master/License)
 
 功能类似半糖首页菜单与QQ音乐歌曲列表页面。即支持UITableview的上下滚动，同时也支持不同列表之间的滑动切换。同时可以设置顶部header view与列表切换功能bar，使用方式类似于原生UITableview的tableHeaderView的方式。 [`Engilish→`](https://github.com/Roylee-ML/SwipeTableView/blob/master/README_EN.md)
+****
 
-# Overview
-
+# 预览
 <img src="https://github.com/Roylee-ML/SwipeTableView/blob/master/ScreenShots/screenshot1.gif" width = "290" height = "517" alt="OverView1" align=center />
 <img src="https://github.com/Roylee-ML/SwipeTableView/blob/master/ScreenShots/screenshot2.gif" width = "290" height = "517" alt="OverView1" align=center />
 <img src="https://github.com/Roylee-ML/SwipeTableView/blob/master/ScreenShots/screenshot3.gif" width = "290" height = "517" alt="OverView1" align=center />
 
-<br>
-# Quick start 
 
+# 使用 Cocoapods 导入
 SwipeTableView is available on [CocoaPods](http://cocoapods.org).  Add the following to your Podfile:
 
 ```ruby
 pod 'SwipeTableView'
 ```
 
-<br>
-# Introduction
 
+# 目录
 1. [实现原理](https://github.com/Roylee-ML/SwipeTableView/blob/master/README.md#实现的原理)
 2. [基本用法](https://github.com/Roylee-ML/SwipeTableView/blob/master/README.md#怎样使用使用方式类似uitableview)
 3. [下拉刷新](https://github.com/Roylee-ML/SwipeTableView/blob/master/README.md#如何支持下拉刷新)
@@ -31,7 +29,8 @@ pod 'SwipeTableView'
 5. [示例代码](https://github.com/Roylee-ML/SwipeTableView/blob/master/README.md#示例代码)
 6. [Demo介绍](https://github.com/Roylee-ML/SwipeTableView/blob/master/README.md#使用的详细用法在swipetableviewdemo文件夹中提供了五种示例)
 
-<br>
+
+
 ## 实现的原理
 >为了兼容下拉刷新，采用了两种实现方式，但基本构造都是一样的
       
@@ -61,15 +60,14 @@ pod 'SwipeTableView'
 1. 在`Mode 2`中，基本结构与`Mode 1`一样，唯一的不同在于每个itemView顶部留白的的方式。
 >通过设置`UITabelView`的`tableHeaderView`，来提供顶部的占位留白，CollectionView采用自定义`STCollectionView`的`collectionHeaderView`来实现占位留白。（目前不支持`UIScrollView`）
 
-<br>
 
 2. 如何设置区分`Mode 1`与`Mode 2`模式？
 >正常条件下即为`Mode 1`模式；在`SwipeTableView.h`中或者在工程PCH文件中设置宏`#define ST_PULLTOREFRESH_HEADER_HEIGHT xx`设置为`Mode 2`模式。
 
-<br>
-# Basic Usage
 
-## 怎样使用？使用方式类似UITableView
+
+## 使用用法
+### 怎样使用？使用方式类似UITableView
 
 **实现 `SwipeTableViewDataSource` 代理的两个方法：**
 
@@ -78,22 +76,18 @@ pod 'SwipeTableView'
 ```
 >返回列表item的个数
 
-<br>
    
 ```objc
 - (UIScrollView *)swipeTableView:(SwipeTableView *)swipeView viewForItemAtIndex:(NSInteger)index reusingView:(UIScrollView *)view
 ```    
 >返回对应index下的itemView，返回的视图类型需要是`UIScrollView`及其子类：`UITableView`或者`UICollectionView`。这里采用重用机制，需要根据reusingView来创建单一的itemView。
 
-<br>
 **使用的`swipeHeaderView`必须是`STHeaderView`及其子类的实例。**
  
-<br>
-## 如何支持下拉刷新？
 
-### 下拉刷新有两种实现方式，一种用户自定义下拉刷新组件（局部修改自定义），一种是简单粗暴设置宏：
+### 如何支持下拉刷新？
 
-<br>
+>**下拉刷新有两种实现方式，一种用户自定义下拉刷新组件（局部修改自定义），一种是简单粗暴设置宏：**
 
 
 **1. 一行代码支持常用的下拉刷新控件，只需要在项目的PCH文件中或者在`SwipeTableView.h`文件中设置如下的宏：**
@@ -105,7 +99,6 @@ pod 'SwipeTableView'
 >上述宏中的`xx`要与您使用的第三方下拉刷新控件的refreshHeader高度相同：      
 `MJRefresh` 为 `MJRefreshHeaderHeight`，`SVPullToRefresh` 为 `SVPullToRefreshViewHeight`（注：此时视图结构为`Model 2`）
 
-<br>
 
 新增下拉刷新代理，可以控制每个item下拉临界高度，并自由控制每个item是否支持下拉刷新
  
@@ -120,7 +113,7 @@ pod 'SwipeTableView'
 ``` 
 >返回对应item下拉刷新的临界高度，如果没有实现此代理，在设置`#define ST_PULLTOREFRESH_HEADER_HEIGHT xx`的时候默认是`ST_PULLTOREFRESH_HEADER_HEIGHT`的高度。**如果没有设置宏，并且想要自定义修改下拉刷新，必须实现此代理，提供下拉刷新控件RefreshHeader的高度（RefreshHeader全部露出的高度），来通知`SwipeTableView`触发下拉刷新。**
 
-<br>
+
 **2. 如果想要更好的扩展性，以及喜欢自己研究的同学，可以尝试修改或者自定义下拉控件来解决下拉刷新的兼容问题，同时这里提供一些思路：**
 
 如果下拉刷新控件的frame是固定的（比如header的frame），这样可以在初始化下拉刷新的header或者在数据源的代理中重设下拉header的frame。
@@ -163,16 +156,16 @@ or
 }
 ```
 
-<br>
+
 如何判断下拉刷新的控件的frame是不是固定不变的呢？
  
 >一是可以研究源码查看RefreshHeader的frame是否固定不变；另一个简单的方式是，在ScrollView的滚动代理中log RefreshHeader的frame（大部分的下拉控件的frame都是固定的）。
 
-<br> 
+ 
 如果使用的下拉刷新控件的frame是变化的（个人感觉极少数），那么只能更深层的修改下拉刷新控件或者自定义下拉刷新。也可以更直接的采用第一种设置宏的方式支持下拉刷新。</br>
  
-<br>
-## 混合模式（UItableView & UICollectionView & UIScrollView）
+
+### 混合模式（UItableView & UICollectionView & UIScrollView）
 
 1. 在`Mode 1`模式下，属于最基本的模式，可扩展性也是最强的，此时，支持`UITableView`、`UICollectionView`、`UIScrollView`。**如果，同时设置`shouldAdjustContentSize`为YES，实现自适应contentSize，在`UICollectionView`内容不足的添加下，只能使用`STCollectionView`及其子类**
    
@@ -180,8 +173,9 @@ or
 
 2. 在`Mode 2`模式下，**`SwipeTableView`支持的collectionView必须是`STCollectionView`及其子类的实例**，目前，不支持`UIScrollView`。
 
-<br>
+
 ## **示例代码**：
+
 ### 初始化并设置header与bar
 ```objc
 self.swipeTableView = [[SwipeTableView alloc]initWithFrame:[UIScreen mainScreen].bounds];
@@ -325,9 +319,8 @@ MyCollectionView.m
 
 ```
 
-<br>
-# Demo Info
 
+## Demo 介绍
 ### 使用的详细用法在SwipeTableViewDemo文件夹中，提供了五种示例：
 
   - `SingleOneKindView`   
@@ -352,6 +345,5 @@ MyCollectionView.m
   -  Demo中提供简单的自定义下拉刷新控件`STRefreshHeader`，供参考
 
 # License
-
 SwipeTableView is available under the MIT license. See the LICENSE file for more info.
 
