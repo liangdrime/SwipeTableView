@@ -12,7 +12,7 @@
 
 @interface STInvocationAgency : NSObject
 
-@property (nonatomic, strong) id target;
+@property (nonatomic, weak) id target;
 @property (nonatomic, assign) SEL selector;
 @property (nonatomic, copy) InjectActionBlock block;
 
