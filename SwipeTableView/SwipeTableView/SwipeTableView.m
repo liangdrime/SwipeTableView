@@ -16,6 +16,10 @@
 #error SwipeTableView is ARC only. Either turn on ARC for the project or use -fobjc-arc flag
 #endif
 
+#ifndef ST_CLAMP // return the clamped value
+#define ST_CLAMP(_x_, _low_, _high_)  (((_x_) > (_high_)) ? (_high_) : (((_x_) < (_low_)) ? (_low_) : (_x_)))
+#endif
+
 const CGFloat SwipeTableViewScrollViewTag = 997998;
 
 @interface SwipeTableView ()<UICollectionViewDelegate,UICollectionViewDataSource,UIScrollViewDelegate>
@@ -196,9 +200,9 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 
 - (NSInteger)currentItemIndex {
     if (_switchPageWithoutAnimation) {
-        return _shouldVisibleItemIndex;
+        return ST_CLAMP(_shouldVisibleItemIndex, 0, [_dataSource numberOfItemsInSwipeTableView:self] - 1);
     }
-    return _currentItemIndex;
+    return ST_CLAMP(_currentItemIndex, 0, [_dataSource numberOfItemsInSwipeTableView:self] - 1);
 }
 
 #pragma mark -
