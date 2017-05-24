@@ -491,6 +491,9 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 }
 
 - (void)moveHeaderViewToItemView:(UIScrollView *)scrollView {
+    if (_contentView.isTracking) {
+        return;
+    }
     UIView * superView = _itemContentTopFromHeaderViewBottom ? scrollView : scrollView.st_headerView;
     if (_headerView.superview == superView || self.swipeHeaderBarAlwaysStickyOnTop) {
         return;
