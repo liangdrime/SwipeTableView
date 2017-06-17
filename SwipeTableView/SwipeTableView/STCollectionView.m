@@ -259,13 +259,10 @@ BOOL isSubClass(STCollectionViewFlowLayout * self) {
     if(nil != collectionView.collectionHeadView) {
         
         // Initialize the header rectangles.
-        CGRect headerFrame;
-        headerFrame.origin.x = 0.0f;
-        headerFrame.origin.y = 0.0f;
+        CGRect headerFrame = CGRectZero;
         
         CGSize headerSize = collectionView.collectionHeadView.bounds.size;
-        headerFrame.size.height = headerSize.height;
-        headerFrame.size.width  = headerSize.width;
+        headerFrame.size  = headerSize;
         
         UICollectionViewLayoutAttributes * headerAttributes = [UICollectionViewLayoutAttributes layoutAttributesForSupplementaryViewOfKind:STCollectionElementKindSectionHeader withIndexPath:sectionIndexPath];
         headerAttributes.frame = headerFrame;
@@ -468,7 +465,7 @@ BOOL isSubClass(STCollectionViewFlowLayout * self) {
 - (NSArray *)searchVisibleLayoutAttributesInRect:(CGRect)rect {
     NSMutableArray * itemAttrs = [[NSMutableArray alloc] init];
     // Check placeholder header
-    if (_headerAttributes && CGRectContainsRect(rect, self.headerAttributes.frame)) {
+    if (_headerAttributes && CGRectIntersectsRect(rect, self.headerAttributes.frame)) {
         [itemAttrs addObject:self.headerAttributes];
     }
     // Other attributes
