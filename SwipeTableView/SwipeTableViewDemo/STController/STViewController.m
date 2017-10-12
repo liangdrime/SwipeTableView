@@ -137,7 +137,7 @@
     return _tableViewHeader;
 }
 
-- (CustomSegmentControl * )segmentBar {
+- (CustomSegmentControl *)segmentBar {
     if (nil == _segmentBar) {
         self.segmentBar = [[CustomSegmentControl alloc]initWithItems:@[@"Item0",@"Item1",@"Item2",@"Item3"]];
         _segmentBar.st_size = CGSizeMake(kScreenWidth, 40);

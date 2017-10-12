@@ -277,7 +277,7 @@ static void *STScrollViewAssociatedKey = &STScrollViewAssociatedKey;
 
 - (SwipeTableView *)st_swipeTableView {
     SwipeTableView * swipeTableView = objc_getAssociatedObject(self, STScrollViewAssociatedKey);
-    if (nil != swipeTableView) {
+    if (swipeTableView) {
         return swipeTableView;
     }
     for (UIView * nextRes = self; nextRes; nextRes = nextRes.superview) {

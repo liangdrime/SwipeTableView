@@ -9,6 +9,9 @@
 #import "STListController.h"
 #import "STViewController.h"
 
+#define kStatusBarHeight    [UIApplication sharedApplication].statusBarFrame.size.height
+#define kNavigationHeight   (kStatusBarHeight + 44)
+
 @interface STListController ()
 
 @property (nonatomic, strong) NSArray * dataSource;

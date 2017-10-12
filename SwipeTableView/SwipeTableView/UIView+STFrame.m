@@ -10,11 +10,11 @@
 
 @implementation UIView (STFrame)
 
--(CGFloat)st_x {
+- (CGFloat)st_x {
     return self.frame.origin.x;
 }
 
--(void)setSt_x:(CGFloat)x {
+- (void)setSt_x:(CGFloat)x {
     CGRect rect = self.frame;
     if (rect.origin.x == x) {
         return;
@@ -23,11 +23,11 @@
     self.frame = rect;
 }
 
--(CGFloat)st_y {
+- (CGFloat)st_y {
     return self.frame.origin.y;
 }
 
--(void)setSt_y:(CGFloat)y {
+- (void)setSt_y:(CGFloat)y {
     CGRect rect = self.frame;
     if (rect.origin.y == y) {
         return;
@@ -36,11 +36,11 @@
     self.frame = rect;
 }
 
--(CGFloat)st_width {
+- (CGFloat)st_width {
     return self.frame.size.width;
 }
 
--(void)setSt_width:(CGFloat)width {
+- (void)setSt_width:(CGFloat)width {
     CGRect rect = self.frame;
     if (rect.size.width == width) {
         return;
@@ -49,7 +49,7 @@
     self.frame = rect;
 }
 
--(CGFloat)st_height {
+- (CGFloat)st_height {
     return self.frame.size.height;
 }
 
@@ -62,11 +62,11 @@
     self.frame = rect;
 }
 
--(CGFloat)st_centerX {
+- (CGFloat)st_centerX {
     return self.center.x;
 }
 
--(void)setSt_centerX:(CGFloat)centerX {
+- (void)setSt_centerX:(CGFloat)centerX {
     CGPoint center = self.center;
     if (center.x == centerX) {
         return;
@@ -75,11 +75,11 @@
     self.center = center;
 }
 
--(CGFloat)st_centerY {
+- (CGFloat)st_centerY {
     return self.center.y;
 }
 
--(void)setSt_centerY:(CGFloat)centerY {
+- (void)setSt_centerY:(CGFloat)centerY {
     CGPoint center = self.center;
     if (center.y == centerY) {
         return;

@@ -267,6 +267,9 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
         UIView *newSubView = [_dataSource swipeTableView:self viewForItemAtIndex:indexPath.row reusingView:subView];
         scrollView = newSubView.st_scrollView;
         scrollView.scrollsToTop = NO;
+        if (@available(iOS 11.0, *)) {
+            scrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
+        }
         
         // Use contentInsets for the space of common headerview.
         if (_itemContentTopFromHeaderViewBottom) {
@@ -287,7 +290,6 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
                 contentInset.top += deltaTopInset;
                 scrollView.contentInset = contentInset;
             }
-            
         }
         // Use tableHeaderView or collectionHeaderView for common headerview, if the itemview
         // from datasource is subclass of UITableView or UICollectionView.
