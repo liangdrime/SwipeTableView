@@ -251,7 +251,7 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
 #pragma mark - UICollectionView M
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
-    if (_dataSource && [_dataSource respondsToSelector:@selector(numberOfItemsInSwipeTableView:)]) {
+    if ([_dataSource respondsToSelector:@selector(numberOfItemsInSwipeTableView:)]) {
         return [_dataSource numberOfItemsInSwipeTableView:self];
     }
     return 0;
@@ -263,13 +263,10 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     UIView * subView = cell.contentView.subviews.firstObject;
     UIScrollView * scrollView = subView.st_scrollView;
     
-    if (_dataSource && [_dataSource respondsToSelector:@selector(swipeTableView:viewForItemAtIndex:reusingView:)]) {
+    if ([_dataSource respondsToSelector:@selector(swipeTableView:viewForItemAtIndex:reusingView:)]) {
         UIView *newSubView = [_dataSource swipeTableView:self viewForItemAtIndex:indexPath.row reusingView:subView];
         scrollView = newSubView.st_scrollView;
         scrollView.scrollsToTop = NO;
-        if (@available(iOS 11.0, *)) {
-            scrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
-        }
         
         // Use contentInsets for the space of common headerview.
         if (_itemContentTopFromHeaderViewBottom) {
@@ -330,8 +327,11 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
             [cell.contentView addSubview:newSubView];
             subView = newSubView;
         }
-        
     }
+    
+//    if (@available(iOS 11.0, *)) {
+//        scrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
+//    }
     
     // Set tag index to the item view.
     scrollView.st_index = indexPath.item;
