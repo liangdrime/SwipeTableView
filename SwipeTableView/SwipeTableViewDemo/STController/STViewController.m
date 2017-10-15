@@ -47,7 +47,7 @@
     _swipeTableView.swipeHeaderBar = self.segmentBar;
     _swipeTableView.swipeHeaderAlwaysOnTop = NO;
 //    _swipeTableView.itemContentTopFromHeaderViewBottom = YES;
-    _swipeTableView.stickyHeaderTopInset = hiddenNavigationBar?0:64;
+    _swipeTableView.stickyHeaderTopInset = hiddenNavigationBar ? 0 : 64;
     [self.view addSubview:_swipeTableView];
     
     // nav bar
