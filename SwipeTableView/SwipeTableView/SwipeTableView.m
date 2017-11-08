@@ -329,9 +329,12 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
         }
     }
     
-//    if (@available(iOS 11.0, *)) {
-//        scrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
-//    }
+    // Adapt for iOS 11.
+#if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED >= 110000
+    if (@available(iOS 11.0, *)) {
+        scrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
+    }
+#endif
     
     // Set tag index to the item view.
     scrollView.st_index = indexPath.item;
