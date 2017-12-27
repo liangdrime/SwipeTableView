@@ -276,7 +276,7 @@
 				TargetAttributes = {
 					7DFB6AC81CAEBCC600C2F0D3 = {
 						CreatedOnToolsVersion = 7.2;
-						DevelopmentTeam = H4JK55MDDZ;
+						DevelopmentTeam = 437D87LT4G;
 					};
 					7DFB6AE11CAEBCC600C2F0D3 = {
 						CreatedOnToolsVersion = 7.2;
@@ -470,7 +470,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = H4JK55MDDZ;
+				DEVELOPMENT_TEAM = 437D87LT4G;
 				INFOPLIST_FILE = SwipeTableView/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.roylee.SwipeTableView;
@@ -482,7 +482,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = H4JK55MDDZ;
+				DEVELOPMENT_TEAM = 437D87LT4G;
 				INFOPLIST_FILE = SwipeTableView/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.roylee.SwipeTableView;

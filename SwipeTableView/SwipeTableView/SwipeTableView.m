@@ -15,6 +15,10 @@
 #error SwipeTableView is ARC only. Either turn on ARC for the project or use -fobjc-arc flag
 #endif
 
+#ifndef iPhoneX
+#define iPhoneX     ([UIScreen instancesRespondToSelector:@selector(currentMode)] ? CGSizeEqualToSize(CGSizeMake(1125, 2436), [[UIScreen mainScreen] currentMode].size) : NO)
+#endif
+
 @interface UICollectionViewCell (ScrollView)
 - (UIScrollView *)scrollView;
 @end
@@ -130,7 +134,7 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     self.contentOffsetQuene  = [NSMutableDictionary dictionaryWithCapacity:0];
     self.contentSizeQuene    = [NSMutableDictionary dictionaryWithCapacity:0];
     self.contentMinSizeQuene = [NSMutableDictionary dictionaryWithCapacity:0];
-    _swipeHeaderTopInset = 64;
+    _swipeHeaderTopInset = iPhoneX ? 88 : 64;
     _headerInset = 0;
     _barInset = 0;
     _currentItemIndex = 0;
@@ -351,6 +355,13 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
         }
     }
 #endif
+    // Adapt for iOS 11.
+#if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED >= 110000
+    if (@available(iOS 11.0, *)) {
+        subView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
+    }
+#endif
+    
     // reuse item view observe
     [_shouldVisibleItemView removeObserver:self forKeyPath:@"contentOffset"];
     [_shouldVisibleItemView removeObserver:self forKeyPath:@"contentSize"];
