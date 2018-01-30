@@ -22,7 +22,13 @@
 @property (nonatomic, assign) CGFloat st_left;
 @property (nonatomic, assign) CGFloat st_right;
 
+/// ceil value for pixel-aligned
+CGFloat STFloatPixelCeil(CGFloat value);
+
+/// floor value for pixel-aligned
 CGFloat STFloatPixelFloor(CGFloat value);
+
+/// round value for pixel-aligned
 CGFloat STFloatPixelRound(CGFloat value);
 
 @end

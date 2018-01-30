@@ -145,6 +145,12 @@
     self.frame = CGRectMake(r - self.st_width, self.st_top, self.st_width, self.st_height);
 }
 
+/// ceil value for pixel-aligned
+CGFloat STFloatPixelCeil(CGFloat value) {
+    CGFloat scale = STScreenScale();
+    return ceil(value * scale) / scale;
+}
+
 /// floor value for pixel-aligned
 CGFloat STFloatPixelFloor(CGFloat value) {
     CGFloat scale = STScreenScale();
