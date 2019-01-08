@@ -16,7 +16,7 @@
 #endif
 
 #ifndef iPhoneX
-#define iPhoneX     ([UIScreen instancesRespondToSelector:@selector(currentMode)] ? CGSizeEqualToSize(CGSizeMake(1125, 2436), [[UIScreen mainScreen] currentMode].size) : NO)
+#define iPhoneX     ([UIScreen instancesRespondToSelector:@selector(currentMode)] ? CGSizeEqualToSize(CGSizeMake(1125, 2436), [[UIScreen mainScreen] currentMode].size) || CGSizeEqualToSize(CGSizeMake(1242, 2688), [[UIScreen mainScreen] currentMode].size): NO)
 #endif
 
 @interface UICollectionViewCell (ScrollView)
@@ -135,6 +135,7 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
     self.contentSizeQuene    = [NSMutableDictionary dictionaryWithCapacity:0];
     self.contentMinSizeQuene = [NSMutableDictionary dictionaryWithCapacity:0];
     _swipeHeaderTopInset = iPhoneX ? 88 : 64;
+    _swipeBarTopInset = 0;
     _headerInset = 0;
     _barInset = 0;
     _currentItemIndex = 0;
@@ -520,23 +521,28 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
         }
         if (!_swipeHeaderBarScrollDisabled) {
             CGFloat newOffsetY      = [change[NSKeyValueChangeNewKey] CGPointValue].y;
+            _swipeBarTopInset = _swipeHeaderView?_swipeBarTopInset:0;
 #if !defined(ST_PULLTOREFRESH_HEADER_HEIGHT)
             CGFloat topMarginOffset = _swipeHeaderTopInset + _barInset;
             // stick the bar
-            if (newOffsetY < - topMarginOffset) {
+            if (newOffsetY < - topMarginOffset && newOffsetY > - (topMarginOffset + _swipeBarTopInset)){
+                _swipeHeaderBar.st_bottom  = topMarginOffset + _swipeBarTopInset ;
+                _swipeHeaderView.st_bottom = fmax(- (newOffsetY + _barInset), 0);
+            }else if (newOffsetY < - topMarginOffset) {
                 if (_swipeHeaderBar) {
                     _swipeHeaderBar.st_bottom  = - newOffsetY;
                     _swipeHeaderView.st_bottom = _swipeHeaderBar.st_top;
                 }else {
                     _swipeHeaderView.st_bottom = - newOffsetY;
                 }
-            }else {
-                _swipeHeaderBar.st_bottom  = topMarginOffset;
+            } else {
+                _swipeHeaderBar.st_bottom  = topMarginOffset + _swipeBarTopInset;
+                
                 // 'fmax' is used to fix the bug below iOS8.3 : the position of the bar will not correct when the swipeHeaderView is outside of the screen. 
                 _swipeHeaderView.st_bottom = fmax(- (newOffsetY + _barInset), 0);
             }
 #else
-            CGFloat topMarginOffset = _headerInset - _swipeHeaderTopInset;
+            CGFloat topMarginOffset = _headerInset + _swipeBarTopInset - _swipeHeaderTopInset;
             // stick the bar
             if (newOffsetY < topMarginOffset) {
                 if (_swipeHeaderView) {
@@ -546,7 +552,7 @@ static void * SwipeTableViewItemPanGestureContext      = &SwipeTableViewItemPanG
                     _swipeHeaderBar.st_top  = - newOffsetY;
                 }
             }else {
-                _swipeHeaderBar.st_top  = _swipeHeaderTopInset;
+                _swipeHeaderBar.st_top  = _swipeHeaderTopInset + _swipeBarTopInset;
                 // 'fmax' is used to fix the bug below iOS8.3 : the position of the bar will not correct when the swipeHeaderView is outside of the screen.
                 _swipeHeaderView.st_top = fmax(- newOffsetY, - _headerInset);
             }
