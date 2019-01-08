@@ -45,6 +45,11 @@
 @property (nonatomic, assign) CGFloat swipeHeaderTopInset;
 
 /**
+ *  swipeView中间bar在移动到距离顶部居多少时悬停。（主要适用与Header全屏，滚动），默认为0，当没有header时无效，直接设置swipeHeaderTopInseth即可。
+ */
+@property (nonatomic, assign) CGFloat swipeBarTopInset;
+
+/**
  *  当前itemView的index，在滑动swipeView过程中，index的变化以显示窗口的1/2宽为界限
  */
 @property (nonatomic, readonly) NSInteger currentItemIndex;
