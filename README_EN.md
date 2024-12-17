@@ -5,6 +5,8 @@
 [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/Roylee-ML/SwipeTableView/blob/master/License)
 
 This component support the UITableview scroll up and down, and both support switch between two list horizontally.At the same time it set a header and a segment bar at the top of list view, the usage is similar to the native UITableview tableHeaderView way.
+
+⚠️**NOTE**: This component has been deprecated due to its unintuitive design. For similar functionality, please refer to [HBHybridCollectionView](https://github.com/Ban-Tang/HBHybridCollectionView), which is more stable and reliable.
 ****
 
 # Overview

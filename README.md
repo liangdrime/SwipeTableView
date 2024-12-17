@@ -6,7 +6,7 @@
 
 功能类似半糖首页菜单与QQ音乐歌曲列表页面。即支持UITableview的上下滚动，同时也支持不同列表之间的滑动切换。同时可以设置顶部header view与列表切换功能bar，使用方式类似于原生UITableview的tableHeaderView的方式。 [`Engilish→`](https://github.com/Roylee-ML/SwipeTableView/blob/master/README_EN.md)
 
-⚠️**注意**: 由于该组件的实现原理并不是十分安全可靠，因此该组件已经停止维护。如有相同需求，请移步到 [HBHybridCollectionView](https://github.com/Ban-Tang/HBHybridCollectionView) 或者类似的组件。HBHybridCollectionView 更稳定，接入更灵活，目前知乎个人页的底层组件使用的是相同的源码。
+⚠️**注意**: 由于该组件的实现原理并不是十分安全可靠，该组件已经停止维护。如有相同需求，请移步到 [HBHybridCollectionView](https://github.com/Ban-Tang/HBHybridCollectionView) 或者类似的组件。HBHybridCollectionView 更稳定，接入更灵活，目前知乎个人页的底层组件使用的是相同的代码。
 ****
 
 # 预览
